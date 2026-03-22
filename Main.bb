@@ -4369,6 +4369,8 @@ Function MovePlayer()
 	
 	Local temp2# = (Speed * Sprint) / (1.0+CrouchState)
 	
+	EntityKinematic(Collider, Noclip)
+	
 	If NoClip Then 
 		Shake = 0
 		CurrSpeed = 0
@@ -4384,8 +4386,6 @@ Function MovePlayer()
 		
 		If KeyDown(KEY_LEFT) Then MoveEntity Collider, -temp2*FPSfactor, 0, 0
 		If KeyDown(KEY_RIGHT) Then MoveEntity Collider, temp2*FPSfactor, 0, 0	
-		
-		ResetEntity Collider
 	Else
 		temp2# = temp2 / Max((Injuries+3.0)/3.0,1.0)
 		If Injuries > 0.5 Then 
@@ -4450,9 +4450,8 @@ Function MovePlayer()
 		EndIf
 		
 		Local VX# = Cos(angle) * CurrSpeed * 70
+		Local VY# = 0.0
 		Local VZ# = Sin(angle)*CurrSpeed * 70
-		
-		EntityLinearVelocity Collider, VX, 0, VZ
 
 		Local CollidedFloor% = False
 		For i = 1 To CountCollisions(Collider)
@@ -4488,7 +4487,9 @@ Function MovePlayer()
 		EndIf
 		PlayerFallingPickDistance# = 10.0
 
-		If (Not UnableToMove%) And ShouldEntitiesFall Then EntityLinearVelocity(Collider, VX, DropSpeed * 70, VZ)
+		If (Not UnableToMove%) And ShouldEntitiesFall Then VY = DropSpeed * 70
+		
+		EntityLinearVelocity Collider, VX, VY, VZ
 	EndIf
 	
 	ForceMove = False
