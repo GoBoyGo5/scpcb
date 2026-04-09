@@ -11,10 +11,13 @@ Global HookCount% = 0
 
 Delete Each Hooks
 Global Initialize.Hooks = CreateHook("Hook_Initialize")
+Global SaveOptions.Hooks = CreateHook("Hook_SaveOptions")
 Global Update.Hooks = CreateHook("Hook_Update")
 Global UpdateEvent.Hooks = CreateHook("Hook_UpdateEvent")
 Global FillRoom.Hooks = CreateHook("Hook_FillRoom")
+Global PostFillRoom.Hooks = CreateHook("Hook_PostFillRoom")
 Global CreateNPC.Hooks = CreateHook("Hook_CreateNPC")
+Global PostCreateNPC.Hooks = CreateHook("Hook_PostCreateNPC")
 Global UpdateNPC.Hooks = CreateHook("Hook_UpdateNPC")
 
 Dim HookFuncs%(HookCount, 0)

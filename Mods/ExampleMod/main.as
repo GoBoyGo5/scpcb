@@ -9,14 +9,11 @@ void Hook_FillRoom(CB::Room@ r) {
 using namespace CB;
 using namespace B3D;
 
+float configuredFOV = -1.f;
+
 void Hook_Update() {
-    NPC@ scp173 = NPC::First;
-    while (scp173 != null && scp173.NPCType != NPC::Type::SCP173) {
-        @scp173 = scp173.Next;
+    if (configuredFOV == -1.f) {
+        configuredFOV = Options::FOV;
     }
-    if (scp173 != null) {
-        Console::CreateMessage("Found SCP-173!");
-    } else {
-        Console::CreateMessage("Couldn't find SCP-173 :(");
-    }
+    Options::FOV = configuredFOV * (1.f + Player::CurrentSpeed * 5);
 }

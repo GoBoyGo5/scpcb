@@ -318,6 +318,13 @@ string CurrentDate();
 string CurrentTime();
 }
 
+namespace CB::Options {
+int GetInt(string section, string key);
+float GetFloat(string section, string key);
+string GetString(string section, string key);
+bool PutINIValue(string section, string key, string value);
+}
+
 namespace CB {
 B3D::Image@ LoadImage(string file, float scale = 0, int flags = 0);
 B3D::Mesh@ LoadMesh(string file, B3D::Entity@ parent);
@@ -2080,7 +2087,60 @@ float FPSFactor;
 }
 
 namespace CB::Options {
-int InvertMouse;
+bool SteamEnabled;
+bool SteamRichPresenceEnabled;
+bool DiscordRichPresenceEnabled;
+bool ModsEnabled;
+bool IntroEnabled;
+int LoadingScreenTimePerCharacter;
+bool AchievementPopupEnabled;
+int GraphicWidth;
+int GraphicHeight;
+bool Fullscreen;
+bool ShowFPS;
+bool BorderlessWindowed;
+bool EnableRoomLights;
+int TextureDetails;
+bool BumpEnabled;
+bool HUDEnabled;
+int Framelimit;
+bool Vsync;
+int AntiAlias;
+float ScreenGamma;
+float ViewBobScale;
+bool InvertMouse;
+float HUDScaleFactor;
+float HUDOffsetScale;
+float FOV;
+float MouseSensitivity;
+float MouseSmoothing;
+int KeyRight;
+int KeyLeft;
+int KeyUp;
+int KeyDown;
+int KeyBlink;
+int KeySprint;
+int KeyInventory;
+int KeyCrouch;
+int KeySave;
+int KeyConsole;
+bool MoveInputCancelling;
+float MusicVolume;
+float SoundVolume;
+bool EnableSFXRelease;
+bool EnableUserTracks;
+int UserTrackMode;
+bool DubbedAudio;
+bool SubtitlesEnabled;
+bool ClosedCaptionsEnabled;
+bool ConsoleEnabled;
+bool ConsoleAutoOpen;
+bool SpeedRunMode;
+bool NumericSeeds;
+bool DebugResourcePackStrictLoad;
+bool DebugMapGen;
+bool DebugForestGen;
+int ParticleAmount;
 }
 
 namespace CB::Input {

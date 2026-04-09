@@ -5558,6 +5558,13 @@ Function FillRoom(r.Rooms)
 		If dt\Button2RotX <> 0 Lor dt\Button2RotY <> 0 Lor dt\Button2RotZ <> 0 Then RotateEntity(door\buttons[1], dt\Button2RotX, r\angle + dt\Button2RotY, dt\Button2RotZ, True)
 		dt = dt\Successor
 	Wend
+
+	If PostFillRoom\Subscribers > 0 Then
+		PrepareFunction(1)
+		rr.Rooms = r ; TODO: Fucking stupid!
+		SetArgObj(0, &rr)
+		CallHook(PostFillRoom)
+	EndIf
 	
 	CatchErrors("FillRoom ("+r\RoomTemplate\Name+")")
 End Function

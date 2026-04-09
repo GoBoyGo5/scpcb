@@ -58,6 +58,10 @@ Function GetOptionFloat#(section$, key$)
 	Return Float(GetOptionString(section, key))
 End Function
 
+Function SetOptionValue%(section$, key$, value$)
+	Return PutINIValue(OptionFile, section, key, value)
+End Function
+
 Function HasCLIFlag%(name$)
 	name = "-" + name
 	Local cmd$ = CommandLine()
@@ -11558,7 +11562,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "audio", "user track setting", UserTrackMode%)
 	PutINIValue(OptionFile, "audio", "dubbed audio", DubbedAudio)
 	PutINIValue(OptionFile, "audio", "subtitles", SubtitlesEnabled)
-	PutIniValue(OptionFile, "audio", "closed captions", ClosedCaptionsEnabled)
+	PutINIValue(OptionFile, "audio", "closed captions", ClosedCaptionsEnabled)
 	
 	PutINIValue(OptionFile, "binds", "Right key", KEY_RIGHT)
 	PutINIValue(OptionFile, "binds", "Left key", KEY_LEFT)
@@ -11571,6 +11575,11 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "binds", "Save key", KEY_SAVE)
 	PutINIValue(OptionFile, "binds", "Console key", KEY_CONSOLE)
 	
+	If SaveOptions\Subscribers > 0 Then
+		PrepareFunction(0)
+		CallHook(SaveOptions.Hooks)
+	EndIf
+
 End Function
 
 ;--------------------------------------- MakeCollBox -functions -------------------------------------------------------

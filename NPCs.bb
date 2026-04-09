@@ -633,6 +633,12 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 	
 	NPCSpeedChange(n)
 	
+	If PostCreateNPC\Subscribers > 0 Then
+		PrepareFunction(1)
+		SetArgObj(0, &n)
+		CallHook(PostCreateNPC.Hooks)
+	EndIf
+
 	Return n
 End Function
 
