@@ -3729,7 +3729,7 @@ While IsRunning
 		BlitzcordRunCallbacks()
 	EndIf
 
-	Flip Vsync Lor IsAnyMenuOpen() Lor MainMenuOpen
+	Flip Vsync Lor MainMenuOpen
 Wend
 
 If ShouldRestart Then
