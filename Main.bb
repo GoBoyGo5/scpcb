@@ -4082,6 +4082,11 @@ End Function
 
 Function Kill()
 	If GodMode Then Return
+
+	If KillPlayer\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(KillPlayer) Then Return
+	End If
 	
 	If BreathCHN <> 0 Then
 		If ChannelPlaying(BreathCHN) Then StopChannel(BreathCHN)
