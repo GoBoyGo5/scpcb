@@ -1837,6 +1837,8 @@ End Type
 
 Type Triggerboxes
 	Field Obj%
+	Field MinX#, MinY#, MinZ#
+	Field MaxX#, MaxY#, MaxZ#
 	Field Name$
 	Field Successor.Triggerboxes
 End Type
@@ -2070,6 +2072,7 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, angle%, name$)
 				r\angle = angle
 				If angle <> 0 Then TurnEntity(r\obj, 0, angle, 0)
 				CalculateRoomExtents(r)
+				SetupTriggerBoxes(r)
 				Return r
 			EndIf
 		Next
@@ -2113,6 +2116,7 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, angle%, name$)
 					r\angle = angle
 					If angle <> 0 Then TurnEntity(r\obj, 0, angle, 0)
 					CalculateRoomExtents(r)
+					SetupTriggerBoxes(r)
 					Return r
 				End If
 			EndIf
@@ -2120,6 +2124,49 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, angle%, name$)
 	Next
 	
 	CatchErrors("CreateRoom")
+End Function
+
+; This must be called after the room angle has been finalized!
+Function SetupTriggerBoxes(r.Rooms)
+	Local sx#, sy#, sz#
+	Local pxmin#, pxmax#
+	Local pzmin#, pzmax#
+	Local tb.Triggerboxes = r\FirstTriggerbox
+	
+	While tb <> Null
+		sx = EntityScaleX(tb\obj, 1)
+		sy = Max(EntityScaleY(tb\obj, 1), 0.001)
+		sz = EntityScaleZ(tb\obj, 1)
+		
+		GetMeshExtents(tb\obj)
+		
+		pxmin = Cos(r\angle) * sx*Mesh_MinX - Sin(r\angle) * sz*Mesh_MinZ + r\x
+		pzmin = Sin(r\angle) * sx*Mesh_MinX + Cos(r\angle) * sz*Mesh_MinZ + r\z
+		
+		pxmax = Cos(r\angle) * sx*Mesh_MaxX - Sin(r\angle) * sz*Mesh_MaxZ + r\x
+		pzmax = Sin(r\angle) * sx*Mesh_MaxX + Cos(r\angle) * sz*Mesh_MaxZ + r\z
+		
+		If pxmin > pxmax Then
+			tb\MinX = pxmax
+			tb\MaxX = pxmin
+		Else
+			tb\MinX = pxmin
+			tb\MaxX = pxmax
+		EndIf
+		
+		If pzmin > pzmax Then
+			tb\MinZ = pzmax
+			tb\MaxZ = pzmin
+		Else
+			tb\MinZ = pzmin
+			tb\MaxZ = pzmax
+		EndIf
+		
+		tb\MinY = ((sy*Mesh_MinY)+r\y)
+		tb\MaxY = ((sy*Mesh_MaxY)+r\y)
+		
+		tb = tb\Successor
+	Wend
 End Function
 
 Function FillRoom(r.Rooms)
@@ -5541,7 +5588,7 @@ Function FillRoom(r.Rooms)
 			lastTb\Successor = tb
 		EndIf
 		lastTb = tb
-		DebugLog "Triggerbox "+i+" name: "+tb\Name
+		DebugLog "Triggerbox name: "+tb\Name
 
 		tempTb = tempTb\Successor
 	Wend

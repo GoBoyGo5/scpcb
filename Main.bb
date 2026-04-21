@@ -7541,6 +7541,7 @@ Function DrawHUD()
 		Else
 			Text x, 310, "Current monitor: NULL"
 		EndIf
+		Text x, 330, "Current trigger: " + CheckTriggers(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 		
 		SetFont Font1
 	EndIf
@@ -12170,21 +12171,10 @@ Function UpdateDeafPlayer()
 End Function
 
 Function CheckTriggers$(r.Rooms, x#, y#, z#)
-	Local i%,sx#,sy#,sz#
-	Local inside% = -1
-
 	Local tb.Triggerboxes = r\FirstTriggerbox
 	While tb <> Null
-		sx# = EntityScaleX(tb\Obj, 1)
-		sy# = Max(EntityScaleY(tb\Obj, 1), 0.001)
-		sz# = EntityScaleZ(tb\Obj, 1)
-		GetMeshExtents(tb\Obj)
-		If x>((sx#*Mesh_MinX)+r\x) And x<((sx#*Mesh_MaxX)+r\x)
-			If y>((sy#*Mesh_MinY)+r\y) And y<((sy#*Mesh_MaxY)+r\y)
-				If z>((sz#*Mesh_MinZ)+r\z) And z<((sz#*Mesh_MaxZ)+r\z)
-					Return tb\Name
-				EndIf
-			EndIf
+		If x>tb\MinX And x<tb\MaxX And y>tb\MinY And y<tb\MaxY And z>tb\MinZ And z<tb\MaxZ
+			Return tb\Name
 		EndIf
 
 		tb = tb\Successor
