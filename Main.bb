@@ -3319,6 +3319,9 @@ While IsRunning
 			UpdateDeafPlayer()
 			UpdateEmitters()
 			MouseLook()
+			UpdateDust()
+			UpdateWearableOverlays()
+			Update1025()
 			If PlayerRoom\RoomTemplate\Name = "dimension1499" And QuickLoadPercent > 0 And QuickLoadPercent < 100
 				ShouldEntitiesFall = False
 			EndIf
@@ -4834,6 +4837,11 @@ Function MouseLook()
 	
 	CameraShake = Max(CameraShake - (FPSfactor / 10), 0)
 	
+	If MouseLook\Subscribers > 0 Then
+		PrepareFunction(0)
+		If CallHook(MouseLook) Then Return
+	EndIf
+
 	;CameraZoomTemp = CurveValue(CurrCameraZoom,CameraZoomTemp, 5.0)
 	ZoomCamera(FOV)
 	CurrCameraZoom = Max(CurrCameraZoom - FPSfactor, 0)
@@ -4923,6 +4931,10 @@ Function MouseLook()
 		
 	EndIf
 	
+	MoveMouse viewport_center_x, viewport_center_y
+End Function
+
+Function UpdateDust()
 	;pölyhiukkasia
 	If ParticleAmount=2
 		If Rand(35) = 1 Then
@@ -4944,9 +4956,9 @@ Function MouseLook()
 			FreeEntity pvt
 		End If
 	EndIf
-	
-	MoveMouse viewport_center_x, viewport_center_y
-	
+End Function
+
+Function UpdateWearableOverlays()
 	If WearingGasMask Or WearingHazmat Or Wearing1499 Then
 		If Wearing714 = False Then
 			If WearingGasMask = 2 Or Wearing1499 = 2 Or WearingHazmat = 2 Then
@@ -4980,7 +4992,9 @@ Function MouseLook()
 		HideEntity(NVOverlay)
 		EntityTexture(Fog, FogTexture)
 	EndIf
-	
+End Function
+
+Function Update1025()
 	For i = 0 To 5
 		If SCP1025state[i]>0 Then
 			Select i
@@ -5052,8 +5066,6 @@ Function MouseLook()
 			End Select 
 		EndIf
 	Next
-	
-	
 End Function
 
 ;--------------------------------------- GUI, menu etc ------------------------------------------------
