@@ -359,6 +359,11 @@ CB::Door@ get_First() property;
 CB::Door@ get_Last() property;
 }
 
+namespace CB::TempTriggerbox {
+CB::TempTriggerbox@ get_First() property;
+CB::TempTriggerbox@ get_Last() property;
+}
+
 namespace CB::TempItem {
 CB::TempItem@ get_First() property;
 CB::TempItem@ get_Last() property;
@@ -377,6 +382,12 @@ CB::RoomTemplate@ get_Last() property;
 namespace CB::TempWaypoint {
 CB::TempWaypoint@ get_First() property;
 CB::TempWaypoint@ get_Last() property;
+}
+
+namespace CB::Triggerbox {
+CB::Triggerbox@ get_First() property;
+CB::Triggerbox@ get_Last() property;
+string Check(CB::Room@ room, float x, float y, float z);
 }
 
 namespace CB::Forest {
@@ -1806,9 +1817,7 @@ class Room {
     carray<B3D::Sprite@> LightSprites2;
     carray<int> LightHidden;
     carray<int> LightFlicker;
-    int TriggerboxAmount;
-    carray<B3D::Mesh@> Triggerbox;
-    carray<string> TriggerboxName;
+    CB::Triggerbox@ FirstTriggerbox;
     float MaxWayPointY;
     carray<float> LightR;
     carray<float> LightG;
@@ -1861,6 +1870,17 @@ class Door {
     CB::Door@ get_Previous() const property;
     void InsertAfter(CB::Door@);
     void InsertBefore(CB::Door@);
+}
+
+class TempTriggerbox {
+    B3D::Mesh@ Object;
+    string Name;
+    CB::TempTriggerbox@ Successor;
+    void Delete();
+    CB::TempTriggerbox@ get_Next() const property;
+    CB::TempTriggerbox@ get_Previous() const property;
+    void InsertAfter(CB::TempTriggerbox@);
+    void InsertBefore(CB::TempTriggerbox@);
 }
 
 class TempItem {
@@ -1935,9 +1955,7 @@ class RoomTemplate {
     int R;
     int G;
     int B;
-    int TempTriggerboxAmount;
-    carray<B3D::Mesh@> TempTriggerbox;
-    carray<string> TempTriggerboxName;
+    CB::TempTriggerbox@ FirstTempTriggerbox;
     CB::TempItem@ FirstTempItem;
     CB::TempDoor@ FirstTempDoor;
     bool UseLightCones;
@@ -1965,6 +1983,17 @@ class TempWaypoint {
     CB::TempWaypoint@ get_Previous() const property;
     void InsertAfter(CB::TempWaypoint@);
     void InsertBefore(CB::TempWaypoint@);
+}
+
+class Triggerbox {
+    B3D::Mesh@ Object;
+    string Name;
+    CB::Triggerbox@ Successor;
+    void Delete();
+    CB::Triggerbox@ get_Next() const property;
+    CB::Triggerbox@ get_Previous() const property;
+    void InsertAfter(CB::Triggerbox@);
+    void InsertBefore(CB::Triggerbox@);
 }
 
 class Forest {
@@ -2181,7 +2210,6 @@ bool ConsoleEnabled;
 bool ConsoleAutoOpen;
 bool SpeedRunMode;
 bool NumericSeeds;
-bool DebugResourcePackStrictLoad;
 bool DebugMapGen;
 bool DebugForestGen;
 int ParticleAmount;

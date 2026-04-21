@@ -82,8 +82,6 @@ Function RegisterOptions()
     RegisterGlobalProperty("bool SpeedRunMode", &SpeedRunMode)
     RegisterGlobalProperty("bool NumericSeeds", &UseNumericSeeds)
 
-    ; Don't forget to remove!!
-    RegisterGlobalProperty("bool DebugResourcePackStrictLoad", &DebugResourcePacks)
     RegisterGlobalProperty("bool DebugMapGen", &DebugMapGen)
     RegisterGlobalProperty("bool DebugForestGen", &DebugForestGen)
 
@@ -186,7 +184,12 @@ Function RegisterDoor()
 End Function
 
 Function RegisterRoomTemplate()
-RegisterTypeFromPtr("TempItem", %TempItems)
+    RegisterTypeFromPtr("TempTriggerbox", %TempTriggerboxes)
+    RegisterTypeField("TempTriggerbox", "B3D::Mesh@ Object", %TempTriggerboxes\Obj)
+    RegisterTypeField("TempTriggerbox", "string Name", %TempTriggerboxes\Name)
+    RegisterTypeField("TempTriggerbox", "TempTriggerbox@ Successor", %TempTriggerboxes\Successor)
+
+    RegisterTypeFromPtr("TempItem", %TempItems)
     RegisterTypeField("TempItem", "string Name", %TempItems\Name)
     RegisterTypeField("TempItem", "float X", %TempItems\X)
     RegisterTypeField("TempItem", "float Y", %TempItems\Y)
@@ -252,10 +255,7 @@ RegisterTypeFromPtr("TempItem", %TempItems)
     RegisterTypeField("RoomTemplate", "int G", %RoomTemplates\G)
     RegisterTypeField("RoomTemplate", "int B", %RoomTemplates\B)
 
-    RegisterTypeField("RoomTemplate", "int TempTriggerboxAmount", %RoomTemplates\TempTriggerboxAmount)
-    RegisterTypeField("RoomTemplate", "carray<B3D::Mesh@> TempTriggerbox", %RoomTemplates\TempTriggerbox)
-    RegisterTypeField("RoomTemplate", "carray<string> TempTriggerboxName", %RoomTemplates\TempTriggerboxName)
-
+    RegisterTypeField("RoomTemplate", "TempTriggerbox@ FirstTempTriggerbox", %RoomTemplates\FirstTempTriggerbox)
     RegisterTypeField("RoomTemplate", "TempItem@ FirstTempItem", %RoomTemplates\FirstTempItem)
     RegisterTypeField("RoomTemplate", "TempDoor@ FirstTempDoor", %RoomTemplates\FirstTempDoor)
 
@@ -288,6 +288,20 @@ Function RegisterWayPoint()
     RegisterTypeField("Waypoint", "float GCost", %WayPoints\Gcost)
     RegisterTypeField("Waypoint", "float HCost", %WayPoints\Hcost)
     RegisterTypeField("Waypoint", "Waypoint@ Parent", %WayPoints\parent)
+End Function
+
+Function RegisterTriggerbox()
+    RegisterTypeFromPtr("Triggerbox", %Triggerboxes)
+    RegisterTypeField("Triggerbox", "B3D::Mesh@ Object", %Triggerboxes\Obj)
+    RegisterTypeField("Triggerbox", "string Name", %Triggerboxes\Name)
+    RegisterTypeField("Triggerbox", "Triggerbox@ Successor", %Triggerboxes\Successor)
+
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Triggerbox") Else SetDefaultNamespace("Triggerbox")
+
+    RegisterGlobalFunction("string Check(Room@ room, float x, float y, float z)", @CheckTriggers)
+
+    SetDefaultNamespace(ns)
 End Function
 
 Function RegisterForest()
@@ -485,6 +499,7 @@ Function RegisterMap()
     RegisterDoor()
     RegisterRoomTemplate()
     RegisterWayPoint()
+    RegisterTriggerbox()
     RegisterForest()
     RegisterMaintenanceTunnel()
 
@@ -531,10 +546,7 @@ Function RegisterMap()
     RegisterTypeField("Room", "carray<int> LightHidden", %Rooms\LightHidden)
     RegisterTypeField("Room", "carray<int> LightFlicker", %Rooms\LightFlicker)
 
-    RegisterTypeField("Room", "int TriggerboxAmount", %Rooms\TriggerboxAmount)
-
-    RegisterTypeField("Room", "carray<B3D::Mesh@> Triggerbox", %Rooms\Triggerbox)
-    RegisterTypeField("Room", "carray<string> TriggerboxName", %Rooms\TriggerboxName)
+    RegisterTypeField("Room", "Triggerbox@ FirstTriggerbox", %Rooms\FirstTriggerbox)
 
     RegisterTypeField("Room", "float MaxWayPointY", %Rooms\MaxWayPointY)
 
