@@ -104,11 +104,15 @@ Function GetCache.Materials(name$)
 	Return Null
 End Function
 
-Function AddTextureToCache(texture%)
+Function AddTextureToCache(texture%, nameOverride$="")
 	Local tc.Materials=GetCache(StripPath(TextureName(texture)))
 	If tc.Materials=Null Then
 		tc.Materials=New Materials
-		tc\name=StripPath(TextureName(texture))
+		If nameOverride<>"" Then
+			tc\name=StripPath(nameOverride)
+		Else
+			tc\name=StripPath(TextureName(texture))
+		EndIf
 		If BumpEnabled Then
 			Local temp$=""
 			Local hasOverride%
@@ -250,14 +254,21 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 	
 	;trigger boxes
 	If hasTriggerBox
+		Local lastTriggerbox.TempTriggerboxes
+
+		Local triggerboxCount% = ReadInt(f)
 		DebugLog "TriggerBoxEnable"
-		rt\TempTriggerboxAmount = ReadInt(f)
-		For tb = 0 To rt\TempTriggerboxAmount-1
-			rt\TempTriggerbox[tb] = CreateMesh(obj)
-			HideEntity(rt\TempTriggerbox[tb])
+		For k = 1 To triggerboxCount
+			Local tb.TempTriggerboxes = New TempTriggerboxes
+			
+			tb\Obj = CreateMesh(obj)
+			EntityAlpha(tb\Obj, 0.0)
+			EntityColor(tb\Obj, 255,255,0)
+			HideEntity(tb\Obj)
+
 			count = ReadInt(f)
 			For i%=1 To count
-				surf=CreateSurface(rt\TempTriggerbox[tb])
+				surf=CreateSurface(tb\Obj)
 				count2=ReadInt(f)
 				For j%=1 To count2
 					x=ReadFloat(f) : y=ReadFloat(f) : z=ReadFloat(f)
@@ -270,7 +281,14 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 					AddTriangle(surf,temp1i,temp3i,temp2i)
 				Next
 			Next
-			rt\TempTriggerboxName[tb] = ReadString(f)
+			tb\Name = ReadString(f)
+
+			If lastTriggerbox = Null Then
+				rt\FirstTempTriggerbox = tb
+			Else
+				lastTriggerbox\Successor = tb
+			EndIf
+			lastTriggerbox = tb
 		Next
 	EndIf
 	
@@ -448,11 +466,10 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 
 				If lastItem = Null Then
 					rt\FirstTempItem = it
-					lastItem = it
 				Else
 					lastItem\Successor = it
-					lastItem = it
 				EndIf
+				lastItem = it
 
 			Case "door"
 				d.TempDoors = New TempDoors
@@ -488,11 +505,10 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 
 				If lastDoor = Null Then
 					rt\FirstTempDoor = d
-					lastDoor = d
 				Else
 					lastDoor\Successor = d
-					lastDoor = d
 				EndIf
+				lastDoor = d
 		End Select
 	Next
 		
@@ -663,9 +679,11 @@ End Function
 Function ResetAllRMeshes()
 	Delete Each TempWayPoints
 	Delete Each TempScreens
+	Delete Each TempTriggerboxes
 	Delete Each TempItems
 	Delete Each TempDoors
 	For rt.RoomTemplates = Each RoomTemplates
+		rt\FirstTempTriggerbox = Null
 		rt\FirstTempItem = Null
 		rt\FirstTempDoor = Null
 		If rt\obj <> 0 Then FreeEntity(rt\obj) : rt\obj = 0
@@ -1565,9 +1583,7 @@ Type RoomTemplates
 
 	Field R%, G%, B%
 	
-	Field TempTriggerboxAmount
-	Field TempTriggerbox[128]
-	Field TempTriggerboxName$[128]
+	Field FirstTempTriggerbox.TempTriggerboxes
 
 	Field FirstTempItem.TempItems
 
@@ -1580,6 +1596,12 @@ Type RoomTemplates
 	Field MinX#, MinY#, MinZ#
 	Field MaxX#, MaxY#, MaxZ#
 End Type 	
+
+Type TempTriggerboxes
+	Field Obj%
+	Field Name$
+	Field Successor.TempTriggerboxes
+End Type
 
 Type TempItems
 	Field Name$
@@ -1806,9 +1828,7 @@ Type Rooms
 	Field LightSprites2%[MaxRoomLights]
 	Field LightHidden%[MaxRoomLights]
 	Field LightFlicker%[MaxRoomLights]
-	Field TriggerboxAmount
-	Field Triggerbox[128]
-	Field TriggerboxName$[128]
+	Field FirstTriggerbox.Triggerboxes
 	Field MaxWayPointY#
 	Field LightR#[MaxRoomLights],LightG#[MaxRoomLights],LightB#[MaxRoomLights]
 	Field LightCone%[MaxRoomLights]
@@ -1818,6 +1838,12 @@ Type Rooms
 	Field MinX#, MinY#, MinZ#
 	Field MaxX#, MaxY#, MaxZ#
 End Type 
+
+Type Triggerboxes
+	Field Obj%
+	Field Name$
+	Field Successor.Triggerboxes
+End Type
 
 Const gridsz%=19 ;Same size as the main map itself (better for the map creator)
 Type Grids
@@ -2872,12 +2898,14 @@ Function FillRoom(r.Rooms)
 			PositionEntity(r\RoomDoors[1]\buttons[1], r\x + 256.0 * RoomScale, EntityY(r\RoomDoors[1]\buttons[1],True), EntityZ(r\RoomDoors[1]\buttons[1],True),True)			
 			r\RoomDoors[1]\AutoClose = False : r\RoomDoors[1]\open = False
 			
-			de.Decals = CreateDecal(22, r\x + 600.0*RoomScale, 0.005, r\z + 232.0*RoomScale, 90, Rand(360), 0)
-			de\Size = 0.6 : ScaleSprite(de\obj, de\Size, de\Size) : EntityParent(de\obj, r\obj)
+			If IsBirthday Then
+				de.Decals = CreateDecal(22, r\x + 600.0*RoomScale, 0.005, r\z + 232.0*RoomScale, 90, Rand(360), 0)
+				de\Size = 0.6 : ScaleSprite(de\obj, de\Size, de\Size) : EntityParent(de\obj, r\obj)
 
-			it = CreateItem("bdc", r\x + 600.0*RoomScale, r\y + 125.0*RoomScale, r\z + 232.0*RoomScale)
-			RotateEntity(it\collider, 0, r\angle + 110, 0)
-			EntityParent(it\collider, r\obj)
+				it = CreateItem("bdc", r\x + 600.0*RoomScale, r\y + 125.0*RoomScale, r\z + 232.0*RoomScale)
+				RotateEntity(it\collider, 0, r\angle + 110, 0)
+				EntityParent(it\collider, r\obj)
+			EndIf
 
 			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 432.0 * RoomScale, 0.0, r\z, 90, r, False, False, 0, "1234")
 			PositionEntity(r\RoomDoors[0]\buttons[0], r\x - 416.0 * RoomScale, EntityY(r\RoomDoors[0]\buttons[0],True), r\z + 176.0 * RoomScale,True)
@@ -5505,16 +5533,23 @@ Function FillRoom(r.Rooms)
 		EndIf
 	Next
 	
-	If r\RoomTemplate\TempTriggerboxAmount > 0
-		r\TriggerboxAmount = r\RoomTemplate\TempTriggerboxAmount
-		For i = 0 To r\TriggerboxAmount-1
-			r\Triggerbox[i] = CopyEntity(r\RoomTemplate\TempTriggerbox[i],r\obj)
-			r\TriggerboxName[i] = r\RoomTemplate\TempTriggerboxName[i]
-			DebugLog "Triggerbox found: "+i
-			DebugLog "Triggerbox "+i+" name: "+r\TriggerboxName[i]
-		Next
-	EndIf
-	
+	Local tempTb.TempTriggerboxes = r\RoomTemplate\FirstTempTriggerbox
+	Local lastTb.Triggerboxes
+	While tempTb <> Null
+		Local tb.Triggerboxes = New Triggerboxes
+		tb\Obj = CopyEntity(tempTb\Obj, r\obj)
+		tb\Name = tempTb\Name
+		If lastTb = Null Then
+			r\FirstTriggerbox = tb
+		Else
+			lastTb\Successor = tb
+		EndIf
+		lastTb = tb
+		DebugLog "Triggerbox "+i+" name: "+tb\Name
+
+		tempTb = tempTb\Successor
+	Wend
+
 	For i = 0 To MaxRoomEmitters-1
 		If r\RoomTemplate\TempSoundEmitter[i]<>0 Then
 			r\SoundEmitterObj[i]=CreatePivot(r\obj)
@@ -5669,21 +5704,6 @@ Function UpdateRooms()
 					Exit
 				EndIf
 			Next
-			If DebugHUD
-				If r\TriggerboxAmount>0
-					For i=0 To r\TriggerboxAmount-1
-						EntityColor r\Triggerbox[i],255,255,0
-						EntityAlpha r\Triggerbox[i],0.2
-					Next
-				EndIf
-			Else
-				If r\TriggerboxAmount>0
-					For i=0 To r\TriggerboxAmount-1
-						EntityColor r\Triggerbox[i],255,255,255
-						EntityAlpha r\Triggerbox[i],0.0
-					Next
-				EndIf
- 			EndIf
 		EndIf
 	Next
 	
@@ -6751,6 +6771,10 @@ Function UpdateButton(obj)
 	
 End Function
 
+Function IsInElevator(entity%, elevator%)
+	Return Abs(EntityX(entity, True)-EntityX(elevator,True))<280.0*RoomScale+(0.015*FPSfactor) And Abs(EntityZ(entity,True)-EntityZ(elevator,True))<280.0*RoomScale+(0.015*FPSfactor) And Abs(EntityY(entity,True)-EntityY(elevator,True))<280.0*RoomScale+(0.015*FPSfactor)
+End Function
+
 Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.Events, ignorerotation% = True)
 	Local x#, z#, sound%
 	Local dist#, dir#, n.NPCs, it.Items
@@ -6778,25 +6802,17 @@ Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.
 	door2\locked = True
 	If door1\open Then
 		door1\IsElevatorDoor = 3
-		If Abs(EntityX(Collider)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-			If Abs(EntityZ(Collider)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
-				If Abs(EntityY(Collider)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
-					door1\locked = False
-					door1\IsElevatorDoor = 1
-				EndIf
-			EndIf
+		If IsInElevator(Collider, room1) Then
+			door1\locked = False
+			door1\IsElevatorDoor = 1
 		EndIf
 	EndIf
 	If door2\open Then
 		door2\IsElevatorDoor = 3
-		If Abs(EntityX(Collider)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-			If Abs(EntityZ(Collider)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
-				If Abs(EntityY(Collider)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-					door2\locked = False
-					door2\IsElevatorDoor = 1
-				EndIf
-			EndIf
-		EndIf	
+		If IsInElevator(Collider, room2) Then
+			door2\locked = False
+			door2\IsElevatorDoor = 1
+		EndIf
 	EndIf
 	
 	Local inside = False
@@ -6807,20 +6823,16 @@ Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.
 		If door1\openstate = 0 And door2\openstate = 0 Then
 			If State < 0 Then
 				State = State - FPSfactor
-				If Abs(EntityX(Collider)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-					If Abs(EntityZ(Collider)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
-						If Abs(EntityY(Collider)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
-							inside = True
-							
-							If event\SoundCHN = 0 Then
-								event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
-							Else
-								If (Not ChannelPlaying(event\SoundCHN)) Then event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
-							EndIf
-							
-							CameraShake = Sin(Abs(State)/3.0)*0.3
-						EndIf
+				If IsInElevator(Collider, room1) Then
+					inside = True
+					
+					If event\SoundCHN = 0 Then
+						event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
+					Else
+						If (Not ChannelPlaying(event\SoundCHN)) Then event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
 					EndIf
+					
+					CameraShake = Sin(Abs(State)/3.0)*0.3
 				EndIf
 				
 				If State < -500 Then
@@ -6853,50 +6865,44 @@ Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.
 					EndIf
 					
 					For n.NPCs = Each NPCs
-						If Abs(EntityX(n\Collider)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-							If Abs(EntityZ(n\Collider)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-								If Abs(EntityY(n\Collider)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-									If (Not ignorerotation) Then
-										dist# = Distance(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room1,True),EntityZ(room1,True))
-										dir# = point_direction(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room1,True),EntityZ(room1,True))
-										dir=dir+EntityYaw(room2,True)-EntityYaw(room1,True)
-										dir=WrapAngle(dir)
-										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
-										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
-										RotateEntity n\Collider,EntityPitch(n\Collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(n\Collider,True),EntityYaw(room1,True)),EntityRoll(n\Collider,True),True
-									Else
-										x# = Max(Min((EntityX(n\Collider)-EntityX(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
-										z# = Max(Min((EntityZ(n\Collider)-EntityZ(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
-									EndIf
-									
-									TeleportEntity(n\Collider, EntityX(room2,True)+x,(0.1*FPSfactor)+EntityY(room2,True)+(EntityY(n\Collider)-EntityY(room1,True)),EntityZ(room2,True)+z,n\CollRadius,True)
-									If n = Curr173
-										Curr173\IdleTimer = 10
-									EndIf
-								EndIf
+						If IsInElevator(n\Collider, room1) Then
+							If (Not ignorerotation) Then
+								dist# = Distance(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room1,True),EntityZ(room1,True))
+								dir# = point_direction(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room1,True),EntityZ(room1,True))
+								dir=dir+EntityYaw(room2,True)-EntityYaw(room1,True)
+								dir=WrapAngle(dir)
+								x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+								z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+								RotateEntity n\Collider,EntityPitch(n\Collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(n\Collider,True),EntityYaw(room1,True)),EntityRoll(n\Collider,True),True
+							Else
+								x# = Max(Min((EntityX(n\Collider)-EntityX(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+								z# = Max(Min((EntityZ(n\Collider)-EntityZ(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
 							EndIf
+									
+							TeleportEntity(n\Collider, EntityX(room2,True)+x,(0.1*FPSfactor)+EntityY(room2,True)+(EntityY(n\Collider)-EntityY(room1,True)),EntityZ(room2,True)+z,n\CollRadius,True)
+							If n = Curr173
+								Curr173\IdleTimer = 10
+							EndIf
+						ElseIf IsInElevator(n\Collider, room2) Then
+							TeleportCloser(n, 2)
 						EndIf
 					Next
 					For it.Items = Each Items
-						If Abs(EntityX(it\collider)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-							If Abs(EntityZ(it\collider)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-								If Abs(EntityY(it\collider)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-									If (Not ignorerotation) Then
-										dist# = Distance(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room1,True),EntityZ(room1,True))
-										dir# = point_direction(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room1,True),EntityZ(room1,True))
-										dir=dir+EntityYaw(room2,True)-EntityYaw(room1,True)
-										dir=WrapAngle(dir)
-										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
-										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
-										RotateEntity it\collider,EntityPitch(it\collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(it\collider,True),EntityYaw(room1,True)),EntityRoll(it\collider,True),True
-									Else
-										x# = Max(Min((EntityX(it\collider)-EntityX(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
-										z# = Max(Min((EntityZ(it\collider)-EntityZ(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
-									EndIf
-									
-									TeleportEntity(it\collider, EntityX(room2,True)+x,(0.1*FPSfactor)+EntityY(room2,True)+(EntityY(it\collider)-EntityY(room1,True)),EntityZ(room2,True)+z,0.01,True)
-								EndIf
+						If IsInElevator(it\collider, room1) Then
+							If (Not ignorerotation) Then
+								dist# = Distance(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room1,True),EntityZ(room1,True))
+								dir# = point_direction(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room1,True),EntityZ(room1,True))
+								dir=dir+EntityYaw(room2,True)-EntityYaw(room1,True)
+								dir=WrapAngle(dir)
+								x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+								z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+								RotateEntity it\collider,EntityPitch(it\collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(it\collider,True),EntityYaw(room1,True)),EntityRoll(it\collider,True),True
+							Else
+								x# = Max(Min((EntityX(it\collider)-EntityX(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+								z# = Max(Min((EntityZ(it\collider)-EntityZ(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
 							EndIf
+									
+							TeleportEntity(it\collider, EntityX(room2,True)+x,(0.1*FPSfactor)+EntityY(room2,True)+(EntityY(it\collider)-EntityY(room1,True)),EntityZ(room2,True)+z,0.01,True)
 						EndIf
 					Next
 					
@@ -6907,20 +6913,16 @@ Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.
 				EndIf
 			Else
 				State = State + FPSfactor
-				If Abs(EntityX(Collider)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-					If Abs(EntityZ(Collider)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
-						If Abs(EntityY(Collider)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-							inside = True
-							
-							If event\SoundCHN = 0 Then
-								event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
-							Else
-								If (Not ChannelPlaying(event\SoundCHN)) Then event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
-							EndIf
-							
-							CameraShake = Sin(Abs(State)/3.0)*0.3
-						EndIf
+				If IsInElevator(Collider, room2) Then
+					inside = True
+					
+					If event\SoundCHN = 0 Then
+						event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
+					Else
+						If (Not ChannelPlaying(event\SoundCHN)) Then event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
 					EndIf
+					
+					CameraShake = Sin(Abs(State)/3.0)*0.3
 				EndIf	
 				
 				If State > 500 Then 
@@ -6952,48 +6954,42 @@ Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.
 					EndIf
 					
 					For n.NPCs = Each NPCs
-						If Abs(EntityX(n\Collider)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-							If Abs(EntityZ(n\Collider)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-								If Abs(EntityY(n\Collider)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-									If (Not ignorerotation) Then
-										dist# = Distance(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room2,True),EntityZ(room2,True))
-										dir# = point_direction(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room2,True),EntityZ(room2,True))
-										dir=dir+EntityYaw(room1,True)-EntityYaw(room2,True)
-										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
-										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
-										RotateEntity n\Collider,EntityPitch(n\Collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(n\Collider,True),EntityYaw(room1,True)),EntityRoll(n\Collider,True),True
-									Else
-										x# = Max(Min((EntityX(n\Collider)-EntityX(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
-										z# = Max(Min((EntityZ(n\Collider)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
-									EndIf
-									
-									TeleportEntity(n\Collider, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(n\Collider)-EntityY(room2,True)),EntityZ(room1,True)+z,n\CollRadius,True)
-									If n = Curr173
-										Curr173\IdleTimer = 10
-									EndIf
-								EndIf
+						If IsInElevator(n\Collider, room2) Then
+							If (Not ignorerotation) Then
+								dist# = Distance(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room2,True),EntityZ(room2,True))
+								dir# = point_direction(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room2,True),EntityZ(room2,True))
+								dir=dir+EntityYaw(room1,True)-EntityYaw(room2,True)
+								x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+								z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+								RotateEntity n\Collider,EntityPitch(n\Collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(n\Collider,True),EntityYaw(room1,True)),EntityRoll(n\Collider,True),True
+							Else
+								x# = Max(Min((EntityX(n\Collider)-EntityX(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+								z# = Max(Min((EntityZ(n\Collider)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
 							EndIf
+							
+							TeleportEntity(n\Collider, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(n\Collider)-EntityY(room2,True)),EntityZ(room1,True)+z,n\CollRadius,True)
+							If n = Curr173
+								Curr173\IdleTimer = 10
+							EndIf
+						ElseIf IsInElevator(n\Collider, room1) Then
+							TeleportCloser(n, 2)
 						EndIf
 					Next
 					For it.Items = Each Items
-						If Abs(EntityX(it\collider)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-							If Abs(EntityZ(it\collider)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-								If Abs(EntityY(it\collider)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
-									If (Not ignorerotation) Then
-										dist# = Distance(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room2,True),EntityZ(room2,True))
-										dir# = point_direction(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room2,True),EntityZ(room2,True))
-										dir=dir+EntityYaw(room1,True)-EntityYaw(room2,True)
-										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
-										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
-										RotateEntity it\collider,EntityPitch(it\collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(it\collider,True),EntityYaw(room1,True)),EntityRoll(it\collider,True),True
-									Else
-										x# = Max(Min((EntityX(it\collider)-EntityX(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
-										z# = Max(Min((EntityZ(it\collider)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
-									EndIf
-									
-									TeleportEntity(it\collider, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(it\collider)-EntityY(room2,True)),EntityZ(room1,True)+z,0.01,True)
-								EndIf
+						If IsInElevator(it\collider, room2) Then
+							If (Not ignorerotation) Then
+								dist# = Distance(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room2,True),EntityZ(room2,True))
+								dir# = point_direction(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room2,True),EntityZ(room2,True))
+								dir=dir+EntityYaw(room1,True)-EntityYaw(room2,True)
+								x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+								z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+								RotateEntity it\collider,EntityPitch(it\collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(it\collider,True),EntityYaw(room1,True)),EntityRoll(it\collider,True),True
+							Else
+								x# = Max(Min((EntityX(it\collider)-EntityX(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+								z# = Max(Min((EntityZ(it\collider)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
 							EndIf
+							
+							TeleportEntity(it\collider, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(it\collider)-EntityY(room2,True)),EntityZ(room1,True)+z,0.01,True)
 						EndIf
 					Next
 					

@@ -5133,7 +5133,7 @@ Function UpdateNPCs()
 	
 End Function
 
-Function TeleportCloser(n.NPCs)
+Function TeleportCloser(n.NPCs, minDist%=16)
 	Local closestDist# = 0
 	Local closestWaypoint.WayPoints
 	Local w.WayPoints
@@ -5146,7 +5146,7 @@ Function TeleportCloser(n.NPCs)
 			If xtemp < 10.0 And xtemp > 1.0 Then 
 				ztemp = Abs(EntityZ(w\obj,True)-EntityZ(n\Collider,True))
 				If ztemp < 10.0 And ztemp > 1.0 Then
-					If (EntityDistance(Collider, w\obj)>16-(8*SelectedDifficulty\aggressiveNPCs)) Then
+					If (EntityDistance(Collider, w\obj)>minDist*(1.0-SelectedDifficulty\aggressiveNPCs*0.5)) Then
 						;teleports to the nearby waypoint that takes it closest to the player
 						Local newDist# = EntityDistance(Collider, w\obj)
 						If (newDist < closestDist Or closestWaypoint = Null) Then

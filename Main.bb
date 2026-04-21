@@ -162,6 +162,7 @@ Global ShowFPS = GetOptionInt("graphics", "show FPS")
 
 Global WireframeState
 Global HalloweenTex
+Global IsBirthday = Left(CurrentDate(), 7) = "15 Apr " Lor HasCLIFlag("birthday")
 Global BirthdayHat = False
 
 Global BorderlessWindowed% = GetOptionInt("graphics", "borderless windowed")
@@ -271,7 +272,7 @@ Global Vsync% = GetOptionInt("graphics", "vsync")
 
 Global Opt_AntiAlias = GetOptionInt("graphics", "antialias")
 
-Global CurrFrameLimit# = (Framelimit%-19)/100.0
+Global CurrFrameLimit# = (Framelimit%-20)/280.0
 
 Global ScreenGamma# = GetOptionFloat("graphics", "screengamma")
 ;If Fullscreen Then UpdateScreenGamma()
@@ -1091,8 +1092,6 @@ Function UpdateConsole()
 					Local itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					If itt = Null Then
 						CreateConsoleMsg("Item not found.",255,150,0)
-					Else If itt\name = "bdc" Then
-						CreateConsoleMsg("Don't be a party pooper!",255,150,0)
 					Else
 						CreateConsoleMsg(itt\displayname + " spawned.")
 						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
@@ -1336,8 +1335,24 @@ Function UpdateConsole()
 					
 					If DebugHUD Then
 						CreateConsoleMsg("Debug Mode On")
+
+						For r.Rooms = Each Rooms
+							Local tb.Triggerboxes = r\FirstTriggerbox
+							While tb <> Null
+								EntityAlpha(tb\Obj, 0.2)
+								tb = tb\Successor
+							Wend
+						Next
 					Else
 						CreateConsoleMsg("Debug Mode Off")
+					
+						For r.Rooms = Each Rooms
+							tb.Triggerboxes = r\FirstTriggerbox
+							While tb <> Null
+								EntityAlpha(tb\Obj, 0.0)
+								tb = tb\Successor
+							Wend
+						Next
 					EndIf
 					;[End Block]
 				Case "stopsound", "stfu"
@@ -1638,8 +1653,11 @@ Function UpdateConsole()
 					Else
 						StrTemp$ = ""
 					EndIf
-					
-					If Int(StrTemp) >= 0 And Int(StrTemp) <= 2 ;<--- This is the maximum ID of particles by Devil Particle system, will be increased after time - ENDSHN
+
+					Local maxParticlesIdx% = 2
+					If IsBirthday Then maxParticlesIdx = 7
+
+					If Int(StrTemp) >= 0 And Int(StrTemp) <= maxParticlesIdx% ;<--- This is the maximum ID of particles by Devil Particle system, will be increased after time - ENDSHN
 						SetEmitter(Collider,ParticleEffect[Int(StrTemp)])
 						CreateConsoleMsg("Spawned particle emitter with ID "+Int(StrTemp)+" at player's position.")
 					Else
@@ -3679,7 +3697,7 @@ While IsRunning
 		BlitzcordRunCallbacks()
 	EndIf
 
-	Flip Vsync Lor IsAnyMenuOpen() Lor MainMenuOpen
+	Flip Vsync Lor MainMenuOpen
 Wend
 
 If ShouldRestart Then
@@ -5949,7 +5967,7 @@ Function DrawGUI()
 				Case "bdc"
 					;[Block]
 					If CanUseItem(False, False, True) Then
-						If Wearing714 = 0 Then
+						If Wearing714 = 0 And IsBirthday Then
 							Injuries = 0
 							BloodLoss = 0
 							ResetDiseases()
@@ -5972,7 +5990,11 @@ Function DrawGUI()
 								Curr173\obj3 = LoadMesh_Strict("GFX\npcs\partyhat.b3d", Curr173\obj)
 							EndIf
 						Else
-							Msg = I_Loc\MessageItem_BdcUseStale
+							If Not (IsBirthday) Then
+								Msg = I_Loc\MessageItem_BdcUseStaleDate
+							Else
+								Msg = I_Loc\MessageItem_BdcUseStale
+							EndIf
 							MsgTimer = 70 * 7
 						EndIf
 
@@ -8008,13 +8030,10 @@ Function DrawMenu()
 					
 					Color 255,255,255
 					If DrawTick(x + 270 * MenuScale, y, CurrFrameLimit > 0.0) Then
-						If CurrFrameLimit = 0 Then CurrFrameLimit = (60-19)/100.0
-						;CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*50.0, 1)/50.0)
-						;CurrFrameLimit = Max(CurrFrameLimit, 0.1)
-						;Framelimit% = CurrFrameLimit#*100.0
-						CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*99.0, 1)/99.0)
-						CurrFrameLimit# = Max(CurrFrameLimit, 0.01)
-						Framelimit% = 19+(CurrFrameLimit*100.0)
+						If CurrFrameLimit = 0 Then CurrFrameLimit = (60-20)/280.0
+						CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*100.0, 1)/100.0)
+						CurrFrameLimit# = Max(CurrFrameLimit, 0.001)
+						Framelimit% = 20+(CurrFrameLimit*280.0)
 						Color 255,255,0
 						Text(x + 5 * MenuScale, y + 25 * MenuScale, Format(I_Loc\OptionName_FramelimitFps, Framelimit%))
 						If (MouseOn(x+150*MenuScale,y+30*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1
@@ -8753,7 +8772,13 @@ Function LoadEntities()
 	;[End Block]
 
 	InitMaterials()
-	
+
+	If IsBirthday Then
+		tex = LoadModdedTextureNonStrict("GFX\map\miscsigns3.ae", 1)
+		TextureBlend(tex, 5)
+		AddTextureToCache(tex, "GFX\map\miscsigns3.jpg")
+	EndIf
+
 	OBJTunnel(0)=LoadRMesh("GFX\map\mt1.rmesh",Null)	
 	HideEntity OBJTunnel(0)				
 	OBJTunnel(1)=LoadRMesh("GFX\map\mt2.rmesh",Null)	
@@ -8830,18 +8855,20 @@ Function LoadEntities()
 	SetTemplateAlphaVel(ParticleEffect[2], True)
 	
 	;BDC
-	For i = 3 To 7
-		ParticleEffect[i] = CreateTemplate()
-		SetTemplateEmitterBlend(ParticleEffect[i], 1)
-		SetTemplateEmitterLifeTime(ParticleEffect[i], 60)
-		SetTemplateParticleLifeTime(ParticleEffect[i], 500, 500)
-		SetTemplateTexture(ParticleEffect[i], "GFX\bd\Confetti" + Str(i-2) + ".png", 2, 1)
-		SetTemplateVelocity(ParticleEffect[i], -0.005, 0.005, 0, 0.005, -0.005, 0.005)
-		SetTemplateOffset(ParticleEffect[i], -0.05, 0.05, 0.05, 0.05, -0.05, 0.05)
-		SetTemplateGravity(ParticleEffect[i], 0.0001)
-		SetTemplateSize(ParticleEffect[i], 0.01, 0.01)
-		SetTemplateRotation(ParticleEffect[i], -30, 30)
-	Next
+	If IsBirthday Then
+		For i = 3 To 7
+			ParticleEffect[i] = CreateTemplate()
+			SetTemplateEmitterBlend(ParticleEffect[i], 1)
+			SetTemplateEmitterLifeTime(ParticleEffect[i], 60)
+			SetTemplateParticleLifeTime(ParticleEffect[i], 500, 500)
+			SetTemplateTexture(ParticleEffect[i], "GFX\bd\Confetti" + Str(i-2) + ".png", 2, 1)
+			SetTemplateVelocity(ParticleEffect[i], -0.005, 0.005, 0, 0.005, -0.005, 0.005)
+			SetTemplateOffset(ParticleEffect[i], -0.05, 0.05, 0.05, 0.05, -0.05, 0.05)
+			SetTemplateGravity(ParticleEffect[i], 0.0001)
+			SetTemplateSize(ParticleEffect[i], 0.01, 0.01)
+			SetTemplateRotation(ParticleEffect[i], -30, 30)
+		Next
+	EndIf
 
 	Room2slCam = CreateCamera()
 	CameraViewport(Room2slCam, 0, 0, 128, 128)
@@ -8877,6 +8904,7 @@ Function InitNewGame()
 	If SelectedMap = -1 Then
 		CreateMap(50, 19)
 	Else
+		UsedConsole = True
 		LoadMap(SavedMapsPath(SelectedMap), 50, 19)
 	EndIf
 	DrawLoading(70)
@@ -9284,6 +9312,7 @@ Function NullGame(playbuttonsfx%=True)
 	
 	;ClearWorld
 	
+	Delete Each Triggerboxes
 	Delete Each LightTemplates
 	Delete Each Materials
 	Delete Each WayPoints
@@ -12019,39 +12048,28 @@ Function UpdateDeafPlayer()
 	
 End Function
 
-Function CheckTriggers$()
+Function CheckTriggers$(r.Rooms, x#, y#, z#)
 	Local i%,sx#,sy#,sz#
 	Local inside% = -1
-	
-	If PlayerRoom\TriggerboxAmount = 0
-		Return ""
-	Else
-		For i = 0 To PlayerRoom\TriggerboxAmount-1
-			EntityAlpha PlayerRoom\Triggerbox[i],1.0
-			sx# = EntityScaleX(PlayerRoom\Triggerbox[i], 1)
-			sy# = Max(EntityScaleY(PlayerRoom\Triggerbox[i], 1), 0.001)
-			sz# = EntityScaleZ(PlayerRoom\Triggerbox[i], 1)
-			GetMeshExtents(PlayerRoom\Triggerbox[i])
-			If DebugHUD
-				EntityColor PlayerRoom\Triggerbox[i],255,255,0
-				EntityAlpha PlayerRoom\Triggerbox[i],0.2
-			Else
-				EntityColor PlayerRoom\Triggerbox[i],255,255,255
-				EntityAlpha PlayerRoom\Triggerbox[i],0.0
- 			EndIf
-			If EntityX(Collider)>((sx#*Mesh_MinX)+PlayerRoom\x) And EntityX(Collider)<((sx#*Mesh_MaxX)+PlayerRoom\x)
-				If EntityY(Collider)>((sy#*Mesh_MinY)+PlayerRoom\y) And EntityY(Collider)<((sy#*Mesh_MaxY)+PlayerRoom\y)
-					If EntityZ(Collider)>((sz#*Mesh_MinZ)+PlayerRoom\z) And EntityZ(Collider)<((sz#*Mesh_MaxZ)+PlayerRoom\z)
-						inside% = i%
-						Exit
-					EndIf
+
+	Local tb.Triggerboxes = r\FirstTriggerbox
+	While tb <> Null
+		sx# = EntityScaleX(tb\Obj, 1)
+		sy# = Max(EntityScaleY(tb\Obj, 1), 0.001)
+		sz# = EntityScaleZ(tb\Obj, 1)
+		GetMeshExtents(tb\Obj)
+		If x>((sx#*Mesh_MinX)+r\x) And x<((sx#*Mesh_MaxX)+r\x)
+			If y>((sy#*Mesh_MinY)+r\y) And y<((sy#*Mesh_MaxY)+r\y)
+				If z>((sz#*Mesh_MinZ)+r\z) And z<((sz#*Mesh_MaxZ)+r\z)
+					Return tb\Name
 				EndIf
 			EndIf
-		Next
-		
-		If inside% > -1 Then Return PlayerRoom\TriggerboxName[inside%]
-	EndIf
-	
+		EndIf
+
+		tb = tb\Successor
+	Wend
+
+	Return ""	
 End Function
 
 Function ScaledMouseX%()
