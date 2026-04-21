@@ -49,7 +49,7 @@ Function LoadImage_Strict%(file$, scale#=0, flags%=0)
 				If tmp <> 0 Then
 					If scale <> 0 Then ScaleImageFromFile(tmp, m\Path + fileNoExt, scale)
 					Return tmp
-				Else If DebugResourcePacks Then
+				Else
 					RuntimeErrorExt("Failed to load image " + Chr(34) + modPath + Chr(34) + ".")
 				EndIf
 			EndIf
@@ -203,10 +203,10 @@ Function FreeSound_Strict(sndHandle%)
 	Local snd.Sound = Object.Sound(sndHandle)
 	If snd <> Null Then
 		If snd\internalHandle <> 0 Then
+			RemoveQueuedSubtitle(snd\internalHandle)
 			FreeSound snd\internalHandle
 			snd\internalHandle = 0
 		EndIf
-		RemoveQueuedSubtitle(snd\internalHandle)
 		Delete snd
 	EndIf
 End Function
@@ -383,7 +383,7 @@ Function LoadAnimMesh_Strict(File$,parent=0)
 				tmp = LoadAnimMesh(modPath, parent)
 				If tmp <> 0 Then
 					Return tmp
-				Else If DebugResourcePacks Then
+				Else
 					RuntimeErrorExt("Failed to load 3D Animated Mesh " + Chr(34) + modPath + Chr(34) + ".")
 				EndIf
 			EndIf
