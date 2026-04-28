@@ -146,6 +146,7 @@ Type LocalizationTable
     Field Mods_Upload$
     Field Mods_Update$
     Field Mods_Visit$
+    Field Mods_Toggleall$
     Field Mods_Reloadmods$
     Field Mods_Reloadgame$
     Field Mods_Openlocal$
@@ -632,6 +633,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "upload" If loc\Mods_Upload = "" Then loc\Mods_Upload = value
                             Case "update" If loc\Mods_Update = "" Then loc\Mods_Update = value
                             Case "visit" If loc\Mods_Visit = "" Then loc\Mods_Visit = value
+                            Case "toggleall" If loc\Mods_Toggleall = "" Then loc\Mods_Toggleall = value
                             Case "reloadmods" If loc\Mods_Reloadmods = "" Then loc\Mods_Reloadmods = value
                             Case "reloadgame" If loc\Mods_Reloadgame = "" Then loc\Mods_Reloadgame = value
                             Case "openlocal" If loc\Mods_Openlocal = "" Then loc\Mods_Openlocal = value

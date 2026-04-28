@@ -1456,6 +1456,8 @@ Function UpdateEvents()
 					EndIf
 					
 					If e\EventState3=0 Then
+						If e\room\Objects[1]<>0 Then FreeEntity(e\room\Objects[1]) : e\room\Objects[1]=0
+
 						If Rand(2)=1 Then
 							GiveAchievement(Achv1048)
 							e\room\Objects[1]=LoadAnimMesh_Strict("GFX\npcs\scp-1048.b3d")
@@ -6719,6 +6721,8 @@ Function UpdateEvents()
 				If e <> Null Then
 					If PlayerRoom = e\room Then
 						If e\EventState = 0 Then
+							If e\room\Objects[7]<>0 Then FreeEntity(e\room\Objects[7]) : e\room\Objects[7]=0
+
 							e\room\Objects[7]=LoadAnimMesh_Strict("GFX\npcs\scp-1048.b3d")
 							ScaleEntity e\room\Objects[7], 0.05,0.05,0.05
 							
@@ -7324,7 +7328,7 @@ Function UpdateEvents()
 							Exit
 						End If
 					Next
-					
+
 					If e\EventState > 0 Then
 						e\EventState = e\EventState + FPSfactor
 						
@@ -7338,7 +7342,7 @@ Function UpdateEvents()
 							e\room\RoomDoors[0]\open = False
 						EndIf
 						
-						If Distance(EntityX(Collider), EntityZ(Collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (170.0 * RoomScale) Then
+						If CheckTriggers(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider)) = "914input" Then
 							
 							If setting = "rough" Or setting = "coarse" Then
 								If e\EventState > 70 * 2.6 And e\EventState - FPSfactor2 < 70 * 2.6 Then PlaySound_Strict Death914SFX
@@ -7373,14 +7377,13 @@ Function UpdateEvents()
 						If e\EventState > (12 * 70) Then							
 							For it.Items = Each Items
 								If it\collider <> 0 And it\Picked = False Then
-									If Distance(EntityX(it\collider), EntityZ(it\collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (180.0 * RoomScale) Then
+									If CheckTriggers(PlayerRoom, EntityX(it\Collider), EntityY(it\Collider), EntityZ(it\Collider)) = "914input" Then
 										Use914(it, setting, EntityX(e\room\Objects[3], True), EntityY(e\room\Objects[3], True), EntityZ(e\room\Objects[3], True))
-										
 									End If
 								End If
 							Next
 							
-							If Distance(EntityX(Collider), EntityZ(Collider), EntityX(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True)) < (160.0 * RoomScale) Then
+							If CheckTriggers(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider)) = "914input" Then
 								Select setting
 									Case "coarse"
 										Injuries = 4.0

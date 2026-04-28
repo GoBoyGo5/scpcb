@@ -1381,21 +1381,37 @@ Function UpdateMainMenu()
 						EndIf
 						DrawTagSelection(x + 10 * MenuScale, y + 210 * MenuScale, 400 * MenuScale)
 					Else
+						If DrawButton(x + 10 * MenuScale, y, 150 * MenuScale, 30 * MenuScale, I_Loc\Mods_Toggleall, False, False, UpdatingMod<>Null) Then
+							Local shouldBe% = False
+							For m.Mods = Each Mods
+								If Not m\IsActive Then shouldBe = True : Exit
+							Next
+							For m.Mods = Each Mods
+								If m\IsActive <> shouldBe Then
+									m\IsActive = shouldBe
+									If m\RequiresReload Then ModsDirty = True
+								EndIf
+							Next
+						EndIf
+						y = y + 40 * MenuScale
+
 						If DrawButton(x + 10 * MenuScale, y, 150 * MenuScale, 30 * MenuScale, I_Loc\Mods_Reloadmods, False, False, UpdatingMod<>Null) Then
 							SerializeMods()
 							ReloadMods()
 						EndIf
+						y = y + 40 * MenuScale
 
-						If DrawButton(x + 10 * MenuScale, y + 40 * MenuScale, 150 * MenuScale, 30 * MenuScale, I_Loc\Mods_Reloadgame, False, False, UpdatingMod<>Null) Then
+						If DrawButton(x + 10 * MenuScale, y, 150 * MenuScale, 30 * MenuScale, I_Loc\Mods_Reloadgame, False, False, UpdatingMod<>Null) Then
 							SerializeMods()
 							Restart()
 							Return
 						EndIf
+						y = y + 40 * MenuScale
 
-						If DrawButton(x + 10 * MenuScale, y + 80 * MenuScale, 150 * MenuScale, 50 * MenuScale, "", False, False, UpdatingMod<>Null) Then
+						If DrawButton(x + 10 * MenuScale, y, 150 * MenuScale, 50 * MenuScale, "", False, False, UpdatingMod<>Null) Then
 							ExecFile("Mods")
 						EndIf
-						RowText(I_Loc\Mods_Openlocal, x + 10 * MenuScale, y + (80 + 10) * MenuScale, 150 * MenuScale, (50 - 15) * MenuScale, True)
+						RowText(I_Loc\Mods_Openlocal, x + 10 * MenuScale, y + 10 * MenuScale, 150 * MenuScale, (50 - 15) * MenuScale, True)
 					EndIf
 				EndIf
 

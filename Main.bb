@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.2"
+Const VersionNumber$ = "1.3.12.3"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
@@ -758,6 +758,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("- heal")
 							CreateConsoleMsg("- infinitestamina")
 							CreateConsoleMsg("- sanic")
+							CreateConsoleMsg("- blinkeffect [strength] [timer]")
 							CreateConsoleMsg("- notarget")
 							CreateConsoleMsg("- teleport [room name] [index]")
 							CreateConsoleMsg("- roomlist")
@@ -927,6 +928,18 @@ Function UpdateConsole()
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Will play tracks in .ogg/.wav format")
 							CreateConsoleMsg("from "+Chr(34)+"SFX\Music\Custom\"+Chr(34)+".")
+							CreateConsoleMsg("******************************")
+						Case "setblinkeffect", "blinkeffect"
+							CreateConsoleMsg("HELP - blinkeffect")
+							CreateConsoleMsg("******************************")
+							CreateConsoleMsg("Sets the blink effect and its timer.")
+							CreateConsoleMsg("The blink effect scales how fast the blink meter")
+							CreateConsoleMsg("depletes. A value of two makes it drain twice")
+							CreateConsoleMsg("as fast, while a value of 0 disables blinking.")
+							CreateConsoleMsg("The timer is specified in seconds and controls")
+							CreateConsoleMsg("how long the effect will last.")
+							CreateConsoleMsg("If a timer value is not specified, the effect")
+							CreateConsoleMsg("will last indefinitely.")
 							CreateConsoleMsg("******************************")
 						Case "omni"
 							CreateConsoleMsg("HELP - omni")
@@ -1405,7 +1418,7 @@ Function UpdateConsole()
 						For r.Rooms = Each Rooms
 							Local tb.Triggerboxes = r\FirstTriggerbox
 							While tb <> Null
-								EntityAlpha(tb\Obj, 0.2)
+								ShowEntity(tb\Obj)
 								tb = tb\Successor
 							Wend
 						Next
@@ -1415,7 +1428,7 @@ Function UpdateConsole()
 						For r.Rooms = Each Rooms
 							tb.Triggerboxes = r\FirstTriggerbox
 							While tb <> Null
-								EntityAlpha(tb\Obj, 0.0)
+								HideEntity(tb\Obj)
 								tb = tb\Successor
 							Wend
 						Next
@@ -1756,12 +1769,17 @@ Function UpdateConsole()
 					Curr106\State = 0
 					Curr106\Idle = False
 					;[End Block]
-				Case "setblinkeffect"
+				Case "setblinkeffect", "blinkeffect"
 					;[Block]
 					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					BlinkEffect = Float(Left(args, Len(args) - Instr(args, " ")))
-					BlinkEffectTimer = Float(Right(args, Len(args) - Instr(args, " ")))
-					CreateConsoleMsg("Set BlinkEffect to: " + BlinkEffect + "and BlinkEffect timer: " + BlinkEffectTimer)
+					BlinkEffect = Float(Piece(args, 1, " "))
+					Local timerStr$ = Piece(args, 2, " ")
+					If timerStr = "" Then
+						If BlinkEffect = 1 Then BlinkEffectTimer = 0 Else BlinkEffectTimer = Infinity
+					Else
+						BlinkEffectTimer = Float(timerStr)
+					EndIf
+					CreateConsoleMsg("Set BlinkEffect to: " + BlinkEffect + " and BlinkEffect timer: " + BlinkEffectTimer)
 					;[End Block]
 				Case "omni"
 					;[Block]
@@ -7558,6 +7576,7 @@ Function DrawHUD()
 		Else
 			Text x, 310, "Current monitor: NULL"
 		EndIf
+		Text x, 330, "Current trigger: " + CheckTriggers(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 		
 		SetFont Font1
 	EndIf
@@ -8394,15 +8413,15 @@ Function LoadEntities()
 	
 	PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg", MenuScale)
 	
-	SprintIcon% = LoadImageHUDScaled("GFX\sprinticon.png")
-	BlinkIcon% = LoadImageHUDScaled("GFX\blinkicon.png")
-	CrouchIcon% = LoadImageHUDScaled("GFX\sneakicon.png")
-	HandIcon% = LoadImageHUDScaled("GFX\handsymbol.png")
-	HandIcon2% = LoadImageHUDScaled("GFX\handsymbol2.png")
+	If SprintIcon = 0 Then SprintIcon% = LoadImageHUDScaled("GFX\sprinticon.png")
+	If BlinkIcon = 0 Then BlinkIcon% = LoadImageHUDScaled("GFX\blinkicon.png")
+	If CrouchIcon = 0 Then CrouchIcon% = LoadImageHUDScaled("GFX\sneakicon.png")
+	If HandIcon = 0 Then HandIcon% = LoadImageHUDScaled("GFX\handsymbol.png")
+	If HandIcon2 = 0 Then HandIcon2% = LoadImageHUDScaled("GFX\handsymbol2.png")
 
-	StaminaMeterIMG% = LoadImageHUDScaled("GFX\staminameter.png")
+	If StaminaMeterIMG = 0 Then StaminaMeterIMG% = LoadImageHUDScaled("GFX\staminameter.png")
 
-	Panel294 = LoadImageHUDScaled("GFX\294panel.jpg")
+	If Panel294 = 0 Then Panel294 = LoadImageHUDScaled("GFX\294panel.jpg")
 
 	Load294()
 
@@ -9393,7 +9412,13 @@ Function NullGame(playbuttonsfx%=True)
 	Delete Each Rooms	
 	Delete Each Inventories
 	Delete Each Items
-	Delete Each ItemTemplates
+
+	For itt.ItemTemplates = Each ItemTemplates
+		FreeImage(itt\invimg)
+		If itt\invimg2 <> 0 Then FreeImage(itt\invimg2)
+		Delete itt
+	Next
+
 	Delete Each Props
 	Delete Each Decals
 	Delete Each NPCs
@@ -12128,21 +12153,10 @@ Function UpdateDeafPlayer()
 End Function
 
 Function CheckTriggers$(r.Rooms, x#, y#, z#)
-	Local i%,sx#,sy#,sz#
-	Local inside% = -1
-
 	Local tb.Triggerboxes = r\FirstTriggerbox
 	While tb <> Null
-		sx# = EntityScaleX(tb\Obj, 1)
-		sy# = Max(EntityScaleY(tb\Obj, 1), 0.001)
-		sz# = EntityScaleZ(tb\Obj, 1)
-		GetMeshExtents(tb\Obj)
-		If x>((sx#*Mesh_MinX)+r\x) And x<((sx#*Mesh_MaxX)+r\x)
-			If y>((sy#*Mesh_MinY)+r\y) And y<((sy#*Mesh_MaxY)+r\y)
-				If z>((sz#*Mesh_MinZ)+r\z) And z<((sz#*Mesh_MaxZ)+r\z)
-					Return tb\Name
-				EndIf
-			EndIf
+		If x>tb\MinX And x<tb\MaxX And y>tb\MinY And y<tb\MaxY And z>tb\MinZ And z<tb\MaxZ
+			Return tb\Name
 		EndIf
 
 		tb = tb\Successor
