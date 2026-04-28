@@ -8396,22 +8396,36 @@ Function LoadEntities()
 	MaskImage PauseMenuIMG, 255,255,0
 	ScaleImage PauseMenuIMG,MenuScale,MenuScale
 	
-	SprintIcon% = LoadImage_Strict("GFX\sprinticon.png")
-	ScaleImage(SprintIcon, HUDScale, HUDScale)
-	BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png")
-	ScaleImage(BlinkIcon, HUDScale, HUDScale)
-	CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png")
-	ScaleImage(CrouchIcon, HUDScale, HUDScale)
-	HandIcon% = LoadImage_Strict("GFX\handsymbol.png")
-	ScaleImage(HandIcon, HUDScale, HUDScale)
-	HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png")
-	ScaleImage(HandIcon2, HUDScale, HUDScale)
+	If SprintIcon = 0 Then
+		SprintIcon% = LoadImage_Strict("GFX\sprinticon.png")
+		ScaleImage(SprintIcon, HUDScale, HUDScale)
+	EndIf
+	If BlinkIcon = 0 Then
+		BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png")
+		ScaleImage(BlinkIcon, HUDScale, HUDScale)
+	EndIf
+	If CrouchIcon = 0 Then
+		CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png")
+		ScaleImage(CrouchIcon, HUDScale, HUDScale)
+	EndIf
+	If HandIcon = 0 Then
+		HandIcon% = LoadImage_Strict("GFX\handsymbol.png")
+		ScaleImage(HandIcon, HUDScale, HUDScale)
+	EndIf
+	If HandIcon2 = 0 Then
+		HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png")
+		ScaleImage(HandIcon2, HUDScale, HUDScale)
+	EndIf
 
-	StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.jpg")
-	ScaleImage(StaminaMeterIMG, HUDScale, HUDScale)
+	If StaminaMeterIMG = 0 Then
+		StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.jpg")
+		ScaleImage(StaminaMeterIMG, HUDScale, HUDScale)
+	EndIf
 
-	Panel294 = LoadImage_Strict("GFX\294panel.jpg")
-	ScaleImage(Panel294, HUDScale, HUDScale)
+	If Panel294 = 0 Then
+		Panel294 = LoadImage_Strict("GFX\294panel.jpg")
+		ScaleImage(Panel294, HUDScale, HUDScale)
+	EndIf
 
 	Load294()
 
@@ -9399,7 +9413,13 @@ Function NullGame(playbuttonsfx%=True)
 	Delete Each Rooms	
 	Delete Each Inventories
 	Delete Each Items
-	Delete Each ItemTemplates
+
+	For itt.ItemTemplates = Each ItemTemplates
+		FreeImage(itt\invimg)
+		If itt\invimg2 <> 0 Then FreeImage(itt\invimg2)
+		Delete itt
+	Next
+
 	Delete Each Props
 	Delete Each Decals
 	Delete Each NPCs
