@@ -298,6 +298,16 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 	count=ReadInt(f) ;point entities
 	For i%=1 To count
 		temp1s=ReadString(f)
+		If LoadRoomTemplateEntity\Subscribers > 0 Then
+			Local rtt.RoomTemplates = rt
+			Local ff% = f
+			PrepareFunction(4)
+			SetArgObj(0, &rtt)
+			SetArgInt(1, version)
+			SetArgObj(2, &ff)
+			SetArgString(3, temp1s)
+			If CallHook(LoadRoomTemplateEntity) Then Continue
+		EndIf
 		Select temp1s
 			Case "screen"
 				

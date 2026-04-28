@@ -87,3 +87,15 @@ void Hook_CombineItems(Item@ dragged, Item@ onto) {
     dragged.Remove(true);
     onto.Remove(true);
 }
+
+bool Hook_LoadRoomTemplateEntity(CB::RoomTemplate@ rt, int version, B3D::Stream@ f, string name) {
+    // Screens-B-Gone!
+    if (name == "screen") {
+        f.ReadFloat();
+        f.ReadFloat();
+        f.ReadFloat();
+        f.ReadString();
+        return true;
+    }
+    return false;
+}
