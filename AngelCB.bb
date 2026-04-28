@@ -861,6 +861,22 @@ Function RegisterPlayer()
     SetDefaultNamespace(ns)
 End Function
 
+Function RegisterDreamfilter()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Dreamfilter") Else SetDefaultNamespace("Dreamfilter")
+
+    RegisterGlobalProperty("B3D::Texture@ Texture", &ark_blur_texture)
+    RegisterGlobalProperty("B3D::Image@ Image", &ark_blur_image)
+    RegisterGlobalProperty("B3D::Camera@ Camera", &ark_blur_cam)
+
+    RegisterGlobalProperty("float Volume", &BlurVolume)
+    RegisterGlobalProperty("float Timer", &BlurTimer)
+
+    RegisterGlobalFunction("void Update(float power)", @UpdateBlur)
+
+    SetDefaultNamespace(ns)
+End Function
+
 Function RegisterConsole()
     Local ns$ = GetDefaultNamespace()
     If ns <> "" Then SetDefaultNamespace(ns + "::Console") Else SetDefaultNamespace("Console")
@@ -936,6 +952,7 @@ Function RegisterCB()
     RegisterDecal()
     RegisterItem()
     RegisterPlayer()
+    RegisterDreamfilter()
     RegisterConsole()
     RegisterEvent()
     SetDefaultNamespace("")

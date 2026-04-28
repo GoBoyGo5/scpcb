@@ -443,6 +443,10 @@ CB::ItemTemplate@ FindTemplate(string name);
 CB::Item@ CreateCup(string drinkName, float x, float y, float z, int r, int g, int b, float a = 1);
 }
 
+namespace CB::Dreamfilter {
+void Update(float power);
+}
+
 namespace CB::Console::Msg {
 CB::Console::Msg@ get_First() property;
 CB::Console::Msg@ get_Last() property;
@@ -2456,6 +2460,14 @@ CB::Item@ OpenInventoryItem;
 float MessageTimer;
 string Message;
 string DeathMessage;
+}
+
+namespace CB::Dreamfilter {
+B3D::Texture@ Texture;
+B3D::Image@ Image;
+B3D::Camera@ Camera;
+float Volume;
+float Timer;
 }
 
 namespace CB::Console {
