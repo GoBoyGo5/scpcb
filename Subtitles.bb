@@ -227,7 +227,8 @@ Function CreateSubtitleToken(entry.SubtitleEntry, soundPathGroup$, tokenType)
 		Local soundPath$ = Trim(Mid(soundPathGroup, offset, toChar-offset))
 		Local t.SubtitleToken = GetSubtitleToken(soundPath)
 
-		If t <> Null And ((t\fromFile And (1 Shl tokenType)) <> 0) Then 
+		tokenTypeMask = (1 Shl tokenType) Or (1 Shl entry\entryType)
+		If t <> Null And ((t\fromFile And tokenTypeMask) <> 0) Then 
 			DebugLog("Token already exists: "+soundPath)
 		Else
 			If t = Null Then
@@ -239,7 +240,7 @@ Function CreateSubtitleToken(entry.SubtitleEntry, soundPathGroup$, tokenType)
 
 				Insert t Before First SubtitleToken
 
-				t\fromFile = 1 Shl tokenType
+				t\fromFile = tokenTypeMask
 			Else
 				; Append entry to existing linked list
 				Local e.SubtitleEntry = t\entry
@@ -249,7 +250,7 @@ Function CreateSubtitleToken(entry.SubtitleEntry, soundPathGroup$, tokenType)
 
 				e\nextEntry = entry
 
-				t\fromFile = t\fromFile Or (1 Shl tokenType)
+				t\fromFile = t\fromFile Or tokenTypeMask
 
 				; All tokens in a group share the same entry. This means that appending to the first one is sufficient.
 				; Appending to the others would actually create a loop in the linked list.

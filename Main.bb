@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.2-s6"
+Const VersionNumber$ = "1.3.12.3-s7"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
@@ -236,8 +236,6 @@ End Select
 Global ConsoleOpening% = GetOptionInt("console", "auto opening")
 Global SFXVolume# = GetOptionFloat("audio", "sound volume")
 
-Global HUDScaleFactor# = GetOptionFloat("graphics", "hud scale factor")
-
 Const StringsFile$ = "Data\strings.ini"
 Include "Localization.bb"
 
@@ -290,7 +288,68 @@ Else
 EndIf
 
 Global MenuScale# = CalculateMenuScale()
-Global HUDScale# = Max(MenuScale * HUDScaleFactor, 1)
+Global HUDScaleScalar# = Max(1.0, MenuScale)
+Global MinHUDScaleFactor#
+Global MaxHUDScaleFactor#
+CalculateHUDScaleFactorLimits()
+Global HUDScaleFactor# = Max(MinHUDScaleFactor, Min(MaxHUDScaleFactor, GetOptionFloat("graphics", "hud scale factor")))
+Global HUDScale# = HUDScaleScalar * HUDScaleFactor
+
+Function CalculateHUDScaleFactorLimits()
+	Local minHUDScale# = 1.0
+	Local maxHUDScale# = Max(1.5, MenuScale * 2)
+	MinHUDScaleFactor = minHUDScale / HUDScaleScalar
+	MaxHUDScaleFactor = maxHUDScale / HUDScaleScalar
+End Function
+
+Type HUDScaledImage
+	Field Img%
+	Field BaseWidth%
+	Field BaseHeight%
+End Type
+
+Function LoadImageHUDScaled(file$, fixedSizeX% = 0, fixedSizeY% = 0)
+	Local img%
+	Local h.HUDScaledImage = New HUDScaledImage
+	If fixedSizeX = 0 Then
+		img = LoadImage_Strict(file, HUDScale)
+		h\BaseWidth = ImageWidthUnscaled(img) * LoadImageScaleResult
+		h\BaseHeight = ImageHeightUnscaled(img) * LoadImageScaleResult
+	Else
+		If fixedSizeY = 0 Then fixedSizeY = fixedSizeX
+		img = LoadImage_Strict(file)
+		ResizeImage(img, fixedSizeX * HUDScale, fixedSizeY * HUDScale)
+		h\BaseWidth = fixedSizeX
+		h\BaseHeight = fixedSizeY
+	EndIf
+	h\Img = img
+	Return img
+End Function
+
+Function FreeImageHUDScaled(img%)
+	For h.HUDScaledImage = Each HUDScaledImage
+		If h\Img = img Then
+			Delete h
+			Exit
+		EndIf
+	Next
+	FreeImage(img)
+End Function
+
+Function UpdateHUDScaleFactor(newFactor#)
+	If newFactor = HUDScaleFactor Then Return
+
+	HUDScaleFactor = newFactor
+	HUDScale = HUDScaleScalar * HUDScaleFactor
+	For h.HUDScaledImage = Each HUDScaledImage
+		ResizeImage(h\Img, h\BaseWidth * HUDScale, h\BaseHeight * HUDScale)
+	Next
+
+	; Hardcoding because I'm LAME!
+	FreeFont Font3 : FreeFont Font4
+	Font3% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(15 * HUDScale))
+	Font4% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(42 * HUDScale))
+End Function
 
 Function CalculateMenuScale#()
 	Local short% = Min(GraphicWidth, GraphicHeight)
@@ -375,13 +434,8 @@ LoadSubtitles()
 
 SetFont Font2
 
-Global BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.png", HUDScale)
-Global MenuMeterIMG%
-If HUDScale = MenuScale Then
-	MenuMeterIMG = BlinkMeterIMG
-Else
-	MenuMeterIMG = LoadImage_Strict("GFX\blinkmeter.png", MenuScale)
-EndIf
+Global BlinkMeterIMG% = LoadImageHUDScaled("GFX\blinkmeter.png")
+Global MenuMeterIMG% = LoadImage_Strict("GFX\blinkmeter.png", MenuScale)
 
 DrawLoading(0, True)
 
@@ -741,6 +795,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("- heal")
 							CreateConsoleMsg("- infinitestamina")
 							CreateConsoleMsg("- sanic")
+							CreateConsoleMsg("- blinkeffect [strength] [timer]")
 							CreateConsoleMsg("- notarget")
 							CreateConsoleMsg("- teleport [room name] [index]")
 							CreateConsoleMsg("- roomlist")
@@ -911,6 +966,18 @@ Function UpdateConsole()
 							CreateConsoleMsg("Will play tracks in .ogg/.wav format")
 							CreateConsoleMsg("from "+Chr(34)+"SFX\Music\Custom\"+Chr(34)+".")
 							CreateConsoleMsg("******************************")
+						Case "setblinkeffect", "blinkeffect"
+							CreateConsoleMsg("HELP - blinkeffect")
+							CreateConsoleMsg("******************************")
+							CreateConsoleMsg("Sets the blink effect and its timer.")
+							CreateConsoleMsg("The blink effect scales how fast the blink meter")
+							CreateConsoleMsg("depletes. A value of two makes it drain twice")
+							CreateConsoleMsg("as fast, while a value of 0 disables blinking.")
+							CreateConsoleMsg("The timer is specified in seconds and controls")
+							CreateConsoleMsg("how long the effect will last.")
+							CreateConsoleMsg("If a timer value is not specified, the effect")
+							CreateConsoleMsg("will last indefinitely.")
+							CreateConsoleMsg("******************************")
 						Case "omni"
 							CreateConsoleMsg("HELP - omni")
 							CreateConsoleMsg("******************************")
@@ -1028,6 +1095,18 @@ Function UpdateConsole()
 						CreateConsoleMsg("Coordinates: "+EntityX(c)+", "+EntityY(c)+", "+EntityZ(c))
 						CreateConsoleMsg("******************************")							
 					EndIf
+					;[End Block]
+				Case "hudscalefactor"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+
+					UpdateHUDScaleFactor(Float(StrTemp))
+					;[End Block]
+				Case "hudoffset"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					HUDOffsetScale = Float(StrTemp)
+					UpdateHUDOffsets()
 					;[End Block]
 				Case "viewbob"
 					;[Block]
@@ -1377,7 +1456,7 @@ Function UpdateConsole()
 						For r.Rooms = Each Rooms
 							Local tb.Triggerboxes = r\FirstTriggerbox
 							While tb <> Null
-								EntityAlpha(tb\Obj, 0.2)
+								ShowEntity(tb\Obj)
 								tb = tb\Successor
 							Wend
 						Next
@@ -1387,7 +1466,7 @@ Function UpdateConsole()
 						For r.Rooms = Each Rooms
 							tb.Triggerboxes = r\FirstTriggerbox
 							While tb <> Null
-								EntityAlpha(tb\Obj, 0.0)
+								HideEntity(tb\Obj)
 								tb = tb\Successor
 							Wend
 						Next
@@ -1728,12 +1807,17 @@ Function UpdateConsole()
 					Curr106\State = 0
 					Curr106\Idle = False
 					;[End Block]
-				Case "setblinkeffect"
+				Case "setblinkeffect", "blinkeffect"
 					;[Block]
 					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					BlinkEffect = Float(Left(args, Len(args) - Instr(args, " ")))
-					BlinkEffectTimer = Float(Right(args, Len(args) - Instr(args, " ")))
-					CreateConsoleMsg("Set BlinkEffect to: " + BlinkEffect + "and BlinkEffect timer: " + BlinkEffectTimer)
+					BlinkEffect = Float(Piece(args, 1, " "))
+					Local timerStr$ = Piece(args, 2, " ")
+					If timerStr = "" Then
+						If BlinkEffect = 1 Then BlinkEffectTimer = 0 Else BlinkEffectTimer = Infinity
+					Else
+						BlinkEffectTimer = Float(timerStr)
+					EndIf
+					CreateConsoleMsg("Set BlinkEffect to: " + BlinkEffect + " and BlinkEffect timer: " + BlinkEffectTimer)
 					;[End Block]
 				Case "omni"
 					;[Block]
@@ -2075,8 +2159,8 @@ Global NoTarget% = False
 Global GuaranteedOmni% = False
 
 Global NVGImages[2]
-NVGImages[0] = LoadImage_Strict("GFX\battery_green.png", HUDScale)
-NVGImages[1] = LoadImage_Strict("GFX\battery_blue.png", HUDScale)
+NVGImages[0] = LoadImageHUDScaled("GFX\battery_green.png")
+NVGImages[1] = LoadImageHUDScaled("GFX\battery_blue.png")
 
 Global Wearing1499% = False
 Global AmbientLight%, AmbientLightNVG%
@@ -2118,12 +2202,10 @@ Global ParticleAmount% = GetOptionInt("graphics","particle amount")
 
 Dim NavImages(5)
 For i = 0 To 3
-	NavImages(i) = LoadImage_Strict("GFX\navigator\roomborder"+i+".png")
-	ScaleImage(NavImages(i), HUDScale, HUDScale)
+	NavImages(i) = LoadImageHUDScaled("GFX\navigator\roomborder"+i+".png")
 Next
 Global NavSize% = ImageWidth(NavImages(0))
-NavImages(4) = LoadImage_Strict("GFX\navigator\batterymeter.png")
-ScaleImage(NavImages(4), HUDScale, HUDScale)
+NavImages(4) = LoadImageHUDScaled("GFX\navigator\batterymeter.png")
 
 Global NavBG%
 
@@ -4159,7 +4241,7 @@ Function DrawEnding()
 			SubBox\screenTop = GraphicsHeight() * 0.9
 			RecalculateSubtitleBoxTarget()
 
-			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt")
+			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt", MenuScale)
 			
 			ShouldPlay = 23
 			CurrMusicVolume = MusicVolume
@@ -4177,7 +4259,7 @@ Function DrawEnding()
 			;-200 -> -700
 			;Max(50 - (Abs(KillTimer)-200),0)    =    0->50
 			If Rand(1,150)<Min((Abs(EndingTimer)-200),155) Then
-				DrawImage EndingScreen, GraphicWidth/2-400, GraphicHeight/2-400
+				DrawImage EndingScreen, GraphicWidth/2-ImageWidth(EndingScreen)/2, GraphicHeight/2-ImageHeight(EndingScreen)/2
 			Else
 				Color 0,0,0
 				Rect 100,100,GraphicWidth-200,GraphicHeight-200
@@ -4195,7 +4277,7 @@ Function DrawEnding()
 			
 		Else
 			
-			DrawImage EndingScreen, GraphicWidth/2-400, GraphicHeight/2-400
+			DrawImage EndingScreen, GraphicWidth/2-ImageWidth(EndingScreen)/2, GraphicHeight/2-ImageHeight(EndingScreen)/2
 			
 			If EndingTimer < -1000 And EndingTimer > -2000
 				
@@ -4341,11 +4423,11 @@ Function InitCredits()
 	Local file% = OpenFile("Credits.txt")
 	Local l$
 	
-	CreditsFont% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(21 * (GraphicHeight / 1024.0)))
-	CreditsFont2% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(35 * (GraphicHeight / 1024.0)))
+	CreditsFont% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(21 * MenuScale))
+	CreditsFont2% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(35 * MenuScale))
 	
 	If CreditsScreen = 0
-		CreditsScreen = LoadImage_Strict("GFX\creditsscreen.pt")
+		CreditsScreen = LoadImage_Strict("GFX\creditsscreen.pt", MenuScale)
 	EndIf
 	
 	Repeat
@@ -4389,7 +4471,7 @@ Function DrawCredits()
     Cls
 	
 	If Rand(1,300)>1
-		DrawImage CreditsScreen, GraphicWidth/2-400, GraphicHeight/2-400
+		DrawImage CreditsScreen, GraphicWidth/2-ImageWidth(CreditsScreen)/2, GraphicHeight/2-ImageHeight(CreditsScreen)/2
 	EndIf
 	
 	id = 0
@@ -6437,7 +6519,7 @@ Function DrawGUI()
 					If SelectedItem\state <= 100 Then SelectedItem\state = Max(0, SelectedItem\state - FPSfactor * 0.004)
 					
 					If SelectedItem\itemtemplate\img=0 Then
-						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath, HUDScale)	
+						SelectedItem\itemtemplate\img=LoadImageHUDScaled(SelectedItem\itemtemplate\imgpath)
 					EndIf
 					
 					;radiostate(5) = has the "use the number keys" -message been shown yet (true/false)
@@ -6931,8 +7013,7 @@ Function DrawGUI()
 					Color 255, 255, 255
 
 					If SelectedItem\itemtemplate\img=0 Then
-						SelectedItem\itemtemplate\img=LoadImage_Strict(SelectedItem\itemtemplate\imgpath)
-						ScaleImage(SelectedItem\itemtemplate\img, HUDScale, HUDScale)
+						SelectedItem\itemtemplate\img=LoadImageHUDScaled(SelectedItem\itemtemplate\imgpath)
 					EndIf
 					
 					If SelectedItem\state <= 100 Then SelectedItem\state = Max(0, SelectedItem\state - FPSfactor * 0.005)
@@ -7588,6 +7669,7 @@ Function DrawHUD()
 		Else
 			Text x, 310, "Current monitor: NULL"
 		EndIf
+		Text x, 330, "Current trigger: " + CheckTriggers(PlayerRoom, EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 		
 		SetFont Font1
 	EndIf
@@ -7837,6 +7919,17 @@ Function DrawMenu()
 					EndIf
 
 					y=y+50*MenuScale
+
+					Local l# = Unlerp(MinHUDScaleFactor, MaxHUDScaleFactor, HUDScaleFactor)
+					l = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, l#*100, 7)/100
+					Color 255,255,255
+					Text(x, y, I_Loc\Launcher_Hudscalefactor)
+					UpdateHUDScaleFactor(Lerp(MinHUDScaleFactor, MaxHUDScaleFactor, l))
+					If (MouseOn(x+270*MenuScale,y+6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=7
+						DrawOptionsTooltip(tx,ty,tw,th,"hudscalefactor")
+					EndIf
+
+					y=y+30*MenuScale
 
 					HUDOffsetScale = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, HUDOffsetScale*100, 5)/100
 					Color 255,255,255
@@ -8413,15 +8506,15 @@ Function LoadEntities()
 	
 	PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg", MenuScale)
 	
-	SprintIcon% = LoadImage_Strict("GFX\sprinticon.png", HUDScale)
-	BlinkIcon% = LoadImage_Strict("GFX\blinkicon.png", HUDScale)
-	CrouchIcon% = LoadImage_Strict("GFX\sneakicon.png", HUDScale)
-	HandIcon% = LoadImage_Strict("GFX\handsymbol.png", HUDScale)
-	HandIcon2% = LoadImage_Strict("GFX\handsymbol2.png", HUDScale)
+	If SprintIcon = 0 Then SprintIcon% = LoadImageHUDScaled("GFX\sprinticon.png")
+	If BlinkIcon = 0 Then BlinkIcon% = LoadImageHUDScaled("GFX\blinkicon.png")
+	If CrouchIcon = 0 Then CrouchIcon% = LoadImageHUDScaled("GFX\sneakicon.png")
+	If HandIcon = 0 Then HandIcon% = LoadImageHUDScaled("GFX\handsymbol.png")
+	If HandIcon2 = 0 Then HandIcon2% = LoadImageHUDScaled("GFX\handsymbol2.png")
 
-	StaminaMeterIMG% = LoadImage_Strict("GFX\staminameter.png", HUDScale)
+	If StaminaMeterIMG = 0 Then StaminaMeterIMG% = LoadImageHUDScaled("GFX\staminameter.png")
 
-	Panel294 = LoadImage_Strict("GFX\294panel.jpg", HUDScale)
+	If Panel294 = 0 Then Panel294 = LoadImageHUDScaled("GFX\294panel.jpg")
 
 	Load294()
 
@@ -9412,7 +9505,13 @@ Function NullGame(playbuttonsfx%=True)
 	Delete Each Rooms	
 	Delete Each Inventories
 	Delete Each Items
-	Delete Each ItemTemplates
+
+	For itt.ItemTemplates = Each ItemTemplates
+		FreeImageHUDScaled(itt\invimg)
+		If itt\invimg2 <> 0 Then FreeImageHUDScaled(itt\invimg2)
+		Delete itt
+	Next
+
 	Delete Each Props
 	Delete Each Decals
 	Delete Each NPCs
@@ -11293,8 +11392,12 @@ Function angleDist#(a0#,a1#)
 	Return bb
 End Function
 
-Function lerp#(a#, b#, f#)
+Function Lerp#(a#, b#, f#)
     Return a * (1.0 - f) + (b * f)
+End Function
+
+Function Unlerp#(a#, b#, f#)
+	Return (f - a) / (b - a)
 End Function
 
 ;--------------------------------------- decals -------------------------------------------------------
@@ -11706,6 +11809,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "general", "speed run mode", SpeedRunMode%)
 	PutINIValue(OptionFile, "general", "numeric seeds", UseNumericSeeds%)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
+	PutINIValue(OptionFile, "graphics", "hud scale factor", HUDScaleFactor)
 	PutINIValue(OptionFile, "graphics", "hud offset", HUDOffsetScale)
 	PutINIValue(OptionFile, "graphics", "view bob", ViewBobScale)
 	PutINIValue(OptionFile, "graphics", "fov", FOV)
@@ -12147,21 +12251,10 @@ Function UpdateDeafPlayer()
 End Function
 
 Function CheckTriggers$(r.Rooms, x#, y#, z#)
-	Local i%,sx#,sy#,sz#
-	Local inside% = -1
-
 	Local tb.Triggerboxes = r\FirstTriggerbox
 	While tb <> Null
-		sx# = EntityScaleX(tb\Obj, 1)
-		sy# = Max(EntityScaleY(tb\Obj, 1), 0.001)
-		sz# = EntityScaleZ(tb\Obj, 1)
-		GetMeshExtents(tb\Obj)
-		If x>((sx#*Mesh_MinX)+r\x) And x<((sx#*Mesh_MaxX)+r\x)
-			If y>((sy#*Mesh_MinY)+r\y) And y<((sy#*Mesh_MaxY)+r\y)
-				If z>((sz#*Mesh_MinZ)+r\z) And z<((sz#*Mesh_MaxZ)+r\z)
-					Return tb\Name
-				EndIf
-			EndIf
+		If x>tb\MinX And x<tb\MaxX And y>tb\MinY And y<tb\MaxY And z>tb\MinZ And z<tb\MaxZ
+			Return tb\Name
 		EndIf
 
 		tb = tb\Successor

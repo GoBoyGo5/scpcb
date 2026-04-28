@@ -262,7 +262,7 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 			Local tb.TempTriggerboxes = New TempTriggerboxes
 			
 			tb\Obj = CreateMesh(obj)
-			EntityAlpha(tb\Obj, 0.0)
+			EntityAlpha(tb\Obj, 0.2)
 			EntityColor(tb\Obj, 255,255,0)
 			HideEntity(tb\Obj)
 
@@ -479,6 +479,11 @@ Function LoadRMesh(file$,rt.RoomTemplates)
 				d\Z = ReadFloat(f) * RoomScale
 
 				d\Dir = ReadInt(f)
+				If version => 0 Then
+					d\Index = ReadInt(f)
+				Else
+					d\Index = -1
+				EndIf
 				d\KeyCard = ReadInt(f)
 				d\Code = ReadString(f)
 				d\Angle = ReadFloat(f)
@@ -1614,6 +1619,7 @@ End Type
 
 Type TempDoors
 	Field Dir%
+	Field Index%
 	Field KeyCard%
 	Field Code$
 	Field X#, Y#, Z#
@@ -1785,6 +1791,7 @@ Global PrevSecondaryLightOn# = True
 Global RemoteDoorOn = True
 Global Contained106 = False
 
+Const ROOM_DOORS_COUNT% = 9
 Type Rooms
 	Field zone%
 	
@@ -1813,7 +1820,7 @@ Type Rooms
 	
 	Field Objects%[MaxRoomObjects]
 	Field Levers%[11]
-	Field RoomDoors.Doors[8]
+	Field RoomDoors.Doors[ROOM_DOORS_COUNT]
 	Field NPC.NPCs[12]
 	Field grid.Grids
 	
@@ -1841,6 +1848,8 @@ End Type
 
 Type Triggerboxes
 	Field Obj%
+	Field MinX#, MinY#, MinZ#
+	Field MaxX#, MaxY#, MaxZ#
 	Field Name$
 	Field Successor.Triggerboxes
 End Type
@@ -2126,6 +2135,49 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, angle%, name$)
 	CatchErrors("CreateRoom")
 End Function
 
+; This must be called after the room angle has been finalized!
+Function SetupTriggerBoxes(r.Rooms)
+	Local sx#, sy#, sz#
+	Local pxmin#, pxmax#
+	Local pzmin#, pzmax#
+	Local tb.Triggerboxes = r\FirstTriggerbox
+	
+	While tb <> Null
+		sx = EntityScaleX(tb\obj, 1)
+		sy = Max(EntityScaleY(tb\obj, 1), 0.001)
+		sz = EntityScaleZ(tb\obj, 1)
+		
+		GetMeshExtents(tb\obj)
+		
+		pxmin = Cos(r\angle) * sx*Mesh_MinX - Sin(r\angle) * sz*Mesh_MinZ + r\x
+		pzmin = Sin(r\angle) * sx*Mesh_MinX + Cos(r\angle) * sz*Mesh_MinZ + r\z
+		
+		pxmax = Cos(r\angle) * sx*Mesh_MaxX - Sin(r\angle) * sz*Mesh_MaxZ + r\x
+		pzmax = Sin(r\angle) * sx*Mesh_MaxX + Cos(r\angle) * sz*Mesh_MaxZ + r\z
+		
+		If pxmin > pxmax Then
+			tb\MinX = pxmax
+			tb\MaxX = pxmin
+		Else
+			tb\MinX = pxmin
+			tb\MaxX = pxmax
+		EndIf
+		
+		If pzmin > pzmax Then
+			tb\MinZ = pzmax
+			tb\MaxZ = pzmin
+		Else
+			tb\MinZ = pzmin
+			tb\MaxZ = pzmax
+		EndIf
+		
+		tb\MinY = ((sy*Mesh_MinY)+r\y)
+		tb\MaxY = ((sy*Mesh_MaxY)+r\y)
+		
+		tb = tb\Successor
+	Wend
+End Function
+
 Function FillRoom(r.Rooms)
 	CatchErrors("Uncaught (FillRoom)")
 	Local d.Doors, d2.Doors, sc.SecurityCams, de.Decals, r2.Rooms, sc2.SecurityCams
@@ -2157,12 +2209,13 @@ Function FillRoom(r.Rooms)
 			CreateWaypoint(r\x+tw\x, r\y+tw\y, r\z+tw\z, Null, r)
 		EndIf
 	Next
-
+	
 	Local tempTb.TempTriggerboxes = r\RoomTemplate\FirstTempTriggerbox
 	Local lastTb.Triggerboxes
 	While tempTb <> Null
 		Local tb.Triggerboxes = New Triggerboxes
 		tb\Obj = CopyEntity(tempTb\Obj, r\obj)
+		HideEntity(tb\Obj)
 		tb\Name = tempTb\Name
 		If lastTb = Null Then
 			r\FirstTriggerbox = tb
@@ -2170,11 +2223,11 @@ Function FillRoom(r.Rooms)
 			lastTb\Successor = tb
 		EndIf
 		lastTb = tb
-		DebugLog "Triggerbox "+i+" name: "+tb\Name
+		DebugLog "Triggerbox name: "+tb\Name
 
 		tempTb = tempTb\Successor
 	Wend
-	
+
 	For i = 0 To MaxRoomEmitters-1
 		If r\RoomTemplate\TempSoundEmitter[i]<>0 Then
 			r\SoundEmitterObj[i]=CreatePivot(r\obj)
@@ -2204,6 +2257,7 @@ Function FillRoom(r.Rooms)
 	Local dt.TempDoors = r\RoomTemplate\FirstTempDoor
 	While dt <> Null
 		Local door.Doors = CreateDoor(r\zone, r\x + dt\X, r\y + dt\Y, r\z + dt\Z, dt\Angle, r, dt\SpawnOpen, dt\Dir, dt\KeyCard, dt\Code)
+		If dt\Index => 0 And dt\Index < ROOM_DOORS_COUNT Then r\RoomDoors[dt\Index] = door
 		If Not dt\AllowRemoteControl Then
 			door\AutoClose = False
 		EndIf
@@ -7578,6 +7632,10 @@ Function CreateMap(loadingstart,loadingcount#)
 	
 	; print all overlapping rooms to debuglog
 	;ReportOverlaps()
+
+	For r.Rooms = Each Rooms
+		SetupTriggerBoxes(r)
+	Next
 	
 	If DebugMapGen Then
 		For x = 0 To MapWidth - 1

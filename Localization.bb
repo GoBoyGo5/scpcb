@@ -116,6 +116,7 @@ Type LocalizationTable
     Field OptionTooltip_Gamma$
     Field OptionTooltip_Texlod$
     Field OptionTooltip_Vram$
+    Field OptionTooltip_Hudscalefactor$
     Field OptionTooltip_Hudoffset$
     Field OptionTooltip_Viewbob$
     Field OptionTooltip_Fov$
@@ -145,6 +146,7 @@ Type LocalizationTable
     Field Mods_Upload$
     Field Mods_Update$
     Field Mods_Visit$
+    Field Mods_Toggleall$
     Field Mods_Reloadmods$
     Field Mods_Reloadgame$
     Field Mods_Openlocal$
@@ -598,6 +600,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "gamma" If loc\OptionTooltip_Gamma = "" Then loc\OptionTooltip_Gamma = value
                             Case "texlod" If loc\OptionTooltip_Texlod = "" Then loc\OptionTooltip_Texlod = value
                             Case "vram" If loc\OptionTooltip_Vram = "" Then loc\OptionTooltip_Vram = value
+                            Case "hudscalefactor" If loc\OptionTooltip_Hudscalefactor = "" Then loc\OptionTooltip_Hudscalefactor = value
                             Case "hudoffset" If loc\OptionTooltip_Hudoffset = "" Then loc\OptionTooltip_Hudoffset = value
                             Case "viewbob" If loc\OptionTooltip_Viewbob = "" Then loc\OptionTooltip_Viewbob = value
                             Case "fov" If loc\OptionTooltip_Fov = "" Then loc\OptionTooltip_Fov = value
@@ -630,6 +633,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "upload" If loc\Mods_Upload = "" Then loc\Mods_Upload = value
                             Case "update" If loc\Mods_Update = "" Then loc\Mods_Update = value
                             Case "visit" If loc\Mods_Visit = "" Then loc\Mods_Visit = value
+                            Case "toggleall" If loc\Mods_Toggleall = "" Then loc\Mods_Toggleall = value
                             Case "reloadmods" If loc\Mods_Reloadmods = "" Then loc\Mods_Reloadmods = value
                             Case "reloadgame" If loc\Mods_Reloadgame = "" Then loc\Mods_Reloadgame = value
                             Case "openlocal" If loc\Mods_Openlocal = "" Then loc\Mods_Openlocal = value

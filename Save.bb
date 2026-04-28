@@ -766,6 +766,7 @@ Function LoadGame(file$)
 		For rt.roomtemplates = Each RoomTemplates
 			If rt\id = roomtemplateID Then
 				r.Rooms = CreateRoom(level, rt\shape, x, y, z, angle, rt\name)
+				SetupTriggerBoxes(r)
 				r\found = found
 				Exit
 			End If
@@ -1297,6 +1298,13 @@ Function LoadGameQuick(file$)
 	DebugLog "---------------------------------------------------------------------------"
 	
 	DebugHUD = False
+	For r.Rooms = Each Rooms
+		tb.Triggerboxes = r\FirstTriggerbox
+		While tb <> Null
+			HideEntity(tb\Obj)
+			tb = tb\Successor
+		Wend
+	Next
 	GameSaved = True
 	NoTarget = False
 	InfiniteStamina = False
@@ -1312,7 +1320,7 @@ Function LoadGameQuick(file$)
 	ResetEntity Collider
 	
 	Local x#, y#, z#, i%, temp%, strtemp$, id%
-	Local player_x#,player_y#,player_z#, r.Rooms, n.NPCs, do.Doors
+	Local player_x#,player_y#,player_z#, n.NPCs, do.Doors
 	Local f% = ReadFile(file + ".cbsav")
 	
 	strtemp = ReadString(f)
@@ -2601,6 +2609,7 @@ Function LoadMap(file$, loadingstart, loadingcount#)
 			EndIf
 			If (r\Adjacent[0]<>Null) And (r\Adjacent[1]<>Null) And (r\Adjacent[2]<>Null) And (r\Adjacent[3]<>Null) Then Exit
 		Next
+		SetupTriggerBoxes(r)
 	Next
 	
 	For x = 0 To MapWidth+1

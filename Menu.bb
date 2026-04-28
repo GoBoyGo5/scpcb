@@ -657,7 +657,7 @@ Function UpdateMainMenu()
 				If MainMenuTab = 3 ;Graphics
 					;[Block]
 					;height = 380 * MenuScale
-					height = 330 * MenuScale
+					height = 360 * MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y=y+20*MenuScale
@@ -711,6 +711,17 @@ Function UpdateMainMenu()
 					EndIf
 
 					y=y+50*MenuScale
+
+					Local l# = Unlerp(MinHUDScaleFactor, MaxHUDScaleFactor, HUDScaleFactor)
+					l = SlideBar(x + 310*MenuScale, y+6*MenuScale,150*MenuScale, l#*100, 7)/100
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, I_Loc\Launcher_Hudscalefactor)
+					UpdateHUDScaleFactor(Lerp(MinHUDScaleFactor, MaxHUDScaleFactor, l))
+					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=7
+						DrawOptionsTooltip(tx,ty,tw,th,"hudscalefactor")
+					EndIf
+
+					y=y+30*MenuScale
 
 					HUDOffsetScale = SlideBar(x + 310*MenuScale, y+6*MenuScale,150*MenuScale, HUDOffsetScale*100, 5)/100
 					Color 255,255,255
@@ -1370,23 +1381,41 @@ Function UpdateMainMenu()
 						EndIf
 						DrawTagSelection(x + 10 * MenuScale, y + 210 * MenuScale, 400 * MenuScale)
 					Else
+						If DrawButton(x + 10 * MenuScale, y, 150 * MenuScale, 30 * MenuScale, I_Loc\Mods_Toggleall, False, False, UpdatingMod<>Null) Then
+							Local shouldBe% = False
+							For m.Mods = Each Mods
+								If Not m\IsActive Then shouldBe = True : Exit
+							Next
+							For m.Mods = Each Mods
+								If m\IsActive <> shouldBe Then
+									m\IsActive = shouldBe
+									If m\RequiresReload Then ModsDirty = True
+								EndIf
+							Next
+						EndIf
+						y = y + 40 * MenuScale
+
 						If DrawButton(x + 10 * MenuScale, y, 150 * MenuScale, 30 * MenuScale, I_Loc\Mods_Reloadmods, False, False, UpdatingMod<>Null) Then
 							SerializeMods()
 							ReloadMods()
 						EndIf
+						y = y + 40 * MenuScale
 
-						If DrawButton(x + 10 * MenuScale, y + 40 * MenuScale, 150 * MenuScale, 30 * MenuScale, I_Loc\Mods_Reloadgame, False, False, UpdatingMod<>Null) Then
+						If DrawButton(x + 10 * MenuScale, y, 150 * MenuScale, 30 * MenuScale, I_Loc\Mods_Reloadgame, False, False, UpdatingMod<>Null) Then
 							SerializeMods()
 							Restart()
 							Return
 						EndIf
+						y = y + 40 * MenuScale
 
-						If DrawButton(x + 10 * MenuScale, y + 80 * MenuScale, 150 * MenuScale, 50 * MenuScale, "", False, False, UpdatingMod<>Null) Then
+						If DrawButton(x + 10 * MenuScale, y, 150 * MenuScale, 50 * MenuScale, "", False, False, UpdatingMod<>Null) Then
 							ExecFile("Mods")
 						EndIf
-						RowText(I_Loc\Mods_Openlocal, x + 10 * MenuScale, y + (80 + 10) * MenuScale, 150 * MenuScale, (50 - 15) * MenuScale, True)
+						RowText(I_Loc\Mods_Openlocal, x + 10 * MenuScale, y + 10 * MenuScale, 150 * MenuScale, (50 - 15) * MenuScale, True)
 
 						If DebuggerAttached()
+							y = y + 40 * MenuScale
+							
 							If DrawButton(x + 10 * MenuScale, y + 140 * MenuScale, 150 * MenuScale, 30 * MenuScale, "Gen. decls.", False, False, UpdatingMod<>Null) Then
 								Local f% = WriteFile("Mods\as.predefined")
 								WriteLine(f, GetDeclarations())
@@ -1694,11 +1723,6 @@ Function UpdateLauncher()
 
 		Text(260 + 50, 262 - 55 + 140, I_Loc\Launcher_ResolutionCurrent+" "+gfxWidth + "x" + gfxHeight)
 
-		x = 20 : y = 350
-		HUDScaleFactor = SlideBar(x+60, y+25, 150, HUDScaleFactor * 100 / 2, 1) * 2 / 100
-		Color 255, 255, 255
-		Text(x, y, I_Loc\Launcher_Hudscalefactor + " " + Int(HUDScaleFactor * 100) + "%")
-
 		If DrawButton(LauncherWidth - 30 - 90 - 130 - 15, LauncherHeight - 50 - 55, 130, 30, I_Loc\Launcher_Mapcreator, False, False) Then
 			ExecFile(Chr(34)+"Map Creator\StartMapCreator.bat"+Chr(34))
 			quit = True
@@ -1738,8 +1762,6 @@ Function UpdateLauncher()
 	Else
 		PutINIValue(OptionFile, "graphics", "borderless windowed", "false")
 	EndIf
-
-	PutINIValue(OptionFile, "graphics", "hud scale factor", HUDScaleFactor)
 	
 	FreeImage(LauncherIMG) : LauncherIMG = 0
 	
@@ -2379,6 +2401,12 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(value*100)), "100")
 		Case "texquality"
 			txt = I_Loc\OptionTooltip_Texlod
+		Case "hudscalefactor"
+			txt = I_Loc\OptionTooltip_Hudscalefactor
+			R = 255
+			G = 255
+			B = 255
+			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(HUDScaleFactor*100)), "100")
 		Case "hudoffset"
 			txt = I_Loc\OptionTooltip_Hudoffset
 			R = 255
