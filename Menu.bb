@@ -1417,12 +1417,19 @@ Function UpdateMainMenu()
 							y = y + 40 * MenuScale
 							
 							If DrawButton(x + 10 * MenuScale, y + 140 * MenuScale, 150 * MenuScale, 30 * MenuScale, "Gen. decls.", False, False, UpdatingMod<>Null) Then
-								Local f% = WriteFile("Mods\as.predefined")
-								WriteLine(f, GetDeclarations())
+								Local decls$ = GetDeclarations()
+								WriteStringToFile("Mods\as.predefined", decls)
+								If FileType("Documentation") = 2 Then
+									ExecFile("git merge-file Documentation\as.predefined Documentation\as.raw.predefined Mods\as.predefined")
+									
+									Delay(1000)
+
+									WriteStringToFile("Documentation\as.raw.predefined", decls)
+								EndIf
+								; TODO: Allow mods to generate documentation for themselves.
 								;For ma.ActiveMods = Each ActiveMods
 								;	If ma\ScriptModule <> 0 Then WriteLine(f, GetDeclarations(ma\ScriptModule))
 								;Next
-								CloseFile f
 							EndIf
 						EndIf
 					EndIf
@@ -1450,6 +1457,12 @@ Function UpdateMainMenu()
 	If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
 	
 	SetFont Font1
+End Function
+
+Function WriteStringToFile(filename$, txt$)
+	Local f% = WriteFile(filename)
+	WriteLine(f, txt)
+	CloseFile f
 End Function
 
 Const TAG_COUNT = 9
