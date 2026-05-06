@@ -99,3 +99,11 @@ bool Hook_LoadRoomTemplateEntity(CB::RoomTemplate@ rt, int version, B3D::Stream@
     }
     return false;
 }
+
+bool Hook_ExecuteConsoleCommand(string cmd) {
+    if (cmd == "ping") {
+        Console::CreateMessage("Pong!");
+        return true;
+    }
+    return false;
+}

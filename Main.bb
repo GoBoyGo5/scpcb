@@ -148,6 +148,7 @@ Function ScriptMessageCallback(severity%, line%, column%, section$, message$)
 End Function
 
 Function LoadScripts()
+	If Shutdown <> Null And Shutdown\Subscribers > 0 Then PrepareFunction(0) : CallHook(Shutdown)
 	InitializeHooks(ActiveModCount)
 	For m.ActiveMods = Each ActiveMods
 		If m\ScriptModule <> 0 Then FreeModule(m\ScriptModule) : m\ScriptModule = 0
@@ -769,8 +770,15 @@ Function UpdateConsole()
 			Else
 				StrTemp$ = Lower(ConsoleInput)
 			End If
+
+			If ExecuteConsoleCommand\Subscribers > 0 Then
+				PrepareFunction(1)
+				SetArgString(0, StrTemp)
+				; GOTO considered preferable to having to refactor all of this shit and making history irreconcilable.
+				If CallHook(ExecuteConsoleCommand) Then Goto ExecuteCommandEnd
+			End If
 			
-			Select Lower(StrTemp)
+			Select StrTemp
 				Case "help"
 					;[Block]
 					If Instr(ConsoleInput, " ")<>0 Then
@@ -780,7 +788,7 @@ Function UpdateConsole()
 					EndIf
 					ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
 					
-					Select Lower(StrTemp)
+					Select StrTemp
 						Case "1",""
 							CreateConsoleMsg("LIST OF COMMANDS - PAGE 1/3")
 							CreateConsoleMsg("******************************")
@@ -1897,6 +1905,8 @@ Function UpdateConsole()
 					;[End Block]
 			End Select
 			
+			.ExecuteCommandEnd
+
 			ConsoleInput = ""
 		End If
 		

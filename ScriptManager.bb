@@ -14,12 +14,14 @@ Const HOOK_TYPE_OVERRIDABLE = 1
 
 Delete Each Hooks
 Global Initialize.Hooks = CreateHook("Hook_Initialize")
+Global Shutdown.Hooks = CreateHook("Hook_Shutdown")
 Global SaveOptions.Hooks = CreateHook("Hook_SaveOptions")
 Global Update.Hooks = CreateHook("Hook_Update")
 Global DrawHUD.Hooks = CreateHook("Hook_DrawHUD", HOOK_TYPE_OVERRIDABLE)
 Global MovePlayer.Hooks = CreateHook("Hook_MovePlayer", HOOK_TYPE_OVERRIDABLE)
 Global MouseLook.Hooks = CreateHook("Hook_MouseLook", HOOK_TYPE_OVERRIDABLE)
 Global KillPlayer.Hooks = CreateHook("Hook_KillPlayer", HOOK_TYPE_OVERRIDABLE)
+Global ExecuteConsoleCommand.Hooks = CreateHook("Hook_ExecuteConsoleCommand", HOOK_TYPE_OVERRIDABLE)
 Global InitializeEvents.Hooks = CreateHook("Hook_InitializeEvents", HOOK_TYPE_OVERRIDABLE)
 Global UpdateEvent.Hooks = CreateHook("Hook_UpdateEvent", HOOK_TYPE_OVERRIDABLE)
 Global FillRoom.Hooks = CreateHook("Hook_FillRoom", HOOK_TYPE_OVERRIDABLE)
