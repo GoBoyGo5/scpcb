@@ -1,13 +1,40 @@
 Function RegisterCommon()
     RegisterGlobalProperty("float FPSFactor", &FPSFactor)
-    
-    ; TODO: Probably move these to a "Menu" namespace.
+
+    RegisterGlobalProperty("bool HasNumericSeed", &HasNumericSeed)
+    RegisterGlobalProperty("string RandomSeed", &RandomSeed)
+    RegisterGlobalProperty("int RandomSeedNumeric", &RandomSeedNumeric)
+
+    RegisterGlobalFunction("bool IsPaused()", @IsPaused)
+
+    RegisterGlobalProperty("int TimerStopped", &TimerStopped)
+    RegisterGlobalProperty("int PlayTime", &PlayTime)
+
+    RegisterGlobalFunction("string FormatDuration(int ms, bool highPrecision=true)", @FormatDuration)
+End Function
+
+Function RegisterMenu()
+    Local ns$ = GetDefaultNamespace()
+    If ns <> "" Then SetDefaultNamespace(ns + "::Menu") Else SetDefaultNamespace("Menu")
+
+    RegisterGlobalProperty("const float Scale", &MenuScale)
+
     RegisterGlobalProperty("const bool IsMainMenuOpen", &MainMenuOpen)
-    RegisterGlobalProperty("int OpenMenu", &MenuOpen)
+    RegisterGlobalProperty("int MainMenuTab", &MainMenuTab)
+    
+    RegisterGlobalFunction("string InputBox(int x, int y, int width, int height, string text, int id=0, int virtualKeyboardMode=0)", @InputBox)
+    RegisterGlobalFunction("void DrawFrame(int x, int y, int width, int height, int xOffset=0, int yOffset=0, bool scrollY=true)", @DrawFrame)
+    RegisterGlobalFunction("bool DrawButton(int x, int y, int width, int height, string text, bool bigFont=true, bool waitForMouseUp=false, bool disabled=false)", @DrawButton)
+    RegisterGlobalFunction("bool DrawTick(int x, int y, bool selected, bool locked=false)", @DrawTick)
+
+    RegisterGlobalProperty("int CurrentOpen", &MenuOpen)
     RegisterGlobalProperty("float StopHidingTimer", &StopHidingTimer)
 
-    RegisterGlobalFunction("bool IsAnyMenuOpen()", @IsAnyMenuOpen)
-    RegisterGlobalFunction("bool IsPaused()", @IsPaused)
+    RegisterGlobalFunction("bool IsAnyOpen()", @IsAnyMenuOpen)
+
+    RegisterGlobalFunction("void StartNewGame()", @StartNewGame)
+
+    SetDefaultNamespace(ns)
 End Function
 
 Function RegisterOptions()
@@ -1100,6 +1127,7 @@ Function RegisterCB()
 
     SetDefaultNamespace("CB")
     RegisterCommon()
+    RegisterMenu()
     RegisterOptions()
     RegisterIO()
     RegisterCBAudio()

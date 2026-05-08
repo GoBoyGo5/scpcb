@@ -326,7 +326,7 @@ Function UpdateMainMenu()
 				Color 255,255,255
 				If SelectedMap = -1 Then
 					Text (x + 20 * MenuScale, y + 60 * MenuScale, I_Loc\Menu_Seed)
-					If UseNumericSeeds Then
+					If HasNumericSeed Then
 						Local txt$
 						If RandomSeedNumeric = 0 Then txt = "" Else txt = Str(RandomSeedNumeric)
 						Local inputBoxSeed$ = InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, txt, 3, 3)
@@ -423,42 +423,7 @@ Function UpdateMainMenu()
 				SetFont Font2
 				
 				If DrawButton(x + 420 * MenuScale, y + height + 10 * MenuScale, 160 * MenuScale, 70 * MenuScale, I_Loc\NewGame_Start, False) Then
-					TimerStopped = True
-
-					If CurrSave = "" Then CurrSave = I_Loc\NewGame_Untitled
-					Local SaveName$ = CurrSave
-					
-					Local SameFound% = 1
-
-					LoadSaveGames()
-					For i% = 1 To SaveGameAmount
-						If SaveGames(i - 1) = CurrSave Then
-							SameFound = SameFound + 1
-							i = 0
-							CurrSave = SaveName + " (" + Str(SameFound) + ")"
-						EndIf
-					Next
-					
-					If UseNumericSeeds Then
-						If RandomSeedNumeric = 0 Then RandomSeedNumeric = MilliSecs()
-					Else
-						If RandomSeed = "" Then RandomSeed = Abs(MilliSecs())
-					EndIf
-
-					SeedRnd GetRandomSeed()
-
-					SetErrorMsg(7, GetSeedString(False))
-
-					LoadEntities()
-					LoadAllSounds()
-					InitRoomTemplates()
-					InitNewGame()
-					MainMenuOpen = False
-					FlushKeys()
-					FlushMouse()
-					
-					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
-					
+					StartNewGame()
 				EndIf
 				
 				;[End Block]
@@ -1459,6 +1424,44 @@ Function UpdateMainMenu()
 	SetFont Font1
 End Function
 
+Function StartNewGame()
+	TimerStopped = True
+
+	If CurrSave = "" Then CurrSave = I_Loc\NewGame_Untitled
+	Local SaveName$ = CurrSave
+	
+	Local SameFound% = 1
+
+	LoadSaveGames()
+	For i% = 1 To SaveGameAmount
+		If SaveGames(i - 1) = CurrSave Then
+			SameFound = SameFound + 1
+			i = 0
+			CurrSave = SaveName + " (" + Str(SameFound) + ")"
+		EndIf
+	Next
+	
+	If HasNumericSeed Then
+		If RandomSeedNumeric = 0 Then RandomSeedNumeric = MilliSecs()
+	Else
+		If RandomSeed = "" Then RandomSeed = Abs(MilliSecs())
+	EndIf
+
+	SeedRnd GetRandomSeed()
+
+	SetErrorMsg(7, GetSeedString(False))
+
+	LoadEntities()
+	LoadAllSounds()
+	InitRoomTemplates()
+	InitNewGame()
+	MainMenuOpen = False
+	FlushKeys()
+	FlushMouse()
+	
+	PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
+End Function
+
 Function WriteStringToFile(filename$, txt$)
 	Local f% = WriteFile(filename)
 	WriteLine(f, txt)
@@ -2103,6 +2106,9 @@ Function DrawLoading(percent%, shortloading=False)
 		If percent <> 100 Then Exit
 		
 	Until (GetKey()<>0 Or MouseHit(1))
+
+	If percent = 100 And PostLoad\Subscribers > 0 Then PrepareFunction(0) : CallHook(PostLoad)
+
 	Cls
 End Function
 

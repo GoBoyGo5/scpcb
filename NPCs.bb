@@ -650,6 +650,13 @@ Function RemoveNPC(n.NPCs)
 	
 	If n=Null Then Return
 	
+	If RemoveNPC\Subscribers > 0 Then
+		PrepareFunction(1)
+		Local nn.NPCS = n
+		SetArgObj(0, &nn)
+		If CallHook(RemoveNPC.Hooks) Then Return
+	EndIf
+
 	If n\obj2 <> 0 Then 
 		FreeEntity n\obj2
 		n\obj2 = 0

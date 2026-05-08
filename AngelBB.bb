@@ -84,7 +84,7 @@ Function RegisterB3DMisc()
     RegisterGlobalFunction("float GetStats3D(int type)", @Stats3D)
     RegisterGlobalFunction("void SetScissorRect(int enable, int x=0, int y=0, int width=0, int height=0)", @ScissorRect)
 
-    RegisterGlobalFunction("float Distance(float x1, float x2, float y1, float y2, float z1=0, float z2=0)", @Distance)
+    ;RegisterGlobalFunction("float Distance(float x1, float x2, float y1, float y2, float z1=0, float z2=0)", @Distance)
     RegisterGlobalFunction("float DistanceSquared(float x1, float x2, float y1, float y2, float z1=0, float z2=0)", @DistanceSquared)
 
     RegisterGlobalFunction("void SetHardwareSkinning(int enable)", @HardwareSkinning)

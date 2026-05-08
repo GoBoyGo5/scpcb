@@ -1,5 +1,6 @@
 Include "AngelBB.bb"
 Include "AngelCB.bb"
+Include "AngelSteam.bb"
 
 Type Hooks
     Field Subscribers%
@@ -22,11 +23,13 @@ Global MovePlayer.Hooks = CreateHook("Hook_MovePlayer", HOOK_TYPE_OVERRIDABLE)
 Global MouseLook.Hooks = CreateHook("Hook_MouseLook", HOOK_TYPE_OVERRIDABLE)
 Global KillPlayer.Hooks = CreateHook("Hook_KillPlayer", HOOK_TYPE_OVERRIDABLE)
 Global ExecuteConsoleCommand.Hooks = CreateHook("Hook_ExecuteConsoleCommand", HOOK_TYPE_OVERRIDABLE)
+Global LoadEntities.Hooks = CreateHook("Hook_LoadEntities")
 Global InitializeEvents.Hooks = CreateHook("Hook_InitializeEvents", HOOK_TYPE_OVERRIDABLE)
 Global UpdateEvent.Hooks = CreateHook("Hook_UpdateEvent", HOOK_TYPE_OVERRIDABLE)
 Global FillRoom.Hooks = CreateHook("Hook_FillRoom", HOOK_TYPE_OVERRIDABLE)
 Global PostFillRoom.Hooks = CreateHook("Hook_PostFillRoom")
 Global LoadRoomTemplateEntity.Hooks = CreateHook("Hook_LoadRoomTemplateEntity", HOOK_TYPE_OVERRIDABLE)
+Global PostLoad.Hooks = CreateHook("Hook_PostLoad")
 Global UpdateItem.Hooks = CreateHook("Hook_UpdateItem", HOOK_TYPE_OVERRIDABLE)
 Global RemoveItem.Hooks = CreateHook("Hook_RemoveItem")
 Global PickItem.Hooks = CreateHook("Hook_PickItem", HOOK_TYPE_OVERRIDABLE)
@@ -35,6 +38,7 @@ Global SelectItem.Hooks = CreateHook("Hook_SelectItem")
 Global CombineItems.Hooks = CreateHook("Hook_CombineItems")
 Global CreateNPC.Hooks = CreateHook("Hook_CreateNPC")
 Global PostCreateNPC.Hooks = CreateHook("Hook_PostCreateNPC")
+Global RemoveNPC.Hooks = CreateHook("Hook_RemoveNPC", HOOK_TYPE_OVERRIDABLE)
 Global UpdateNPC.Hooks = CreateHook("Hook_UpdateNPC", HOOK_TYPE_OVERRIDABLE)
 
 Dim HookFuncs%(HookCount, 0)

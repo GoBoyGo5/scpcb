@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.3-s7"
+Const VersionNumber$ = "1.3.12.3-s8"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
@@ -8507,6 +8507,8 @@ Include "LoadAllSounds.bb"
 Function LoadEntities()
 	CatchErrors("Uncaught (LoadEntities)")
 	DrawLoading(0)
+
+	If LoadEntities\Subscribers > 0 Then PrepareFunction(0) : CallHook(LoadEntities)
 	
 	Local i%
 	
@@ -11342,6 +11344,7 @@ Function GenerateSeedNumber(seed$)
  	Return temp
 End Function
 
+; TODO: THIS IS FUCKED! B3D has a function with the same signature, but differently ordered parameters.
 Function Distance#(x1#, y1#, x2#, y2#)
 	Local x# = x2 - x1, y# = y2 - y1
 	Return(Sqr(x*x + y*y))
