@@ -38,12 +38,25 @@ End Type
 Global SubBox.SubtitleBox
 
 
+Const TOKEN_TYPE_REGULAR% = 0
+Const TOKEN_TYPE_DUBBED% = 1
+Const TOKEN_TYPE_CAPTION% = 2
+
 Type SubtitleToken ; ~ A subtitle definition, contains the beginning of a linked list of SubtitleEntry.
 	field soundPath$
-	field fromFile% ; Bit 0 = From Subtitles File, Bit 1 = From Captions File, Bit 2 = From Dubbed Subtitles File
+	field fromFile% ; Bitmask of bits in TOKEN_TYPE_* constants above.
 
 	field entry.SubtitleEntry
 End Type
+
+; First bit determines whether it is dubbed or not.
+; Second bit determines whether it is a caption or not.
+; Third bit is set for dubbing-agnostic captions (loaded from the captions file).
+Const ENTRY_TYPE_REGULAR% = 0
+Const ENTRY_TYPE_DUBBED% = 1
+Const ENTRY_TYPE_CAPTION_REGULAR% = 2
+Const ENTRY_TYPE_CAPTION_DUBBED% = 3
+Const ENTRY_TYPE_CAPTION_AGNOSTIC% = 4
 
 Type SubtitleEntry ; ~ A single subtitle line. Contains a timing and duration.
 	field nextEntry.SubtitleEntry
@@ -207,10 +220,16 @@ Function CreateSubtitleEntry.SubtitleEntry(key$, value$, clr.SubtitleColor, toke
 	e\length = (5.0+1.0) * 70.0
 
 	e\col = clr
-	e\txt = ParseSubtitleSettings(e, value, tokenType=1)
+	e\txt = ParseSubtitleSettings(e, value)
 
-	; If not explicitly defined as a caption, apply based on load type.
-	If e\entryType <> 1 Then e\entryType = tokenType
+	If tokenType = TOKEN_TYPE_CAPTION Then
+		; Entries from the captions file are always agnostic to whether it is dubbed.
+		e\entryType = ENTRY_TYPE_CAPTION_AGNOSTIC
+	Else
+		; Sets dubbed bit.
+		e\entryType = e\entryType Or tokenType
+	EndIf
+
 
 	Insert e Before First SubtitleEntry
 	Return e
@@ -227,8 +246,7 @@ Function CreateSubtitleToken(entry.SubtitleEntry, soundPathGroup$, tokenType)
 		Local soundPath$ = Trim(Mid(soundPathGroup, offset, toChar-offset))
 		Local t.SubtitleToken = GetSubtitleToken(soundPath)
 
-		tokenTypeMask = (1 Shl tokenType) Or (1 Shl entry\entryType)
-		If t <> Null And ((t\fromFile And tokenTypeMask) <> 0) Then 
+		If t <> Null And ((t\fromFile And (1 Shl tokenType)) <> 0) Then
 			DebugLog("Token already exists: "+soundPath)
 		Else
 			If t = Null Then
@@ -240,7 +258,7 @@ Function CreateSubtitleToken(entry.SubtitleEntry, soundPathGroup$, tokenType)
 
 				Insert t Before First SubtitleToken
 
-				t\fromFile = tokenTypeMask
+				t\fromFile = (1 Shl tokenType)
 			Else
 				; Append entry to existing linked list
 				Local e.SubtitleEntry = t\entry
@@ -250,7 +268,7 @@ Function CreateSubtitleToken(entry.SubtitleEntry, soundPathGroup$, tokenType)
 
 				e\nextEntry = entry
 
-				t\fromFile = t\fromFile Or tokenTypeMask
+				t\fromFile = t\fromFile Or (1 Shl tokenType)
 
 				; All tokens in a group share the same entry. This means that appending to the first one is sufficient.
 				; Appending to the others would actually create a loop in the linked list.
@@ -275,7 +293,7 @@ End Function
 
 
 ; Example of inline Subtitle settings: <r=255,g=255,b=255,voice=classd,italic=true,bold=true,caption=true>
-Function ParseSubtitleSettings$(e.SubtitleEntry, txt$, isCaption%=False)
+Function ParseSubtitleSettings$(e.SubtitleEntry, txt$)
 	; If the string doesn't begin with settings definitions, ignore.
 	If Mid(txt, 1, 1) <> "<" Or Instr(txt, ">") = 0 Then
 		Return txt
@@ -337,8 +355,9 @@ Function ApplySubtitleDataSetting%(key$, value$, e.SubtitleEntry)
 	EndIf
 
 	If key = "caption" Then
+		; Second bit indicates whether it is a caption or not.
 		If value = "true" Then
-			e\entryType = 1
+			e\entryType = 2
 		ElseIf value = "false" Then
 			e\entryType = 0
 		EndIf
@@ -498,26 +517,26 @@ Function LoadSubtitles()
 	Local dubbedSubtitlesUnlocked% = True
 	For m.ActiveMods = Each ActiveMods
 		If subtitlesUnlocked And FileType(m\Path + SubtitleFilePath) = 1 Then
-			LoadSubtitleTokens(m\Path + SubtitleFilePath, 0)
+			LoadSubtitleTokens(m\Path + SubtitleFilePath, TOKEN_TYPE_REGULAR)
 			If FileType(m\Path + SubtitleFilePath + ".OVERRIDE") = 1 Then subtitlesUnlocked = False
 		EndIf
 
-		If captionsUnlocked And FileType(m\Path + ClosedCaptionFilePath) = 1 Then
-			LoadSubtitleTokens(m\Path + ClosedCaptionFilePath, 1)
-			If FileType(m\Path + ClosedCaptionFilePath + ".OVERRIDE") = 1 Then captionsUnlocked = False
+		If dubbedSubtitlesUnlocked And FileType(m\Path + DubbedSubtitleFilePath) = 1 Then
+			LoadSubtitleTokens(m\Path + DubbedSubtitleFilePath, TOKEN_TYPE_DUBBED)
+			If FileType(m\Path + DubbedSubtitleFilePath + ".OVERRIDE") = 1 Then dubbedSubtitlesUnlocked = False
 		EndIf
 
-		If dubbedSubtitlesUnlocked And FileType(m\Path + DubbedSubtitleFilePath) = 1 Then
-			LoadSubtitleTokens(m\Path + DubbedSubtitleFilePath, 2)
-			If FileType(m\Path + DubbedSubtitleFilePath + ".OVERRIDE") = 1 Then dubbedSubtitlesUnlocked = False
+		If captionsUnlocked And FileType(m\Path + ClosedCaptionFilePath) = 1 Then
+			LoadSubtitleTokens(m\Path + ClosedCaptionFilePath, TOKEN_TYPE_CAPTION)
+			If FileType(m\Path + ClosedCaptionFilePath + ".OVERRIDE") = 1 Then captionsUnlocked = False
 		EndIf
 
 		If (Not subtitlesUnlocked) And (Not captionsUnlocked) And (Not dubbedSubtitlesUnlocked) Then Exit
 	Next
 
-	If subtitlesUnlocked Then LoadSubtitleTokens(SubtitleFilePath, 0)
-	If captionsUnlocked Then LoadSubtitleTokens(ClosedCaptionFilePath, 1)
+	If subtitlesUnlocked Then LoadSubtitleTokens(SubtitleFilePath, TOKEN_TYPE_REGULAR)
 	; Dubbed subtitles don't exist for the base game.
+	If captionsUnlocked Then LoadSubtitleTokens(ClosedCaptionFilePath, TOKEN_TYPE_CAPTION)
 
 	CleanupColors()
 
@@ -629,9 +648,11 @@ End Function
 
 Function ShouldShowSubtitle%(e.SubtitleEntry)
 	Select e\entryType
-		Case 0 Return Not UsesDubbedAudio
-		Case 1 Return ClosedCaptionsEnabled
-		Case 2 Return UsesDubbedAudio
+		Case ENTRY_TYPE_REGULAR Return Not UsesDubbedAudio
+		Case ENTRY_TYPE_DUBBED Return UsesDubbedAudio
+		Case ENTRY_TYPE_CAPTION_REGULAR Return ClosedCaptionsEnabled And (Not UsesDubbedAudio)
+		Case ENTRY_TYPE_CAPTION_DUBBED Return ClosedCaptionsEnabled And UsesDubbedAudio
+		Case ENTRY_TYPE_CAPTION_AGNOSTIC Return ClosedCaptionsEnabled
 		Default Return False
 	End Select
 End Function
