@@ -7270,7 +7270,7 @@ Function Console_CheckCanToggleNPC(npcType%)
 	Select npcType
 		Case -1
 			CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return False
-		Case NPCtype106, NPCtype173
+		Case NPCtypeOldMan, NPCtype173
 			Return True
 		Default
 			CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be enabled/disabled with the console. Sorry!", 255, 0, 0) : Return False
@@ -7307,7 +7307,7 @@ End Function
 
 Function EnableNPC(n.NPCs)
 	Select n\NPCtype
-		Case NPCtype106
+		Case NPCtypeOldMan
 			n\Idle = False
 			Contained106 = False
 		Case NPCtype173
@@ -7319,7 +7319,7 @@ End Function
 
 Function DisableNPC(n.NPCs)
 	Select n\NPCtype
-		Case NPCtype106
+		Case NPCtypeOldMan
 			n\Idle = True
 			n\State = 200000
 			Contained106 = True
