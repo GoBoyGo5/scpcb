@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.3-s8"
+Const VersionNumber$ = "1.3.12.4-s9"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12"
 
@@ -308,6 +308,7 @@ Type HUDScaledImage
 	Field BaseWidth%
 	Field BaseHeight%
 End Type
+Delete Each HUDScaledImage
 
 Function LoadImageHUDScaled(file$, fixedSizeX% = 0, fixedSizeY% = 0)
 	Local img%
@@ -369,7 +370,7 @@ Global Vsync% = GetOptionInt("graphics", "vsync")
 
 Global Opt_AntiAlias = GetOptionInt("graphics", "antialias")
 
-Global CurrFrameLimit# = (Framelimit%-20)/280.0
+Global CurrFrameLimit# = (Framelimit%-17)/280.0
 
 Global ScreenGamma# = GetOptionFloat("graphics", "screengamma")
 ;If Fullscreen Then UpdateScreenGamma()
@@ -623,7 +624,11 @@ Function UpdateConsole()
 		For cm.ConsoleMsg = Each ConsoleMsg
 			consoleHeight = consoleHeight + 15*MenuScale
 		Next
-		scrollbarHeight = (Float(height)/Float(consoleHeight))*height
+		If consoleHeight = 0 Then
+			scrollbarHeight = height
+		Else
+			scrollbarHeight = (Float(height)/Float(consoleHeight))*height
+		EndIf
 		If scrollbarHeight>height Then scrollbarHeight = height
 		If consoleHeight<height Then consoleHeight = height
 		
@@ -817,16 +822,11 @@ Function UpdateConsole()
 							CreateConsoleMsg("LIST OF COMMANDS - PAGE 2/3")
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("- spawn [npc type] [state]")
-							CreateConsoleMsg("- 096state")
+							CreateConsoleMsg("- npcspeed [npc type] [speed]")
+							CreateConsoleMsg("- npcstate [npc type]")
+							CreateConsoleMsg("- enable [npc type]")
+							CreateConsoleMsg("- disable [npc type]")
 							CreateConsoleMsg("- reset096")
-							CreateConsoleMsg("- 106state")
-							CreateConsoleMsg("- 106speed")
-							CreateConsoleMsg("- disable106")
-							CreateConsoleMsg("- enable106")
-							CreateConsoleMsg("- 173speed")
-							CreateConsoleMsg("- 173state")
-							CreateConsoleMsg("- disable173")
-							CreateConsoleMsg("- enable173")
 							CreateConsoleMsg("- halloween")
 							CreateConsoleMsg("- scp-420-j")
 							CreateConsoleMsg("******************************")
@@ -916,9 +916,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Spawns an NPC at the player's location.")
 							CreateConsoleMsg("Valid parameters are:")
-							CreateConsoleMsg("008zombie / 049 / 049-2 / 066 / 096 / 106 / 173")
-							CreateConsoleMsg("/ 372 / 513-1 / 966 / 1048-a / 1499-1 / class-d")
-							CreateConsoleMsg("/ guard / mtf / apache / tentacle")
+							Console_ListNPCTypes()
 							CreateConsoleMsg("******************************")
 						Case "revive","undead","resurrect"
 							CreateConsoleMsg("HELP - revive")
@@ -1253,6 +1251,14 @@ Function UpdateConsole()
 					
 					WireFrame WireframeState
 					;[End Block]
+				Case "npcspeed"
+					;[Block]
+					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp$ = Piece$(args$, 1)
+					StrTemp2$ = Piece$(args$, 2)
+
+					Console_ChangeNPCSpeed(StrTemp$, Float(StrTemp2))
+					;[End Block]
 				Case "173speed"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
@@ -1264,6 +1270,21 @@ Function UpdateConsole()
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					Curr106\Speed = Float(StrTemp)
 					CreateConsoleMsg("106's speed set to " + StrTemp)
+					;[End Block]
+				Case "npcstate"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Console_PrintNPCState(StrTemp)
+					;[End Block]
+				Case "enable"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Console_EnableNPC(StrTemp)
+					;[End Block]
+				Case "disable"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Console_DisableNPC(StrTemp)
 					;[End Block]
 				Case "173state"
 					;[Block]
@@ -1296,28 +1317,19 @@ Function UpdateConsole()
 					;[End Block]
 				Case "disable173"
 					;[Block]
-					Curr173\Idle = 3 ;This phenominal comment is brought to you by PolyFox. His absolute wisdom in this fatigue of knowledge brought about a new era of 173 state checks.
-					HideEntity Curr173\obj
-					HideEntity Curr173\Collider
+					DisableNPC(Curr173)
 					;[End Block]
 				Case "enable173"
 					;[Block]
-					Curr173\Idle = False
-					ShowEntity Curr173\obj
-					ShowEntity Curr173\Collider
+					EnableNPC(Curr173)
 					;[End Block]
 				Case "disable106"
 					;[Block]
-					Curr106\Idle = True
-					Curr106\State = 200000
-					Contained106 = True
+					DisableNPC(Curr106)
 					;[End Block]
 				Case "enable106"
 					;[Block]
-					Curr106\Idle = False
-					Contained106 = False
-					ShowEntity Curr106\Collider
-					ShowEntity Curr106\obj
+					EnableNPC(Curr106)
 					;[End Block]
 				Case "halloween"
 					;[Block]
@@ -1881,6 +1893,8 @@ Function UpdateConsole()
 				Case "exec"
 					StrTemp$ = Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " "))
 					ExecuteString(StrTemp$)
+				Case "clear", "cls"
+					Delete Each ConsoleMsg
 				Case "mav"
 					RuntimeErrorExt("Violation Access Memory")
 				Case "jorge"
@@ -1955,9 +1969,8 @@ CreateConsoleMsg(" ")
 CreateConsoleMsg("  - heal")
 CreateConsoleMsg("  - spawnitem [item name]")
 CreateConsoleMsg(" ")
-CreateConsoleMsg("  - disable173/enable173")
-CreateConsoleMsg("  - disable106/enable106")
-CreateConsoleMsg("  - 173state/106state/096state")
+CreateConsoleMsg("  - disable/enable [npc type]")
+CreateConsoleMsg("  - npcspeed [npc type] [speed]")
 CreateConsoleMsg("  - spawn [npc type]")
 
 ;---------------------------------------------------------------------------------------------------
@@ -2236,17 +2249,17 @@ Global ForestNPC,ForestNPCTex,ForestNPCData#[3]
 
 ;-----------------------------------------  Images ----------------------------------------------------------
 
-Global PauseMenuIMG%
+Global PauseMenuIMG% = 0
 
-Global SprintIcon%
-Global BlinkIcon%
-Global CrouchIcon%
-Global HandIcon%
-Global HandIcon2%
+Global SprintIcon% = 0
+Global BlinkIcon% = 0
+Global CrouchIcon% = 0
+Global HandIcon% = 0
+Global HandIcon2% = 0
 
-Global StaminaMeterIMG%
+Global StaminaMeterIMG% = 0
 
-Global Panel294, Using294%, Input294$
+Global Panel294 = 0, Using294%, Input294$
 
 DrawLoading(35, True)
 
@@ -4248,7 +4261,7 @@ Function DrawEnding()
 		;EndIf
 		
 		If EndingScreen = 0 Then
-			SubBox\screenTop = GraphicsHeight() * 0.9
+			SubBox\screenTop = GraphicHeight * 0.9
 			RecalculateSubtitleBoxTarget()
 
 			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt", MenuScale)
@@ -4303,7 +4316,7 @@ Function DrawEnding()
 				Text(x + width / 2 + 40*MenuScale, y + 20*MenuScale, I_Loc\Menu_End, True)
 				SetFont Font1
 				
-				If AchievementsMenu=0 Then 
+				If AchievementsMenu<=0 Then 
 					x = x+132*MenuScale
 					y = y+122*MenuScale
 					
@@ -5431,7 +5444,7 @@ Function DrawGUI()
 		KeypadMSG = ""
 	EndIf
 	
-	If KeyHit(1) And EndingTimer=0 And (Not Using294) Then
+	If KeyHit(1) And EndingTimer=0 And SelectedEnding="" And (Not Using294) Then
 		If (MenuOpen Or InvOpen) And OptionsMenu <> 0 Then SaveOptionsINI()
 		MenuOpen = (Not MenuOpen)
 		UpdateMenuState()
@@ -7706,10 +7719,10 @@ End Function
 Function DrawTimer()
 	SetFont(Font2)
 	Local durText$ = FormatDuration(PlayTime)
-	Local x% = HUDEndX - StringWidth(durText) - 24 * HUDScale
-	Local y% = HUDStartY + 24 * HUDScale
+	Local x% = HUDEndX - StringWidth(durText) - 24 * MenuScale
+	Local y% = HUDStartY + 24 * MenuScale
 	Color 0, 0, 0
-	Text(x + 3 * HUDScale, y + 3 * HUDScale, durText)
+	Text(x + 3 * MenuScale, y + 3 * MenuScale, durText)
 	If UsedConsole Then
 		Color 150, 150, 150
 	Else If First ActiveMods <> Null Then
@@ -7759,7 +7772,7 @@ Function DrawMenu()
 	Local x%, y%, width%, height%
 	Local steamOverlayActive = SteamActive And Steam_GetOverlayState()
 	If api_GetFocus() = 0 Lor steamOverlayActive Then ;Game is out of focus -> pause the game
-		If (Not Using294) Then
+		If (Not Using294) And EndingTimer=0 And SelectedEnding="" Then
 			MenuOpen = True
 			UpdateMenuState()
 		EndIf
@@ -8226,10 +8239,10 @@ Function DrawMenu()
 					
 					Color 255,255,255
 					If DrawTick(x + 270 * MenuScale, y, CurrFrameLimit > 0.0) Then
-						If CurrFrameLimit = 0 Then CurrFrameLimit = (60-20)/280.0
-						CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*100.0, 1)/100.0)
-						CurrFrameLimit# = Max(CurrFrameLimit, 0.001)
-						Framelimit% = 20+(CurrFrameLimit*280.0)
+						If CurrFrameLimit = 0 Then CurrFrameLimit = (60-17)/100.0
+						CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*99.0, 1)/99.0)
+						CurrFrameLimit# = Max(CurrFrameLimit, 0.01)
+						Framelimit% = 17+(CurrFrameLimit*280.0)
 						Color 255,255,0
 						Text(x + 5 * MenuScale, y + 25 * MenuScale, Format(I_Loc\OptionName_FramelimitFps, Framelimit%))
 						If (MouseOn(x+150*MenuScale,y+30*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=1
@@ -8485,9 +8498,9 @@ Function GetSeedString$(loc%=True)
 		EndIf
 	Else
 		If HasNumericSeed Then
-			Return "Map seed: "+Str(RandomSeedNumeric)
+			Return "Map seed (numeric): "+Str(RandomSeedNumeric)
 		Else
-			Return "Map seed (numeric): "+RandomSeed
+			Return "Map seed: "+RandomSeed
 		EndIf
 	EndIf
 End Function
@@ -8516,7 +8529,7 @@ Function LoadEntities()
 		TempSounds[i]=0
 	Next
 	
-	PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg", MenuScale)
+	If PauseMenuIMG = 0 Then PauseMenuIMG% = LoadImage_Strict("GFX\menu\pausemenu.jpg", MenuScale)
 	
 	If SprintIcon = 0 Then SprintIcon% = LoadImageHUDScaled("GFX\sprinticon.png")
 	If BlinkIcon = 0 Then BlinkIcon% = LoadImageHUDScaled("GFX\blinkicon.png")
@@ -9521,6 +9534,7 @@ Function NullGame(playbuttonsfx%=True)
 	For itt.ItemTemplates = Each ItemTemplates
 		FreeImageHUDScaled(itt\invimg)
 		If itt\invimg2 <> 0 Then FreeImageHUDScaled(itt\invimg2)
+		If itt\img <> 0 Then FreeImageHUDScaled(itt\img)
 		Delete itt
 	Next
 
@@ -9578,9 +9592,9 @@ Function NullGame(playbuttonsfx%=True)
 	
 	NoTarget% = False
 	
-	OptionsMenu% = -1
-	QuitMSG% = -1
-	AchievementsMenu% = -1
+	OptionsMenu% = 0
+	QuitMSG% = 0
+	AchievementsMenu% = 0
 	
 	SFXVolume# = PrevSFXVolume
 	DeafPlayer% = False
@@ -12209,6 +12223,7 @@ Function CheckForPlayerInFacility()
 End Function
 
 Function IsItemGoodFor1162(itt.ItemTemplates)
+	If itt\group = "misc" Return True
 	If itt\group = "paper" Then
 		;if the item is a paper, only allow spawning it if the name contains the word "note" or "log"
 		;(because those are items created recently, which D-9341 has most likely never seen)
@@ -12217,7 +12232,7 @@ Function IsItemGoodFor1162(itt.ItemTemplates)
 	Select itt\name
 		Case "key1", "key2", "key3"
 			Return True
-		Case "misc", "scp420j", "cigarette"
+		Case "scp420j", "cigarette"
 			Return True
 		Case "vest", "finevest","gasmask"
 			Return True
