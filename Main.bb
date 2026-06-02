@@ -3445,6 +3445,7 @@ While IsRunning
 			EndIf
 			
 			If FallTimer < 0 Then
+				CanSave = False
 				If SelectedItem <> Null Then
 					If SelectedItem\itemtemplate\group = "hazmat" Or SelectedItem\itemtemplate\group = "vest" Then
 						If WearingHazmat=0 And WearingVest=0 Then
