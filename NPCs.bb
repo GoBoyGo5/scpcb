@@ -7191,7 +7191,7 @@ Function Console_SpawnNPC(c_input$, c_state$ = "")
 		Case NPCtype008, NPCtype049, NPCtypeZombie
 			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 			n\State = 1
-		Case NPCtype066, NPCtype372, NPCtype5131, NPCType966, NPCtype1048a, NPCtype1499, NPCtypeD, NPCtypeGuard, NPCtypeApache, NPCtypeClerk
+		Case NPCtype066, NPCtype372, NPCtype5131, NPCType966, NPCtype1048a, NPCtype1499, NPCtypeD, NPCtypeGuard, NPCtypeMTF, NPCtypeApache, NPCtypeClerk
 			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
 		Case NPCType096
 			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.2, EntityZ(Collider))
