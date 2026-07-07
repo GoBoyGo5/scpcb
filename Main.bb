@@ -463,7 +463,8 @@ Global PlayTime%
 ; 0 = Running; 1 = Stopped; 2 = Pre-made save loaded; 3 = Ending reached
 Global TimerStopped% = True
 Global PreMadeSaveLoaded% = False
-Global JorgeCommand%
+Global ConsoleFlush%
+Global ConsoleFlushSnd% = 0, ConsoleMusFlush% = 0, ConsoleMusPlay% = 0
 
 Global InfiniteStamina% = False
 Global NVBlink%
@@ -9608,7 +9609,9 @@ End Function
 
 Function UpdateMusic()
 	
-	If (Not PlayCustomMusic)
+	If ConsoleFlush Then
+		If Not ChannelPlaying(ConsoleMusPlay) Then ConsoleMusPlay = PlaySound(ConsoleMusFlush)
+	ElseIf (Not PlayCustomMusic)
 		If NowPlaying <> ShouldPlay ; playing the wrong clip, fade out
 			CurrMusicVolume# = Max(CurrMusicVolume - (FPSfactor / 250.0), 0)
 			If CurrMusicVolume = 0
