@@ -1052,7 +1052,7 @@ Function UpdateNPCs()
 									If (dist > 25.0 Or PlayerRoom\RoomTemplate\Name = "pocketdimension" Or Visible Or n\PathStatus <> 1) And PlayerRoom\RoomTemplate\Name <> "gatea" Then 
 										
 										If (dist > 40 Or PlayerRoom\RoomTemplate\Name = "pocketdimension") Then
-											TranslateEntity n\Collider, 0, ((EntityY(Collider) - 0.14) - EntityY(n\Collider)) / 50.0, 0
+											TranslateEntity n\Collider, 0, ((EntityY(Collider) - 0.14) - EntityY(n\Collider)) * FPSFactor / 50.0, 0
 										EndIf
 										
 										n\CurrSpeed = CurveValue(n\Speed,n\CurrSpeed,10.0)
