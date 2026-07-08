@@ -1659,7 +1659,7 @@ Function UpdateConsole()
 							EndIf
 						Next
 						If (Not pl_room_found)
-							CreateConsoleMsg("The current room doesn't has any event applied.",255,150,0)
+							CreateConsoleMsg("The current room doesn't have any event applied.",255,150,0)
 						EndIf
 					EndIf
 					;[End Block]
@@ -1694,7 +1694,7 @@ Function UpdateConsole()
 					For a.Achievements = Each Achievements
 						If i = searched%
 							a\Unlocked = True
-							CreateConsoleMsg("Achievemt "+a\LocalName+" unlocked.")
+							CreateConsoleMsg("Achievement "+a\LocalName+" unlocked.")
 							i = -1
 							Exit
 						EndIf
