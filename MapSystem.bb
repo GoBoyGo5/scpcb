@@ -1272,6 +1272,8 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 		FreeImage(hmap[i])
 		FreeTexture(mask[i])
 	Next
+
+	HideEntity fr\Forest_Pivot
 	
 	CatchErrors("PlaceForest")
 End Function
