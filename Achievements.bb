@@ -172,12 +172,12 @@ Function UpdateAchievementMsg()
 			Color 255,255,255
 			SetFont Font1
 			RowText(Format(I_Loc\HUD_AchvUnlocked, amsg\achv\LocalName),x+84*scale,y+10*scale,width-94*scale,y-20*scale)
-			If amsg\msgtime > 0.0 And amsg\msgtime < 70*7
+			If amsg\msgtime > 0.0 And amsg\msgtime < TickRate*7
 				amsg\msgtime = amsg\msgtime + FPSfactor2
 				If amsg\msgx > -width%
 					amsg\msgx = Max(amsg\msgx-4*FPSfactor2,-width%)
 				EndIf
-			ElseIf amsg\msgtime >= 70*7
+			ElseIf amsg\msgtime >= TickRate*7
 				amsg\msgtime = -1
 			ElseIf amsg\msgtime = -1
 				If amsg\msgx < 0.0
