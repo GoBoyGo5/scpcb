@@ -143,6 +143,8 @@ Global CanOpenConsole% = GetOptionInt("console", "enabled")
 
 Global UseNumericSeeds% = GetOptionInt("general", "numeric seeds")
 
+Global TickRate# = 70.0
+
 Dim ArrowIMG(4)
 
 ;[Block]
@@ -1707,7 +1709,7 @@ Function UpdateConsole()
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
-					I_427\Timer = Float(StrTemp)*70.0
+					I_427\Timer = Float(StrTemp)*TickRate
 					;[End Block]
 				Case "teleport106"
 					;[Block]
@@ -2564,7 +2566,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 			If showmsg = True Then
 				If Not HasKeyCardMsg() Then
 					Msg = I_Loc\MessageButton_KeyRequired
-					MsgTimer = 70 * 7
+					MsgTimer = TickRate * 7
 					ActivateKeyCardMsgCooldown()
 				EndIf
 			EndIf
@@ -2591,7 +2593,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 				If showmsg = True Then
 					If Not HasKeyCardMsg() Then
 						Msg = I_Loc\MessageButton_KeyRequired
-						MsgTimer = 70 * 7
+						MsgTimer = TickRate * 7
 						ActivateKeyCardMsgCooldown()
 					EndIf
 				EndIf
@@ -2602,13 +2604,13 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					If d\locked Then
 						PlaySound_Strict KeyCardSFX2
 						Msg = I_Loc\MessageButton_KeyNothing
-						MsgTimer = 70 * 7
+						MsgTimer = TickRate * 7
 						ActivateKeyCardMsgCooldown()
 						Return
 					Else
 						PlaySound_Strict KeyCardSFX1
 						Msg = I_Loc\MessageButton_KeyInserted
-						MsgTimer = 70 * 7	
+						MsgTimer = TickRate * 7	
 						ActivateKeyCardMsgCooldown()
 					EndIf
 				EndIf
@@ -2621,7 +2623,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					Else
 						Msg = Format(I_Loc\MessageButton_KeyRequiredLevel, d\KeyCard)
 					EndIf
-					MsgTimer = 70 * 7					
+					MsgTimer = TickRate * 7					
 					ActivateKeyCardMsgCooldown()
 				EndIf
 				Return
@@ -2636,13 +2638,13 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 		If temp <> 0 Then
 			PlaySound_Strict ScannerSFX1
 			Msg = I_Loc\MessageButton_DnaSuccess
-			MsgTimer = 70 * 10
+			MsgTimer = TickRate * 10
 			ActivateScannerMsgCooldown()
 		Else
 			If showmsg = True And (Not HasScannerMsg()) Then 
 				PlaySound_Strict ScannerSFX2
 				Msg = I_Loc\MessageButton_DnaSelf
-				MsgTimer = 70 * 10
+				MsgTimer = TickRate * 10
 			EndIf
 			Return			
 		EndIf
@@ -2660,7 +2662,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
                     Else
                         Msg = I_Loc\MessageButton_ElevatorBroken
                     EndIf
-					MsgTimer = 70 * 5
+					MsgTimer = TickRate * 5
 				Else
 					If d\IsElevatorDoor <> 3 Then
 						Local now% = MilliSecs()
@@ -2675,12 +2677,12 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 
 					If d\IsElevatorDoor = 1 Then
 						Msg = I_Loc\MessageButton_ElevatorCall
-						MsgTimer = 70 * 5
+						MsgTimer = TickRate * 5
 					ElseIf d\IsElevatorDoor = 3 Then
 						Msg = I_Loc\MessageButton_ElevatorFloor
-						MsgTimer = 70 * 5
+						MsgTimer = TickRate * 5
 					ElseIf (Msg<>I_Loc\MessageButton_ElevatorCall)
-						If (Msg=I_Loc\MessageButton_ElevatorAlready) Or (MsgTimer<70*3) Or (ElevatorButtonSpamCount > 20 And Msg <> I_Loc\MessageButton_ElevatorMav)
+						If (Msg=I_Loc\MessageButton_ElevatorAlready) Or (MsgTimer<TickRate*3) Or (ElevatorButtonSpamCount > 20 And Msg <> I_Loc\MessageButton_ElevatorMav)
 							Local rnd%
 							If ElevatorButtonSpamCount > 20 Then
 								rnd = 3
@@ -2690,21 +2692,21 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 							Select rnd
 								Case 1
 									Msg = I_Loc\MessageButton_ElevatorStop
-									MsgTimer = 70 * 7
+									MsgTimer = TickRate * 7
 								Case 2
 									Msg = I_Loc\MessageButton_ElevatorFaster
-									MsgTimer = 70 * 7
+									MsgTimer = TickRate * 7
 								Case 3
 									Msg = I_Loc\MessageButton_ElevatorMav
-									MsgTimer = 70 * 7
+									MsgTimer = TickRate * 7
 								Default
 									Msg = I_Loc\MessageButton_ElevatorAlready
-									MsgTimer = 70 * 7
+									MsgTimer = TickRate * 7
 							End Select
 						EndIf
 					Else
 						Msg = I_Loc\MessageButton_ElevatorAlready
-						MsgTimer = 70 * 7
+						MsgTimer = TickRate * 7
 					EndIf
 				EndIf
 				
@@ -3155,7 +3157,7 @@ While IsRunning
 	PrevTime = CurTime
 	If (SpeedRunMode Lor (Not (MainMenuOpen Lor MenuOpen))) And SelectedEnding="" And TimerStopped=0 Then PlayTime = PlayTime + ElapsedTime
 	PrevFPSFactor = FPSfactor
-	FPSfactor = Min(ElapsedTime / 1000.0 * 70, 5.0)
+	FPSfactor = Min(ElapsedTime / 1000.0 * TickRate, 5.0)
 	FPSfactor2 = FPSfactor
 
 	If IsPaused() Then FPSfactor = 0
@@ -3367,7 +3369,7 @@ While IsRunning
 					darkA = Max(Min((-Sanity - 200) / 700.0, 0.6), darkA)
 					If KillTimer => 0 Then 
 						HeartBeatVolume = Min(Abs(Sanity+200)/500.0,1.0)
-						HeartBeatRate = Max(70 + Abs(Sanity+200)/6.0,HeartBeatRate)
+						HeartBeatRate = Max(TickRate + Abs(Sanity+200)/6.0,HeartBeatRate)
 					EndIf
 				EndIf
 			End If
@@ -3380,7 +3382,7 @@ While IsRunning
 				If EyeStuck < 6000 Then darkA = Min(Max(darkA, (6000-EyeStuck)/5000.0),1.0)
 				If EyeStuck < 9000 And EyeStuck+FPSfactor =>9000 Then 
 					Msg = I_Loc\MessageItem_EyedropsTear
-					MsgTimer = 70*6
+					MsgTimer = TickRate*6
 				EndIf
 			EndIf
 			
@@ -3417,7 +3419,7 @@ While IsRunning
 			EyeIrritation = Max(0, EyeIrritation - FPSfactor)
 			
 			If BlinkEffectTimer > 0 Then
-				BlinkEffectTimer = BlinkEffectTimer - (FPSfactor/70)
+				BlinkEffectTimer = BlinkEffectTimer - (FPSfactor/TickRate)
 			Else
 				If BlinkEffect <> 1.0 Then BlinkEffect = 1.0
 			EndIf
@@ -3473,7 +3475,7 @@ While IsRunning
 			If LightFlash > 0 Then
 				ShowEntity Light
 				EntityAlpha(Light, Max(Min(LightFlash + Rnd(-0.2, 0.2), 1.0), 0.0))
-				LightFlash = Max(LightFlash - (FPSfactor / 70.0), 0)
+				LightFlash = Max(LightFlash - (FPSfactor / TickRate), 0)
 			Else
 				HideEntity Light
 				;EntityAlpha(Light, LightFlash)
@@ -3505,33 +3507,33 @@ While IsRunning
 				RN$ = PlayerRoom\RoomTemplate\Name$
 				If RN$ = "173" Or (RN$ = "exit1" And EntityY(Collider)>1040.0*RoomScale) Or RN$ = "gatea"
 					Msg = I_Loc\MessageSave_DisabledLocation
-					MsgTimer = 70 * 4
+					MsgTimer = TickRate * 4
 				ElseIf (Not CanSave) Or QuickLoadPercent > -1
 					If QuickLoadPercent > -1
 						Msg = I_Loc\MessageSave_DisabledLoading
 					Else
 						Msg = I_Loc\MessageSave_DisabledMoment
 					EndIf
-					MsgTimer = 70 * 4
+					MsgTimer = TickRate * 4
 				Else
 					SaveGame(SavePath + CurrSave)
 				EndIf
 			ElseIf SelectedDifficulty\saveType = SAVEONSCREENS
 				If SelectedScreen=Null And SelectedMonitor=Null Then
 					Msg = I_Loc\MessageSave_Screens
-					MsgTimer = 70 * 4
+					MsgTimer = TickRate * 4
 				Else
 					RN$ = PlayerRoom\RoomTemplate\Name$
 					If RN$ = "173" Or (RN$ = "exit1" And EntityY(Collider)>1040.0*RoomScale) Or RN$ = "gatea"
 						Msg = I_Loc\MessageSave_DisabledLocation
-						MsgTimer = 70 * 4
+						MsgTimer = TickRate * 4
 					ElseIf (Not CanSave) Or QuickLoadPercent > -1
 						If QuickLoadPercent > -1
 							Msg = I_Loc\MessageSave_DisabledLoading
 						Else
 							Msg = I_Loc\MessageSave_DisabledMoment
 						EndIf
-						MsgTimer = 70 * 4
+						MsgTimer = TickRate * 4
 					Else
 						If SelectedScreen<>Null
 							GameSaved = False
@@ -3543,12 +3545,12 @@ While IsRunning
 				EndIf
 			Else
 				Msg = I_Loc\MessageSave_Disabled
-				MsgTimer = 70 * 4
+				MsgTimer = TickRate * 4
 			EndIf
 		Else If SelectedDifficulty\saveType = SAVEONSCREENS And (SelectedScreen<>Null Or SelectedMonitor<>Null)
 			If (Msg<>I_Loc\MessageSave_Saved And Msg<>I_Loc\MessageSave_DisabledLocation And Msg<>I_Loc\MessageSave_DisabledMoment) Or MsgTimer<=0 Then
 				Msg = Format(I_Loc\MessageSave_Anywhere, KeyName(KEY_SAVE))
-				MsgTimer = 70*4
+				MsgTimer = TickRate*4
 			EndIf
 			
 			If MouseHit2 Then SelectedMonitor = Null
@@ -3589,7 +3591,7 @@ While IsRunning
 						If e\EventState3 => 40 And e\EventState3 < 50 Then
 							If InvOpen Then
 								Msg = I_Loc\MessageHelp_View
-								MsgTimer=70*7
+								MsgTimer=TickRate*7
 								e\EventState3 = 50
 								Exit
 							EndIf
@@ -3868,7 +3870,7 @@ Function QuickLoadEvents()
 					;e\room\NPC[0]\PrevState = 2
 					
 					e\EventState = 1
-					If e\EventState2 = 0 Then e\EventState2 = -(70*5)
+					If e\EventState2 = 0 Then e\EventState2 = -(TickRate*5)
 					
 					QuickLoadPercent = 100
 				EndIf
@@ -4497,7 +4499,7 @@ Function MovePlayer()
 		
 		CameraShake = Sin(SuperManTimer / 5.0) * (SuperManTimer / 1500.0)
 		
-		If SuperManTimer > 70 * 50 Then
+		If SuperManTimer > TickRate * 50 Then
 			DeathMSG = I_Loc\DeathMessage_914Superman
 			Kill()
 			ShowEntity Fog
@@ -4521,7 +4523,7 @@ Function MovePlayer()
     EndIf
 	
 	If StaminaEffectTimer > 0 Then
-		StaminaEffectTimer = StaminaEffectTimer - (FPSfactor/70)
+		StaminaEffectTimer = StaminaEffectTimer - (FPSfactor/TickRate)
 	Else
 		If StaminaEffect <> 1.0 Then StaminaEffect = 1.0
 	EndIf
@@ -4539,13 +4541,13 @@ Function MovePlayer()
 					temp = 0
 					If WearingGasMask>0 Or Wearing1499>0 Then temp=1
 					BreathCHN = PlaySound_Strict(BreathSFX((temp), Rand(1,3)))
-					ChannelVolume BreathCHN, Min((70.0-Stamina)/70.0,1.0)*SFXVolume
+					ChannelVolume BreathCHN, Min((TickRate-Stamina)/TickRate,1.0)*SFXVolume
 				Else
 					If ChannelPlaying(BreathCHN)=False Then
 						temp = 0
 						If WearingGasMask>0 Or Wearing1499>0 Then temp=1
 						BreathCHN = PlaySound_Strict(BreathSFX((temp), Rand(1,3)))
-						ChannelVolume BreathCHN, Min((70.0-Stamina)/70.0,1.0)*SFXVolume			
+						ChannelVolume BreathCHN, Min((TickRate-Stamina)/TickRate,1.0)*SFXVolume			
 					EndIf
 				EndIf
 			EndIf
@@ -4764,13 +4766,13 @@ Function MovePlayer()
 	If Injuries > 1.0 Then
 		temp2 = Bloodloss
 		BlurTimer = Max(Max(Sin(MilliSecs()/100.0)*Bloodloss*30.0,Bloodloss*2*(2.0-CrouchState)),BlurTimer)
-		If (Not I_427\Using And I_427\Timer < 70*360) Then
+		If (Not I_427\Using And I_427\Timer < TickRate*360) Then
 			Bloodloss = Min(Bloodloss + (Min(Injuries,3.5)/300.0)*FPSfactor,100)
 		EndIf
 		
 		If temp2 <= 60 And Bloodloss > 60 Then
 			Msg = I_Loc\Message_BloodlossFaint
-			MsgTimer = 70*4
+			MsgTimer = TickRate*4
 		EndIf
 	EndIf
 	
@@ -4801,16 +4803,16 @@ Function MovePlayer()
 			HeartBeatRate = Max(150-(Bloodloss-80)*5,HeartBeatRate)
 			HeartBeatVolume = Max(HeartBeatVolume, 0.75+(Bloodloss-80.0)*0.0125)	
 		ElseIf Bloodloss > 35.0
-			HeartBeatRate = Max(70+Bloodloss,HeartBeatRate)
+			HeartBeatRate = Max(TickRate+Bloodloss,HeartBeatRate)
 			HeartBeatVolume = Max(HeartBeatVolume, (Bloodloss-35.0)/60.0)			
 		EndIf
 	EndIf
 	
 	If HealTimer > 0 Then
 		DebugLog HealTimer
-		HealTimer = HealTimer - (FPSfactor / 70)
+		HealTimer = HealTimer - (FPSfactor / TickRate)
 		Bloodloss = Min(Bloodloss + (2 / 400.0) * FPSfactor, 100)
-		Injuries = Max(Injuries - (FPSfactor / 70) / 30, 0.0)
+		Injuries = Max(Injuries - (FPSfactor / TickRate) / 30, 0.0)
 	EndIf
 		
 	If Playable Then
@@ -4824,7 +4826,7 @@ Function MovePlayer()
 			tempchn = PlaySound_Strict (HeartBeatSFX)
 			ChannelVolume tempchn, HeartBeatVolume*SFXVolume#
 			
-			HeartBeatTimer = 70.0*(60.0/Max(HeartBeatRate,1.0))
+			HeartBeatTimer = TickRate*(60.0/Max(HeartBeatRate,1.0))
 		Else
 			HeartBeatTimer = HeartBeatTimer - FPSfactor
 		EndIf
@@ -4876,7 +4878,7 @@ Function MouseLook()
 		Local rawX# = MouseXSpeed() * (MouseSens + 0.6)
 		Local rawY# = MouseYSpeed() * (MouseSens + 0.6)
 		Local S# = (6.0 / (MouseSens + 1.0)) * MouseSmooth
-		Local tau# = S / 70.0
+		Local tau# = S / TickRate
 
 		If MouseSmooth <= 0 Then
 			mouse_x_speed_1# = rawX
@@ -5017,7 +5019,7 @@ Function MouseLook()
 				Case 1 ;chicken pox
 					If Rand(9000)=1 And Msg="" Then
 						Msg=I_Loc\Message_1025ChickenpoxItchy
-						MsgTimer =70*4
+						MsgTimer =TickRate*4
 					EndIf
 				Case 2 ;cancer of the lungs
 					If FPSfactor>0 Then 
@@ -5032,14 +5034,14 @@ Function MouseLook()
 					Stamina = Stamina - FPSfactor * 0.1
 				Case 3 ;appendicitis
 					;0.035/sec = 2.1/min
-					If (Not I_427\Using And I_427\Timer < 70*360) Then
+					If (Not I_427\Using And I_427\Timer < TickRate*360) Then
 						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.0005
 					EndIf
 					If SCP1025state[i]>20.0 Then
-						If SCP1025state[i]-FPSfactor<=20.0 Then Msg=I_Loc\Message_1025Appendicitis2 : MsgTimer = 70*4
+						If SCP1025state[i]-FPSfactor<=20.0 Then Msg=I_Loc\Message_1025Appendicitis2 : MsgTimer = TickRate*4
 						Stamina = Stamina - FPSfactor * 0.3
 					ElseIf SCP1025state[i]>10.0
-						If SCP1025state[i]-FPSfactor<=10.0 Then Msg=I_Loc\Message_1025Appendicitis1 : MsgTimer = 70*4
+						If SCP1025state[i]-FPSfactor<=10.0 Then Msg=I_Loc\Message_1025Appendicitis1 : MsgTimer = TickRate*4
 					EndIf
 				Case 4 ;asthma
 					If Stamina < 35 Then
@@ -5053,7 +5055,7 @@ Function MouseLook()
 						CurrSpeed = CurveValue(0, CurrSpeed, 10+Stamina*15)
 					EndIf
 				Case 5;cardiac arrest
-					If (Not I_427\Using And I_427\Timer < 70*360) Then
+					If (Not I_427\Using And I_427\Timer < TickRate*360) Then
 						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.35
 					EndIf
 					;35/sec
@@ -5065,7 +5067,7 @@ Function MouseLook()
 							Kill()
 						EndIf
 					Else
-						HeartBeatRate=Max(HeartBeatRate, 70+SCP1025state[i])
+						HeartBeatRate=Max(HeartBeatRate, TickRate+SCP1025state[i])
 						HeartBeatVolume = 1.0
 					EndIf
 			End Select 
@@ -5256,7 +5258,7 @@ Function DrawGUI()
 			If KeypadMSG <> "" Then 
 				KeypadTimer = KeypadTimer-FPSfactor2
 				
-				If (KeypadTimer Mod 70) < 35 Then Text GraphicWidth/2, y+124*scale, KeypadMSG, True,True
+				If (KeypadTimer Mod TickRate) < 35 Then Text GraphicWidth/2, y+124*scale, KeypadMSG, True,True
 				If KeypadTimer =<0 Then
 					KeypadMSG = ""
 					SelectedDoor = Null
@@ -5567,7 +5569,7 @@ Function DrawGUI()
 						SelectedItem = Null
 					ElseIf PrevOtherOpen\Inventory\Items[MouseSlot] <> SelectedItem
 						Msg = I_Loc\MessageItem_Cantcombine
-						MsgTimer = 70 * 5
+						MsgTimer = TickRate * 5
 					EndIf
 					
 				EndIf
@@ -5670,7 +5672,7 @@ Function DrawGUI()
 							If DoubleClick Then
 								If WearingHazmat > 0 And SelectedItem\itemtemplate\group <> "hazmat" Then
 									Msg = I_Loc\MessageItem_HazmatNouseAny
-									MsgTimer = 70*5
+									MsgTimer = TickRate*5
 									SelectedItem = Null
 									Return
 								EndIf
@@ -5723,11 +5725,11 @@ Function DrawGUI()
 					Select SelectedItem\itemtemplate\name
 						Case "vest","finevest","hazmatsuit","hazmatsuit2","hazmatsuit3"
 							Msg = I_Loc\MessageHelp_Remove
-							MsgTimer = 70*5
+							MsgTimer = TickRate*5
 						Case "scp1499","super1499"
 							If Wearing1499>0 Then
 								Msg = I_Loc\MessageHelp_Remove
-								MsgTimer = 70*5
+								MsgTimer = TickRate*5
 							Else
 								DropItem(SelectedItem)
 								SelectedItem = Null
@@ -5794,10 +5796,10 @@ Function DrawGUI()
 											EndIf
 											
 										EndIf
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Else
 										Msg = I_Loc\MessageItem_Cantcombine
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									EndIf
 								ElseIf Inventory(MouseSlot)\itemtemplate\name = "wallet" Then
 									;Add an item to clipboard
@@ -5833,14 +5835,14 @@ Function DrawGUI()
 											Msg = Format(I_Loc\MessageItem_WalletAdd, added\itemtemplate\displayname)
 										EndIf
 										
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Else
 										Msg = I_Loc\MessageItem_Cantcombine
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									EndIf
 								Else
 									Msg = I_Loc\MessageItem_Cantcombine
-									MsgTimer = 70 * 5
+									MsgTimer = TickRate * 5
 								EndIf
 								SelectedItem = Null
 								
@@ -5854,36 +5856,36 @@ Function DrawGUI()
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
 										Msg = I_Loc\MessageItem_NavBatReplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "snavulti"
 										Msg = I_Loc\MessageItem_NavBatNoplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "radio"
 										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
 										Msg = I_Loc\MessageItem_RadioBatReplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "fineradio", "veryfineradio"
 										Msg = I_Loc\MessageItem_RadioBatNoplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "18vradio"
 										Msg = I_Loc\MessageItem_RadioBatNofit
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "supernv", "nvgoggles"
 										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 1000.0
 										Msg = I_Loc\MessageItem_NvgBatReplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "finenvgoggles"
 										Msg = I_Loc\MessageItem_NvgBatNoplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Default
 										Msg = I_Loc\MessageItem_Cantcombine
-										MsgTimer = 70 * 5	
+										MsgTimer = TickRate * 5	
 								End Select
 								;[End Block]
 							Case "18vbat"
@@ -5891,32 +5893,32 @@ Function DrawGUI()
 								Select Inventory(MouseSlot)\itemtemplate\name
 									Case "snav", "snav300", "snav310"
 										Msg = I_Loc\MessageItem_NavBatNofit
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "snavulti"
 										Msg = I_Loc\MessageItem_NavBatNoplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "radio"
 										Msg = I_Loc\MessageItem_RadioBatNofit
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "fineradio", "veryfineradio"
 										Msg = I_Loc\MessageItem_RadioBatNoplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Case "18vradio"
 										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
 										Msg = I_Loc\MessageItem_RadioBatReplace
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 									Default
 										Msg = I_Loc\MessageItem_Cantcombine
-										MsgTimer = 70 * 5
+										MsgTimer = TickRate * 5
 								End Select
 								;[End Block]
 							Default
 								;[Block]
 								Msg = I_Loc\MessageItem_Cantcombine
-								MsgTimer = 70 * 5
+								MsgTimer = TickRate * 5
 								;[End Block]
 						End Select					
 					End If
@@ -5956,7 +5958,7 @@ Function DrawGUI()
 						Msg = I_Loc\MessageItem_NvgConflictHazmat
 					EndIf
 					SelectedItem = Null
-					MsgTimer = 70 * 5
+					MsgTimer = TickRate * 5
 					;[End Block]
 				Case "supernv"
 					;[Block]
@@ -5979,7 +5981,7 @@ Function DrawGUI()
 						Msg = I_Loc\MessageItem_NvgConflictHazmat
 					EndIf
 					SelectedItem = Null
-					MsgTimer = 70 * 5
+					MsgTimer = TickRate * 5
 					;[End Block]
 				Case "finenvgoggles"
 					;[Block]
@@ -6002,7 +6004,7 @@ Function DrawGUI()
 						Msg = I_Loc\MessageItem_NvgConflictHazmat
 					EndIf
 					SelectedItem = Null
-					MsgTimer = 70 * 5
+					MsgTimer = TickRate * 5
 					;[End Block]
 				Case "scp1123"
 					;[Block]
@@ -6054,7 +6056,7 @@ Function DrawGUI()
 							Else
 								Msg = I_Loc\MessageItem_BdcUseFlipped
 							EndIf
-							MsgTimer = 70 * 10
+							MsgTimer = TickRate * 10
 
 							For i% = 3 To 7
 								SetEmitter(Camera, ParticleEffect[i], True)
@@ -6072,7 +6074,7 @@ Function DrawGUI()
 							Else
 								Msg = I_Loc\MessageItem_BdcUseStale
 							EndIf
-							MsgTimer = 70 * 7
+							MsgTimer = TickRate * 7
 						EndIf
 
 						RemoveItem(SelectedItem)
@@ -6089,7 +6091,7 @@ Function DrawGUI()
 						Else
 							Msg = I_Loc\MessageItem_PillUse
 						EndIf
-						MsgTimer = 70*7
+						MsgTimer = TickRate*7
 						
 						ResetDiseases()
 						
@@ -6104,29 +6106,29 @@ Function DrawGUI()
 							Case 1
 								Injuries = 3.5
 								Msg = I_Loc\MessageItem_VeryfinefirstaidUseHurt
-								MsgTimer = 70*7
+								MsgTimer = TickRate*7
 							Case 2
 								Injuries = 0
 								Bloodloss = 0
 								Msg = I_Loc\MessageItem_VeryfinefirstaidUseFullheal
-								MsgTimer = 70*7
+								MsgTimer = TickRate*7
 							Case 3
 								Injuries = Max(0, Injuries - Rnd(0.5,3.5))
 								Bloodloss = Max(0, Bloodloss - Rnd(10,100))
 								Msg = I_Loc\MessageItem_VeryfinefirstaidUseHeal
-								MsgTimer = 70*7
+								MsgTimer = TickRate*7
 							Case 4
 								BlurTimer = 10000
 								Bloodloss = 0
 								Msg = I_Loc\MessageItem_VeryfinefirstaidUseNausea
-								MsgTimer = 70*7
+								MsgTimer = TickRate*7
 							Case 5
 								BlinkTimer = -10
 								Local roomname$ = PlayerRoom\RoomTemplate\Name
 								If roomname = "dimension1499" Or roomname = "gatea" Or (roomname="exit1" And EntityY(Collider)>1040.0*RoomScale)
 									Injuries = 2.5
 									Msg = I_Loc\MessageItem_VeryfinefirstaidUseHurt
-									MsgTimer = 70*7
+									MsgTimer = TickRate*7
 								Else
 									For r.Rooms = Each Rooms
 										If r\RoomTemplate\Name = "pocketdimension" Then
@@ -6143,7 +6145,7 @@ Function DrawGUI()
 										EndIf
 									Next
 									Msg = I_Loc\MessageItem_VeryfinefirstaidUsePocketdimension
-									MsgTimer = 70*8
+									MsgTimer = TickRate*8
 								EndIf
 						End Select
 						
@@ -6154,7 +6156,7 @@ Function DrawGUI()
 					;[Block]
 					If Bloodloss = 0 And Injuries = 0 Then
 						Msg = I_Loc\MessageItem_FirstaidUseFull
-						MsgTimer = 70*5
+						MsgTimer = TickRate*5
 						SelectedItem = Null
 					Else
 						If CanUseItem(False, True, True)
@@ -6178,7 +6180,7 @@ Function DrawGUI()
 									Else
 										Msg = I_Loc\MessageItem_FinefirstaidUse3
 									EndIf
-									MsgTimer = 70*5
+									MsgTimer = TickRate*5
 									RemoveItem(SelectedItem)
 								Else
 									Bloodloss = Max(0, Bloodloss - Rand(10,20))
@@ -6226,7 +6228,7 @@ Function DrawGUI()
 										End Select
 									EndIf
 									
-									MsgTimer = 70*5
+									MsgTimer = TickRate*5
 									RemoveItem(SelectedItem)
 								EndIf							
 							EndIf
@@ -6317,14 +6319,14 @@ Function DrawGUI()
 						If strtemp <> "" Then PlaySound_Strict LoadTempSound(strtemp)
 
 						strtemp = GetINIString2(iniStr, loc, "message")
-						If strtemp <> "" Then Msg = strtemp : MsgTimer = 70*6
+						If strtemp <> "" Then Msg = strtemp : MsgTimer = TickRate*6
 
 						strtemp = GetINIString2(iniStr, loc, "deathmessage")
 						If strtemp <> "" Then DeathMSG = strtemp
 
 						If GetINIInt2(iniStr, loc, "lethal") Then Kill()
 						
-						BlurTimer = Max(BlurTimer + GetINIInt2(iniStr, loc, "blur")*70, 0);*temp
+						BlurTimer = Max(BlurTimer + GetINIInt2(iniStr, loc, "blur")*TickRate, 0);*temp
 						CameraShakeTimer = Max(CameraShakeTimer + GetINIString2(iniStr, loc, "camerashake"), 0)
 						
 						temp = GetINIInt2(iniStr, loc, "vomit")
@@ -6336,7 +6338,7 @@ Function DrawGUI()
 							EndIf
 						EndIf
 						
-						temp = GetINIInt2(iniStr, loc, "deathtimer")*70
+						temp = GetINIInt2(iniStr, loc, "deathtimer")*TickRate
 						If temp > 0 Then
 							If DeathTimer = 0 Then
 								DeathTimer = temp
@@ -6363,7 +6365,7 @@ Function DrawGUI()
 						strtemp = GetINIString2(iniStr, loc, "refusemessage")
 						If strtemp <> "" Then
 							Msg = strtemp 
-							MsgTimer = 70*6		
+							MsgTimer = TickRate*6		
 						Else
 							it.Items = CreateItem("emptycup", 0,0,0)
 							it\Picked = True
@@ -6385,7 +6387,7 @@ Function DrawGUI()
 						StaminaEffectTimer = 20
 						
 						Msg = I_Loc\MessageItem_SyringeUse
-						MsgTimer = 70 * 8
+						MsgTimer = TickRate * 8
 						
 						RemoveItem(SelectedItem)
 					EndIf
@@ -6398,7 +6400,7 @@ Function DrawGUI()
 						StaminaEffectTimer = Rnd(20, 30)
 						
 						Msg = I_Loc\MessageItem_FinesyringeUse
-						MsgTimer = 70 * 8
+						MsgTimer = TickRate * 8
 						
 						RemoveItem(SelectedItem)
 					EndIf
@@ -6420,7 +6422,7 @@ Function DrawGUI()
 								Msg = I_Loc\MessageItem_VeryfinesyringeUseStomacheache
 						End Select
 						
-						MsgTimer = 70 * 8
+						MsgTimer = TickRate * 8
 						RemoveItem(SelectedItem)
 					EndIf
 					;[End Block]
@@ -6441,7 +6443,7 @@ Function DrawGUI()
 						SelectedItem\state2 = 66
 					ElseIf RadioState(5) = 0 And SelectedItem\state > 0
 						Msg = I_Loc\MessageItem_RadioUse
-						MsgTimer = 70 * 5
+						MsgTimer = TickRate * 5
 						RadioState(5) = 1
 						RadioState(0) = -1
 					EndIf
@@ -6780,7 +6782,7 @@ Function DrawGUI()
 							Msg = I_Loc\MessageItem_CigaretteUseUnable
 						EndIf
 						
-						MsgTimer = 70 * 5
+						MsgTimer = TickRate * 5
 					EndIf
 					;[End Block]
 				Case "scp420j"
@@ -6795,7 +6797,7 @@ Function DrawGUI()
 							GiveAchievement(Achv420)
 							PlaySound_Strict LoadTempSound("SFX\Music\420J.ogg")
 						EndIf
-						MsgTimer = 70 * 5
+						MsgTimer = TickRate * 5
 						RemoveItem(SelectedItem)
 					EndIf
 					;[End Block]
@@ -6809,7 +6811,7 @@ Function DrawGUI()
 							Msg = I_Loc\MessageItem_420jUseNap
 							KillTimer = -1						
 						EndIf
-						MsgTimer = 70 * 6
+						MsgTimer = TickRate * 6
 						RemoveItem(SelectedItem)
 					EndIf
 					;[End Block]
@@ -6823,7 +6825,7 @@ Function DrawGUI()
 						Msg = I_Loc\MessageItem_Scp714On
 						Wearing714 = True
 					EndIf
-					MsgTimer = 70 * 5
+					MsgTimer = TickRate * 5
 					SelectedItem = Null	
 					;[End Block]
 				Case "hazmatsuit", "hazmatsuit2", "hazmatsuit3"
@@ -6857,7 +6859,7 @@ Function DrawGUI()
 								WearingNightVision = 0
 							EndIf
 							SelectedItem\state=0
-							MsgTimer = 70 * 5
+							MsgTimer = TickRate * 5
 							SelectedItem = Null
 						EndIf
 					EndIf
@@ -6888,7 +6890,7 @@ Function DrawGUI()
 							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 						EndIf
 						SelectedItem\state=0
-						MsgTimer = 70 * 5
+						MsgTimer = TickRate * 5
 						SelectedItem = Null
 					EndIf
 					;[End Block]
@@ -6920,7 +6922,7 @@ Function DrawGUI()
 						Msg = I_Loc\MessageItem_GasmaskConflictHazmat
 					EndIf
 					SelectedItem = Null
-					MsgTimer = 70 * 5
+					MsgTimer = TickRate * 5
 					;[End Block]
 				Case "snav", "snav300", "snav310", "snavulti"
 					;[Block]
@@ -7139,7 +7141,7 @@ Function DrawGUI()
 					;[Block]
 					If WearingHazmat>0
 						Msg = I_Loc\MessageItem_Scp1499ConflictHazmat
-						MsgTimer = 70 * 5
+						MsgTimer = TickRate * 5
 						SelectedItem=Null
 						Return
 					EndIf
@@ -7216,7 +7218,7 @@ Function DrawGUI()
 							Next
 						EndIf
 						SelectedItem\state=0
-						;MsgTimer = 70 * 5
+						;MsgTimer = TickRate * 5
 						SelectedItem = Null
 					EndIf
 					;[End Block]
@@ -7235,7 +7237,7 @@ Function DrawGUI()
 						PlaySound_Strict LoadTempSound("SFX\SCP\1162\NostalgiaCancer"+Rand(6,10)+".ogg")
 						If SelectedItem\itemtemplate\name = "oldbadge"
 							Msg = I_Loc\MessageItem_1162UseBadge
-							MsgTimer = 70*10
+							MsgTimer = TickRate*10
 						EndIf
 						
 						SelectedItem\state = 1
@@ -7247,7 +7249,7 @@ Function DrawGUI()
 						PlaySound_Strict LoadTempSound("SFX\SCP\1162\NostalgiaCancer"+Rand(6,10)+".ogg")
 						
 						Msg = I_Loc\MessageItem_1162UseKey
-						MsgTimer = 70*10						
+						MsgTimer = TickRate*10						
 					EndIf
 					
 					SelectedItem\state = 1
@@ -7268,7 +7270,7 @@ Function DrawGUI()
 						BlurTimer = 1000
 						
 						Msg = I_Loc\MessageItem_1162UseHearing
-						MsgTimer = 70*10
+						MsgTimer = TickRate*10
 						PlaySound_Strict LoadTempSound("SFX\SCP\1162\NostalgiaCancer"+Rand(6,10)+".ogg")
 						SelectedItem\state = 1
 					EndIf
@@ -7294,14 +7296,14 @@ Function DrawGUI()
 						Msg = I_Loc\MessageItem_427On
 						I_427\Using = True
 					EndIf
-					MsgTimer = 70 * 5
+					MsgTimer = TickRate * 5
 					SelectedItem = Null
 					;[End Block]
 				Case "pill"
 					;[Block]
 					If CanUseItem(False, False, True)
 						Msg = I_Loc\MessageItem_PillUse
-						MsgTimer = 70*7
+						MsgTimer = TickRate*7
 						
 						RemoveItem(SelectedItem)
 						SelectedItem = Null
@@ -7311,10 +7313,10 @@ Function DrawGUI()
 					;[Block]
 					If CanUseItem(False, False, True)
 						Msg = I_Loc\MessageItem_PillUse
-						MsgTimer = 70*7
+						MsgTimer = TickRate*7
 						
-						If I_427\Timer < 70*360 Then
-							I_427\Timer = 70*360
+						If I_427\Timer < TickRate*360 Then
+							I_427\Timer = TickRate*360
 						EndIf
 						
 						RemoveItem(SelectedItem)
@@ -7352,7 +7354,7 @@ Function DrawGUI()
 									
 									If (SelectedItem\state = 0) Then
 										Msg = I_Loc\MessageItem_1162UseTicket
-										MsgTimer = 70*10
+										MsgTimer = TickRate*10
 										PlaySound_Strict LoadTempSound("SFX\SCP\1162\NostalgiaCancer"+Rand(1,5)+".ogg")
 										SelectedItem\state = 1
 									EndIf
@@ -7579,7 +7581,7 @@ Function DrawHUD()
 		EndIf
 		Text x, 90, "Triangles rendered: "+CurrTrisAmount
 		Text x, 110, "Active textures: "+ActiveTextures()
-		Text x, 130, "SCP-427 state (secs): "+Int(I_427\Timer/70.0)
+		Text x, 130, "SCP-427 state (secs): "+Int(I_427\Timer/TickRate)
 		Text x, 150, "SCP-008 infection: "+Infect
 		For i = 0 To 5
 			Text x, 170+(20*i), "SCP-1025 State "+i+": "+SCP1025state[i]
@@ -7692,7 +7694,7 @@ Function DrawMenu()
 					If StopHidingTimer => 40 Then
 						PlaySound_Strict(HorrorSFX(15))
 						Msg = I_Loc\Message_Stophiding
-						MsgTimer = 6*70
+						MsgTimer = 6*TickRate
 						MenuOpen = False
 						Return
 					EndIf
@@ -9034,7 +9036,7 @@ Function InitNewGame()
 
 	HideDistance# = 15.0
 	
-	HeartBeatRate = 70
+	HeartBeatRate = TickRate
 	
 	AccessCode = 0
 	For i = 0 To 3
@@ -9055,7 +9057,7 @@ Function InitNewGame()
 	
 	Curr173 = CreateNPC(NPCtype173, 0, -30.0, 0)
 	Curr106 = CreateNPC(NPCtypeOldMan, 0, -30.0, 0)
-	Curr106\State = 70 * 60 * Rand(12,17)
+	Curr106\State = TickRate * 60 * Rand(12,17)
 	
 	For d.Doors = Each Doors
 		EntityParent(d\obj, 0)
@@ -9166,7 +9168,7 @@ Function InitNewGame()
 	Stamina = 100
 	
 	Playable = False
-	For i% = 0 To 70
+	For i% = 0 To TickRate
 		FPSfactor = 1.0
 		FlushKeys()
 		MovePlayer()
@@ -10912,7 +10914,7 @@ Function Use427()
 	Local i%,pvt%,de.Decals,tempchn%
 	Local prevI427Timer# = I_427\Timer
 	
-	If I_427\Timer < 70*360
+	If I_427\Timer < TickRate*360
 		If I_427\Using=True Then
 			I_427\Timer = I_427\Timer + FPSfactor
 			If Injuries > 0.0 Then
@@ -10935,7 +10937,7 @@ Function Use427()
 			If (Not ChannelPlaying(I_427\SoundCHN[0])) Then
 				I_427\SoundCHN[0] = PlaySound_Strict(I_427\Sound[0])
 			EndIf
-			If I_427\Timer => 70*180 Then
+			If I_427\Timer => TickRate*180 Then
 				If I_427\Sound[1]=0 Then
 					I_427\Sound[1] = LoadSound_Strict("SFX\SCP\427\Transform.ogg")
 				EndIf
@@ -10943,12 +10945,12 @@ Function Use427()
 					I_427\SoundCHN[1] = PlaySound_Strict(I_427\Sound[1])
 				EndIf
 			EndIf
-			If prevI427Timer < 70*60 And I_427\Timer => 70*60 Then
+			If prevI427Timer < TickRate*60 And I_427\Timer => TickRate*60 Then
 				Msg = I_Loc\Message_427_1
-				MsgTimer = 70*5
-			ElseIf prevI427Timer < 70*180 And I_427\Timer => 70*180 Then
+				MsgTimer = TickRate*5
+			ElseIf prevI427Timer < TickRate*180 And I_427\Timer => TickRate*180 Then
 				Msg = I_Loc\Message_427_2
-				MsgTimer = 70*5
+				MsgTimer = TickRate*5
 			EndIf
 		Else
 			For i = 0 To 1
@@ -10960,12 +10962,12 @@ Function Use427()
 			Next
 		EndIf
 	Else
-		If prevI427Timer-FPSfactor < 70*360 And I_427\Timer => 70*360 Then
+		If prevI427Timer-FPSfactor < TickRate*360 And I_427\Timer => TickRate*360 Then
 			Msg = I_Loc\Message_427_3
-			MsgTimer = 70*5
-		ElseIf prevI427Timer-FPSfactor < 70*390 And I_427\Timer => 70*390 Then
+			MsgTimer = TickRate*5
+		ElseIf prevI427Timer-FPSfactor < TickRate*390 And I_427\Timer => TickRate*390 Then
 			Msg = I_Loc\Message_427_4
-			MsgTimer = 70*5
+			MsgTimer = TickRate*5
 		EndIf
 		I_427\Timer = I_427\Timer + FPSfactor
 		If I_427\Sound[0]=0 Then
@@ -10992,10 +10994,10 @@ Function Use427()
 			FreeEntity pvt
 			BlurTimer = 800
 		EndIf
-		If I_427\Timer >= 70*420 Then
+		If I_427\Timer >= TickRate*420 Then
 			Kill()
 			DeathMSG = I_Loc\DeathMessage_427
-		ElseIf I_427\Timer >= 70*390 Then
+		ElseIf I_427\Timer >= TickRate*390 Then
 			Crouch = True
 		EndIf
 	EndIf
@@ -11043,23 +11045,23 @@ Function UpdateMTF%()
 			EndIf
 		EndIf
 	Else
-		If MTFtimer <= 70*120 ;70*120
+		If MTFtimer <= TickRate*120 ;70*120
 			MTFtimer = MTFtimer + FPSfactor
-		ElseIf MTFtimer > 70*120 And MTFtimer < 10000
+		ElseIf MTFtimer > TickRate*120 And MTFtimer < 10000
 			If PlayerInReachableRoom()
 				PlayAnnouncement("SFX\Character\MTF\AnnouncAfter1.ogg")
 			EndIf
 			MTFtimer = 10000
-		ElseIf MTFtimer >= 10000 And MTFtimer <= 10000+(70*120) ;70*120
+		ElseIf MTFtimer >= 10000 And MTFtimer <= 10000+(TickRate*120) ;70*120
 			MTFtimer = MTFtimer + FPSfactor
-		ElseIf MTFtimer > 10000+(70*120) And MTFtimer < 20000
+		ElseIf MTFtimer > 10000+(TickRate*120) And MTFtimer < 20000
 			If PlayerInReachableRoom()
 				PlayAnnouncement("SFX\Character\MTF\AnnouncAfter2.ogg")
 			EndIf
 			MTFtimer = 20000
-		ElseIf MTFtimer >= 20000 And MTFtimer <= 20000+(70*60) ;70*120
+		ElseIf MTFtimer >= 20000 And MTFtimer <= 20000+(TickRate*60) ;70*120
 			MTFtimer = MTFtimer + FPSfactor
-		ElseIf MTFtimer > 20000+(70*60) And MTFtimer < 25000
+		ElseIf MTFtimer > 20000+(TickRate*60) And MTFtimer < 25000
 			If PlayerInReachableRoom()
 				;If the player has an SCP in their inventory play special voice line.
 				For i = 0 To MaxItemAmount-1
@@ -11077,9 +11079,9 @@ Function UpdateMTF%()
 			EndIf
 			MTFtimer = 25000
 			
-		ElseIf MTFtimer >= 25000 And MTFtimer <= 25000+(70*60) ;70*120
+		ElseIf MTFtimer >= 25000 And MTFtimer <= 25000+(TickRate*60) ;70*120
 			MTFtimer = MTFtimer + FPSfactor
-		ElseIf MTFtimer > 25000+(70*60) And MTFtimer < 30000
+		ElseIf MTFtimer > 25000+(TickRate*60) And MTFtimer < 30000
 			If PlayerInReachableRoom()
 				PlayAnnouncement("SFX\Character\MTF\ThreatAnnouncFinal.ogg")
 			EndIf
@@ -11116,7 +11118,7 @@ Function UpdateInfect()
 		
 		If Infect < 93.0 Then
 			temp=Infect
-			If (Not I_427\Using And I_427\Timer < 70*360) Then
+			If (Not I_427\Using And I_427\Timer < TickRate*360) Then
 				Infect = Min(Infect+FPSfactor*0.002,100)
 			EndIf
 			
@@ -11135,16 +11137,16 @@ Function UpdateInfect()
 			
 			If Infect > 20 And temp =< 20.0 Then
 				Msg = I_Loc\Message_008_1
-				MsgTimer = 70*6
+				MsgTimer = TickRate*6
 			ElseIf Infect > 40 And temp =< 40.0
 				Msg = I_Loc\Message_008_2
-				MsgTimer = 70*6
+				MsgTimer = TickRate*6
 			ElseIf Infect > 60 And temp =< 60.0
 				Msg = I_Loc\Message_008_3
-				MsgTimer = 70*6
+				MsgTimer = TickRate*6
 			ElseIf Infect > 80 And temp =< 80.0
 				Msg = I_Loc\Message_008_4
-				MsgTimer = 70*6
+				MsgTimer = TickRate*6
 			ElseIf Infect =>91.5
 				BlinkTimer = Max(Min(-10*(Infect-91.5),BlinkTimer),-10)
 				IsZombie = True
@@ -11308,7 +11310,7 @@ End Function
 
 Function SmoothMouseValue#(target#, current#, tau#)
     If tau <= 0 Then Return target
-    Local dt# = FPSfactor / 70.0
+    Local dt# = FPSfactor / TickRate
     Local alpha# = 1.0 - Exp(-dt / tau)
     Return current + (target - current) * alpha
 End Function
@@ -12397,15 +12399,15 @@ End Function
 Function CanUseItem(canUseWithHazmat%, canUseWithGasMask%, canUseWithEyewear%)
 	If (canUseWithHazmat = False And WearingHazmat) Then
 		Msg = I_Loc\MessageItem_HazmatNouse
-		MsgTimer = 70*5
+		MsgTimer = TickRate*5
 		Return False
 	ElseIf (canUseWithGasMask = False And (WearingGasMask Or Wearing1499))
 		Msg = I_Loc\MessageItem_GasmaskNouse
-		MsgTimer = 70*5
+		MsgTimer = TickRate*5
 		Return False
 	ElseIf (canUseWithEyewear = False And (WearingNightVision))
 		Msg = I_Loc\MessageItem_NvgNouse
-		MsgTimer = 70*5
+		MsgTimer = TickRate*5
 		Return False
 	EndIf
 	
@@ -12462,23 +12464,23 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 			e\SoundCHN = PlaySound_Strict(e\Sound)
 		EndIf
 		
-		If EventState > 70*1.9 And EventState < 70*2+FPSfactor
+		If EventState > TickRate*1.9 And EventState < TickRate*2+FPSfactor
 			CameraShake = 7
-		ElseIf EventState > 70*4.2 And EventState < 70*4.25+FPSfactor
+		ElseIf EventState > TickRate*4.2 And EventState < TickRate*4.25+FPSfactor
 			CameraShake = 1
-		ElseIf EventState > 70*5.9 And EventState < 70*5.95+FPSfactor
+		ElseIf EventState > TickRate*5.9 And EventState < TickRate*5.95+FPSfactor
 			CameraShake = 1
-		ElseIf EventState > 70*7.25 And EventState < 70*7.3+FPSfactor
+		ElseIf EventState > TickRate*7.25 And EventState < TickRate*7.3+FPSfactor
 			CameraShake = 1
 			d\fastopen = True
 			d\open = True
 			Curr096\State = 4
 			Curr096\LastSeen = 1
-		ElseIf EventState > 70*8.1 And EventState < 70*8.15+FPSfactor
+		ElseIf EventState > TickRate*8.1 And EventState < TickRate*8.15+FPSfactor
 			CameraShake = 1
 		EndIf
 		
-		If EventState <= 70*8.1 Then
+		If EventState <= TickRate*8.1 Then
 			d\openstate = Min(d\openstate,20)
 		EndIf
 		EventState = EventState + FPSfactor * 1.4
