@@ -464,7 +464,7 @@ Function SaveGame(file$)
 		EndIf
 		
 		Msg = I_Loc\MessageSave_Saved
-		MsgTimer = 70 * 4
+		MsgTimer = TickRate * 4
 	EndIf
 	
 	CatchErrors("SaveGame")
