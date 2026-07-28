@@ -2268,7 +2268,7 @@ Function FillRoom(r.Rooms)
 		Case "lockroom", "lockroom_ez"
 			;[Block]
 			d = CreateDoor(r\zone, r\x - 736.0 * RoomScale, 0, r\z - 104.0 * RoomScale, 0, r, True)
-			d\timer = 70 * 5 : d\AutoClose = False : d\open = False
+			d\timer = TickRate * 5 : d\AutoClose = False : d\open = False
 			
 			EntityParent(d\buttons[0], 0)
 			PositionEntity(d\buttons[0], r\x - 288.0 * RoomScale, 0.7, r\z - 640.0 * RoomScale)
@@ -2277,7 +2277,7 @@ Function FillRoom(r.Rooms)
 			FreeEntity(d\buttons[1]) : d\buttons[1] = 0
 			
 			d2 = CreateDoor(r\zone, r\x + 104.0 * RoomScale, 0, r\z + 736.0 * RoomScale, 270, r, True)
-			d2\timer = 70 * 5 : d2\AutoClose = False: d2\open = False
+			d2\timer = TickRate * 5 : d2\AutoClose = False: d2\open = False
 			EntityParent(d2\buttons[0], 0)
 			PositionEntity(d2\buttons[0], r\x + 640.0 * RoomScale, 0.7, r\z + 288.0 * RoomScale)
 			RotateEntity (d2\buttons[0], 0, 90, 0)
@@ -2672,8 +2672,8 @@ Function FillRoom(r.Rooms)
 			r\Objects[0] = CreatePivot(r\obj)
 			PositionEntity (r\Objects[0], r\x + 720.0*RoomScale, 120.0*RoomScale, r\z+333.0*RoomScale, True)
 			
-			r\RoomDoors[0]\timer = 70 * 5
-			r\RoomDoors[1]\timer = 70 * 5
+			r\RoomDoors[0]\timer = TickRate * 5
+			r\RoomDoors[1]\timer = TickRate * 5
 			
 			sc.SecurityCams = CreateSecurityCam(r\x+192.0*RoomScale, r\y+704.0*RoomScale, r\z-960.0*RoomScale, r)
 			sc\angle = 45
@@ -2724,8 +2724,8 @@ Function FillRoom(r.Rooms)
 			RotateEntity (r\Objects[3],0,0,0)
 			EntityFX r\Objects[3],1
 			
-			r\RoomDoors[0]\timer = 70 * 5
-			r\RoomDoors[1]\timer = 70 * 5
+			r\RoomDoors[0]\timer = TickRate * 5
+			r\RoomDoors[1]\timer = TickRate * 5
 			
 			If MapTemp(Floor(r\x / 8.0),Floor(r\z /8.0)-1)=0 Then
 				CreateDoor(r\zone, r\x, 0, r\z  - 4.0, 0, r, 0, False, 0, "GEAR")
@@ -5479,7 +5479,7 @@ Function FillRoom(r.Rooms)
 		Case "lockroom3"
 			;[Block]
 			d = CreateDoor(r\zone, r\x - 736.0 * RoomScale, 0, r\z - 104.0 * RoomScale, 0, r, True)
-			d\timer = 70 * 5 : d\AutoClose = False : d\open = False : d\locked = True
+			d\timer = TickRate * 5 : d\AutoClose = False : d\open = False : d\locked = True
 			
 			EntityParent(d\buttons[0], 0)
 			PositionEntity(d\buttons[0], r\x - 288.0 * RoomScale, 0.7, r\z - 640.0 * RoomScale)
@@ -5488,7 +5488,7 @@ Function FillRoom(r.Rooms)
 			FreeEntity(d\buttons[1]) : d\buttons[1] = 0
 			
 			d2 = CreateDoor(r\zone, r\x + 104.0 * RoomScale, 0, r\z + 736.0 * RoomScale, 270, r, True)
-			d2\timer = 70 * 5 : d2\AutoClose = False: d2\open = False : d2\locked = True
+			d2\timer = TickRate * 5 : d2\AutoClose = False: d2\open = False : d2\locked = True
 			EntityParent(d2\buttons[0], 0)
 			PositionEntity(d2\buttons[0], r\x + 640.0 * RoomScale, 0.7, r\z + 288.0 * RoomScale)
 			RotateEntity (d2\buttons[0], 0, 90, 0)
