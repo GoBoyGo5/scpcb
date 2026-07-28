@@ -541,7 +541,7 @@ Function PickItem(item.Items)
 	
 	If WearingHazmat > 0 Then
 		Msg = I_Loc\MessageItem_HazmatNopickup
-		MsgTimer = 70*5
+		MsgTimer = TickRate*5
 		Return
 	EndIf
 	
@@ -590,7 +590,7 @@ Function PickItem(item.Items)
 						GiveAchievement(AchvOmni)
 					Case "veryfinevest"
 						Msg = I_Loc\MessageItem_VestHeavy
-						MsgTimer = 70*6
+						MsgTimer = TickRate*6
 						Exit
 					Case "firstaid", "finefirstaid", "veryfinefirstaid", "firstaid2"
 						item\state = 0
@@ -612,11 +612,11 @@ Function PickItem(item.Items)
 						
 						If canpickitem=False Then
 							Msg = I_Loc\MessageItem_HazmatConflictHazmat
-							MsgTimer = 70 * 5
+							MsgTimer = TickRate * 5
 							Return
 						ElseIf canpickitem=2 Then
 							Msg = I_Loc\MessageItem_VestConflictHazmat
-							MsgTimer = 70 * 5
+							MsgTimer = TickRate * 5
 							Return
 						Else
 							;TakeOffStuff(1+16)
@@ -638,11 +638,11 @@ Function PickItem(item.Items)
 						
 						If canpickitem=False Then
 							Msg = I_Loc\MessageItem_VestConflictVest
-							MsgTimer = 70 * 5
+							MsgTimer = TickRate * 5
 							Return
 						ElseIf canpickitem=2 Then
 							Msg = I_Loc\MessageItem_VestConflictHazmat
-							MsgTimer = 70 * 5
+							MsgTimer = TickRate * 5
 							Return
 						Else
 							;TakeOffStuff(2)
@@ -664,7 +664,7 @@ Function PickItem(item.Items)
 		Next
 	Else
 		Msg = I_Loc\MessageItem_Full
-		MsgTimer = 70 * 5
+		MsgTimer = TickRate * 5
 	EndIf
 	CatchErrors("PickItem")
 End Function
@@ -672,7 +672,7 @@ End Function
 Function DropItem(item.Items,playdropsound%=True)
 	If WearingHazmat > 0 Then
 		Msg = I_Loc\MessageItem_HazmatNodrop
-		MsgTimer = 70*5
+		MsgTimer = TickRate*5
 		Return
 	EndIf
 	
@@ -728,16 +728,16 @@ Function Update294()
 	CatchErrors("Uncaught (Update294)")
 	
 	If CameraShakeTimer > 0 Then
-		CameraShakeTimer = Max(CameraShakeTimer - (FPSfactor/70), 0)
+		CameraShakeTimer = Max(CameraShakeTimer - (FPSfactor/TickRate), 0)
 		CameraShake = 2
 	EndIf
 	
 	If VomitTimer > 0 Then
 		DebugLog VomitTimer
-		VomitTimer = VomitTimer - (FPSfactor/70)
+		VomitTimer = VomitTimer - (FPSfactor/TickRate)
 		
 		If (MilliSecs() Mod 1600) < Rand(200, 400) Then
-			If BlurTimer = 0 Then BlurTimer = Rnd(10, 20)*70
+			If BlurTimer = 0 Then BlurTimer = Rnd(10, 20)*TickRate
 			CameraShake = Rnd(0, 2)
 		EndIf
 		
@@ -760,7 +760,7 @@ Function Update294()
 		EndIf
 		
 	ElseIf VomitTimer < 0 Then ;vomit
-		VomitTimer = VomitTimer - (FPSfactor/70)
+		VomitTimer = VomitTimer - (FPSfactor/TickRate)
 		
 		If VomitTimer > -5 Then
 			If (MilliSecs() Mod 400) < 50 Then CameraShake = 4 
@@ -771,14 +771,14 @@ Function Update294()
 		EndIf
 		
 		If (Not Vomit) Then
-			BlurTimer = 40 * 70
+			BlurTimer = 40 * TickRate
 			VomitSFX = LoadSound_Strict("SFX\SCP\294\Vomit.ogg")
 			VomitCHN = PlaySound_Strict(VomitSFX)
 			PrevInjuries = Injuries
 			PrevBloodloss = Bloodloss
 			Injuries = Injuries + 1.5
-			Bloodloss = Bloodloss + 70
-			EyeIrritation = 9 * 70
+			Bloodloss = Bloodloss + TickRate
+			EyeIrritation = 9 * TickRate
 			
 			pvt = CreatePivot()
 			PositionEntity(pvt, EntityX(Camera), EntityY(Collider) - 0.05, EntityZ(Camera))
