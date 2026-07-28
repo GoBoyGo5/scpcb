@@ -137,8 +137,8 @@ Function UpdateEmitters()
 	Next
 	
 	If InSmoke Then
-		If EyeIrritation > (70 * 6) Then BlurVolume = Max(BlurVolume, (EyeIrritation - (70 * 6)) / (70.0 * 24.0))
-		If EyeIrritation > (70 * 24) Then 
+		If EyeIrritation > (TickRate * 6) Then BlurVolume = Max(BlurVolume, (EyeIrritation - (TickRate * 6)) / (TickRate * 24.0))
+		If EyeIrritation > (TickRate * 24) Then 
 			DeathMSG = I_Loc\DeathMessage_Gassed
 			Kill()
 		EndIf
@@ -252,8 +252,8 @@ Function UpdateDevilEmitters()
 	Next
 	
 	If InSmoke Then
-		If EyeIrritation > (70 * 6) Then BlurVolume = Max(BlurVolume, (EyeIrritation - (70 * 6)) / (70.0 * 24.0))
-		If EyeIrritation > (70 * 24) Then 
+		If EyeIrritation > (TickRate * 6) Then BlurVolume = Max(BlurVolume, (EyeIrritation - (TickRate * 6)) / (TickRate * 24.0))
+		If EyeIrritation > (TickRate * 24) Then 
 			DeathMSG = I_Loc\DeathMessage_Gassed
 			Kill()
 		EndIf
