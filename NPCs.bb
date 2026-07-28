@@ -1077,12 +1077,12 @@ Function UpdateNPCs()
 										n\PathTimer = Max(n\PathTimer-FPSfactor,0)
 										If n\PathTimer =< 0 Then
 											n\PathStatus = FindPath (n, EntityX(Collider,True), EntityY(Collider,True), EntityZ(Collider,True))
-											n\PathTimer = 70*10
+											n\PathTimer = TickRate*10
 										EndIf
 									Else 
 										If n\PathTimer <= 0 Then
 											n\PathStatus = FindPath (n, EntityX(Collider,True), EntityY(Collider,True), EntityZ(Collider,True))
-											n\PathTimer = 70*10
+											n\PathTimer = TickRate*10
 											n\CurrSpeed = 0
 										Else
 											n\PathTimer = Max(n\PathTimer-FPSfactor,0)
@@ -1192,7 +1192,7 @@ Function UpdateNPCs()
                                             PlaySound2(OldManSFX(3),Camera,n\Collider)
 											n\SoundChn2 = PlaySound2(OldManSFX(6+Rand(0,2)),Camera,n\Collider)
                                             n\PathTimer = 0
-                                            n\Reload = (70*10.0)/(SelectedDifficulty\otherFactors+1)
+                                            n\Reload = (TickRate*10.0)/(SelectedDifficulty\otherFactors+1)
                                             DebugLog "Teleported 106 (Distance: "+EntityDistance(n\Collider,Collider)+")"
                                         EndIf
                                     EndIf
@@ -1274,13 +1274,13 @@ Function UpdateNPCs()
 								EndIf
 							Else
 								AnimateNPC(n,936,1263,0.1)
-								If n\State3 < 70*6
+								If n\State3 < TickRate*6
 									n\State3=n\State3+FPSfactor
 								Else
 									If Rand(1,5)=1
 										n\State3 = -1
 									Else
-										n\State3=70*(Rand(0,3))
+										n\State3=TickRate*(Rand(0,3))
 									EndIf
 								EndIf
 							EndIf
@@ -1354,7 +1354,7 @@ Function UpdateNPCs()
 							EndIf
 							
 							If n\LastSeen=1 Then
-								n\PathTimer=Max(70*3, n\PathTimer)
+								n\PathTimer=Max(TickRate*3, n\PathTimer)
 								n\PathStatus=0
 								
 								If n\Target<> Null Then dist = EntityDistance(n\Target\Collider, n\Collider)
@@ -1472,7 +1472,7 @@ Function UpdateNPCs()
 										Else
 											n\PathStatus = FindPath(n, EntityX(Collider),EntityY(Collider)+0.2,EntityZ(Collider))	
 										EndIf
-										n\PathTimer = 70*5
+										n\PathTimer = TickRate*5
 									EndIf
 								EndIf
 							EndIf
@@ -1529,7 +1529,7 @@ Function UpdateNPCs()
 							;If n\Frame=>972 Then n\State = 3 : n\State2=0
 						ElseIf n\State=3
 							n\State2 = n\State2+FPSfactor
-							If n\State2 > 70*18 Then
+							If n\State2 > TickRate*18 Then
 								AnimateNPC(n,823,847,n\Speed*8,False)
 								;AnimateNPC(n, 973, 1001, 0.5, False)
 								If n\Frame>846.9 Then ;1000.9 
@@ -1721,7 +1721,7 @@ Function UpdateNPCs()
 									n\PathStatus = 0
 									n\PathTimer# = 0.0
 									n\PathLocation = 0
-									If PlayerSeeAble%=True Then n\State2 = 70*2
+									If PlayerSeeAble%=True Then n\State2 = TickRate*2
 									
 									PointEntity n\obj,Collider
 									RotateEntity n\Collider,0,CurveAngle(EntityYaw(n\obj),EntityYaw(n\Collider),10.0),0
@@ -1874,7 +1874,7 @@ Function UpdateNPCs()
 									Else ;No Path to the player found - stands still and tries to find a path
 										;[Block]
 										n\PathTimer# = n\PathTimer# + FPSfactor
-										If n\PathTimer# > 70*(5-(2*SelectedDifficulty\aggressiveNPCs)) Then
+										If n\PathTimer# > TickRate*(5-(2*SelectedDifficulty\aggressiveNPCs)) Then
 											n\PathStatus = FindPath(n, EntityX(Collider),EntityY(Collider),EntityZ(Collider))
 											n\PathTimer# = 0.0
 											n\State3 = 0
@@ -1991,7 +1991,7 @@ Function UpdateNPCs()
 										TeleportCloser(n)
 										DebugLog "SCP-049 teleported closer due to distance"
 									Else
-										n\Idle = 60*70
+										n\Idle = 60*TickRate
 										DebugLog "SCP-049 is now idle"
 									EndIf
 								EndIf
@@ -2040,7 +2040,7 @@ Function UpdateNPCs()
 								n\PathLocation = 0
 								n\PathTimer = 0
 								n\State3 = 0
-								n\State2 = 70*2
+								n\State2 = TickRate*2
 								n\PrevState = 0
 								PlaySound_Strict LoadTempSound("SFX\Room\Room2SL049Spawn.ogg")
 							ElseIf PlayerSeeAble% = 2 And n\State3 > 0.0
@@ -2174,9 +2174,9 @@ Function UpdateNPCs()
 								;[Block]
 								If n\State3 < 0 Then ;check if the player is visible every three seconds
 									If EntityDistance(Collider, n\Collider)<5.0 Then 
-										If EntityVisible(Collider, n\Collider) Then n\State2 = 70*5
+										If EntityVisible(Collider, n\Collider) Then n\State2 = TickRate*5
 									EndIf
-									n\State3=70*3
+									n\State3=TickRate*3
 								Else
 									n\State3=n\State3-FPSfactor
 								EndIf
@@ -2241,7 +2241,7 @@ Function UpdateNPCs()
 										n\PathTimer = n\PathTimer-FPSfactor
 										If n\PathTimer =< 0 Then
 											n\PathStatus = FindPath(n, EntityX(Collider),EntityY(Collider)+0.1,EntityZ(Collider))
-											n\PathTimer = n\PathTimer+70*5
+											n\PathTimer = n\PathTimer+TickRate*5
 										EndIf
 									EndIf
 								EndIf
@@ -2822,7 +2822,7 @@ Function UpdateNPCs()
 											n\Path[0]=w
 											
 											n\Idle = False
-											n\State2 = Rand(15,20)*70
+											n\State2 = Rand(15,20)*TickRate
 											n\State = Max(Rand(-1,2),0)
 											n\PrevState = Rand(0,1)
 											Exit
@@ -3829,7 +3829,7 @@ Function UpdateNPCs()
 								n\SoundChn = PlaySound2(n\Sound, Camera, n\Collider)	
 								
 								n\Frame = 175
-								n\Reload = 70 * 3
+								n\Reload = TickRate * 3
 								;SetAnimTime(n\obj, 175)	
 							EndIf
 							
@@ -3924,7 +3924,7 @@ Function UpdateNPCs()
 										Case 1
 											If n\Sound2=0 Then n\Sound2=LoadSound_Strict("SFX\SCP\066\Beethoven.ogg")
 											n\SoundChn2 = PlaySound2(n\Sound2, Camera, n\Collider, 20.0, 1.0, False)
-											DeafTimer# = 70*(45+(15*SelectedDifficulty\aggressiveNPCs))
+											DeafTimer# = TickRate*(45+(15*SelectedDifficulty\aggressiveNPCs))
 											DeafPlayer = True
 											CameraShake = 10.0
 										Case 2
@@ -3953,7 +3953,7 @@ Function UpdateNPCs()
 								EndIf
 								
 								n\State2 = n\State2+FPSfactor
-								If n\State2>70 Then 
+								If n\State2>TickRate Then 
 									n\State = 3
 									n\State2 = 0
 								EndIf
@@ -4059,8 +4059,8 @@ Function UpdateNPCs()
 						HideEntity n\obj
 						If dist<1 And n\Reload <= 0 Then
 							Msg = I_Loc\Message_966Presence[Rand(6)]
-                            n\Reload = 20*70
-							MsgTimer=8*70
+                            n\Reload = 20*TickRate
+							MsgTimer=8*TickRate
 						EndIf
 						n\Reload = n\Reload - FPSfactor
 						
@@ -4068,7 +4068,7 @@ Function UpdateNPCs()
 						ShowEntity n\obj
 					EndIf
 					
-					If n\State3>5*70 Then
+					If n\State3>5*TickRate Then
 						;n\State = 1
 						If n\State3<1000.0 Then
 							For n2.NPCs = Each NPCs	
@@ -4152,7 +4152,7 @@ Function UpdateNPCs()
 
 									If StaminaEffect<1.5 Then
 										Msg = I_Loc\Message_966Sleep[Rand(4)]
-										MsgTimer = 7*70
+										MsgTimer = 7*TickRate
 									EndIf
 									
 									BlinkEffect = Max(BlinkEffect, 1.5)
@@ -4365,7 +4365,7 @@ Function UpdateNPCs()
 				If n\State3 > 0 And EntityDistance(Collider, n\obj) >= 4 Then
 					n\State3 = n\State3 + FPSfactor
 
-					If n\State3>70*25 And (n\SoundChn = 0 Lor (Not ChannelPlaying(n\SoundChn))) Then
+					If n\State3>TickRate*25 And (n\SoundChn = 0 Lor (Not ChannelPlaying(n\SoundChn))) Then
 						RemoveNPC(n)
 						Return
 					EndIf
@@ -4397,9 +4397,9 @@ Function UpdateNPCs()
 								PlaySound_Strict n\Sound2
 								
 								Msg = I_Loc\Message_1048a1
-								MsgTimer = 70.0 * 3.0
+								MsgTimer = TickRate * 3.0
 							Else
-								n\State3 = 70*30
+								n\State3 = TickRate*30
 							EndIf
 						EndIf
 
@@ -4412,13 +4412,13 @@ Function UpdateNPCs()
 						
 						If (n\State2>250.0 And n\State2-FPSfactor <= 250.0) Then
 							Msg = I_Loc\Message_1048a2[Rand(3)]
-							MsgTimer = 70.0 * 3.0
+							MsgTimer = TickRate * 3.0
 						Else If (n\State2>600.0 And n\State2-FPSfactor <= 600.0)
 							Msg = I_Loc\Message_1048a3[Rand(4)]
-							MsgTimer = 70.0 * 5.0
+							MsgTimer = TickRate * 5.0
 						EndIf
 						
-						If (n\State2>70*15) Then
+						If (n\State2>TickRate*15) Then
 							DeathMSG = I_Loc\DeathMessage_1048a
 							Kill()
 							n\State = 3
@@ -4840,7 +4840,7 @@ Function UpdateNPCs()
 							PlayerSeeAble = MeNPCSeesPlayer(n)
 							If PlayerSeeAble=1 Or n\State2 > 0.0
 								If PlayerSeeAble=1
-									n\State2 = 70*2
+									n\State2 = TickRate*2
 								Else
 									n\State2 = Max(n\State2-FPSfactor,0)
 								EndIf
@@ -4905,7 +4905,7 @@ Function UpdateNPCs()
 								Else
 									AnimateNPC(n, 323, 344, 0.2, True)
 									n\CurrSpeed = 0
-									If n\PathTimer < 70*5
+									If n\PathTimer < TickRate*5
 										n\PathTimer = n\PathTimer + Rnd(1,2+(2*SelectedDifficulty\aggressiveNPCs))*FPSfactor
 									Else
 										n\PathStatus = FindPath(n,EntityX(Collider),EntityY(Collider),EntityZ(Collider))
@@ -4914,11 +4914,11 @@ Function UpdateNPCs()
 								EndIf
 								
 								If EntityDistance(n\Collider,Collider)>HideDistance
-									If n\State3 < 70*(15+(10*SelectedDifficulty\aggressiveNPCs))
+									If n\State3 < TickRate*(15+(10*SelectedDifficulty\aggressiveNPCs))
 										n\State3 = n\State3+FPSfactor
 									Else
 										DebugLog "SCP-008-1 IDLE"
-										n\State3 = 70*(6*60)
+										n\State3 = TickRate*(6*60)
 										n\State = 4
 									EndIf
 								EndIf
@@ -5099,15 +5099,15 @@ Function UpdateNPCs()
 		
 	Next
 	
-	If MTF_CameraCheckTimer>0.0 And MTF_CameraCheckTimer<70*90
+	If MTF_CameraCheckTimer>0.0 And MTF_CameraCheckTimer<TickRate*90
 		MTF_CameraCheckTimer=MTF_CameraCheckTimer+FPSfactor
-	ElseIf MTF_CameraCheckTimer>=70*90
+	ElseIf MTF_CameraCheckTimer>=TickRate*90
 		MTF_CameraCheckTimer=0.0
 		If (Not PlayerDetected)
 			If MTF_CameraCheckDetected
 				PlayAnnouncement("SFX\Character\MTF\AnnouncCameraFound"+Rand(1,2)+".ogg")
 				PlayerDetected=True
-				MTF_CameraCheckTimer=70*60
+				MTF_CameraCheckTimer=TickRate*60
 			Else
 				PlayAnnouncement("SFX\Character\MTF\AnnouncCameraNoFound.ogg")
 			EndIf
@@ -5313,7 +5313,7 @@ Function UpdateMTFUnit(n.NPCs)
 				PlayMTFSound(LoadTempSound("SFX\Character\MTF\173\BLINKING.ogg"),n)
 			EndIf
 		EndIf
-		n\BlinkTimer = 70.0*Rnd(10.0,15.0)
+		n\BlinkTimer = TickRate*Rnd(10.0,15.0)
 	EndIf	
 	
 	n\Reload = n\Reload - FPSfactor
@@ -5427,8 +5427,8 @@ Function UpdateMTFUnit(n.NPCs)
 							EndIf
 						EndIf
 					EndIf
-					n\PathTimer = 70.0 * Rnd(6.0,10.0) ;search again after 6-10 seconds
-                ElseIf (n\PathTimer<=70.0 * 2.5) And (n\MTFLeader=Null) Then
+					n\PathTimer = TickRate * Rnd(6.0,10.0) ;search again after 6-10 seconds
+                ElseIf (n\PathTimer<=TickRate * 2.5) And (n\MTFLeader=Null) Then
 					n\PathTimer=n\PathTimer-FPSfactor
 					n\CurrSpeed = 0.0
 					If Rand(1,35)=1 Then
@@ -5482,7 +5482,7 @@ Function UpdateMTFUnit(n.NPCs)
 								EndIf
 								n\Path[n\PathLocation]\door\open = True
 								If n\Path[n\PathLocation]\door\MTFClose
-									n\Path[n\PathLocation]\door\timerstate = 70.0*5.0
+									n\Path[n\PathLocation]\door\timerstate = TickRate*5.0
 								EndIf
 							EndIf
                             
@@ -5507,7 +5507,7 @@ Function UpdateMTFUnit(n.NPCs)
 						If Distance(EntityX(n\Collider),EntityZ(n\Collider),n\PathX#,n\PathZ#)<0.2
 							n\PathX# = 0.0
 							n\PathZ# = 0.0
-							n\PathTimer = 70.0 * Rnd(6.0,10.0)
+							n\PathTimer = TickRate * Rnd(6.0,10.0)
 						EndIf
 						
 						FreeEntity pvt
@@ -5543,7 +5543,7 @@ Function UpdateMTFUnit(n.NPCs)
 				If NoTarget Then temp = False
 				
                 If temp>False Then
-					If n\LastSeen > 0 And n\LastSeen < 70*15 Then
+					If n\LastSeen > 0 And n\LastSeen < TickRate*15 Then
 						If temp < 2
 							If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
 							n\Sound = LoadSound_Strict("SFX\Character\MTF\ThereHeIs"+Rand(1,6)+".ogg")
@@ -5562,14 +5562,14 @@ Function UpdateMTFUnit(n.NPCs)
 						EndIf
 					EndIf
 					
-					n\LastSeen = (70*Rnd(30,40))
+					n\LastSeen = (TickRate*Rnd(30,40))
 					n\LastDist = 1
 					
 					n\State = 1
 					n\EnemyX = EntityX(Collider,True)
 					n\EnemyY = EntityY(Collider,True)
 					n\EnemyZ = EntityZ(Collider,True)
-					n\State2 = 70.0*(15.0*temp) ;give up after 15 seconds (30 seconds if detected by loud noise, over camera: 45)
+					n\State2 = TickRate*(15.0*temp) ;give up after 15 seconds (30 seconds if detected by loud noise, over camera: 45)
 					DebugLog "player spotted :"+n\State2
 					n\PathTimer=0.0
 					n\PathStatus=0
@@ -5589,7 +5589,7 @@ Function UpdateMTFUnit(n.NPCs)
 							n\EnemyX = EntityX(Curr173\Collider,True)
 							n\EnemyY = EntityY(Curr173\Collider,True)
 							n\EnemyZ = EntityZ(Curr173\Collider,True)
-							n\State2 = 70.0*15.0 ;give up after 15 seconds
+							n\State2 = TickRate*15.0 ;give up after 15 seconds
 							n\State3 = 0.0
 							n\PathTimer=0.0
 							n\PathStatus=0
@@ -5608,7 +5608,7 @@ Function UpdateMTFUnit(n.NPCs)
 							n\EnemyX = EntityX(Curr106\Collider,True)
 							n\EnemyY = EntityY(Curr106\Collider,True)
 							n\EnemyZ = EntityZ(Curr106\Collider,True)
-							n\State2 = 70*15.0
+							n\State2 = TickRate*15.0
 							n\State3 = 0.0
 							n\PathTimer = 0.0
 							n\PathStatus = 0
@@ -5630,7 +5630,7 @@ Function UpdateMTFUnit(n.NPCs)
 							n\EnemyX = EntityX(Curr096\Collider,True)
 							n\EnemyY = EntityY(Curr096\Collider,True)
 							n\EnemyZ = EntityZ(Curr096\Collider,True)
-							n\State2 = 70*15.0
+							n\State2 = TickRate*15.0
 							n\State3 = 0.0
 							n\PathTimer = 0.0
 							n\PathStatus = 0
@@ -5652,7 +5652,7 @@ Function UpdateMTFUnit(n.NPCs)
 								n\EnemyX = EntityX(n2\Collider,True)
 								n\EnemyY = EntityY(n2\Collider,True)
 								n\EnemyZ = EntityZ(n2\Collider,True)
-								n\State2 = 70*15.0
+								n\State2 = TickRate*15.0
 								n\State3 = 0.0
 								n\PathTimer = 0.0
 								n\PathStatus = 0
@@ -5671,12 +5671,12 @@ Function UpdateMTFUnit(n.NPCs)
 								n\EnemyX = EntityX(n2\Collider,True)
 								n\EnemyY = EntityY(n2\Collider,True)
 								n\EnemyZ = EntityZ(n2\Collider,True)
-								n\State2 = 70*15.0
+								n\State2 = TickRate*15.0
 								n\State3 = 0.0
 								n\PathTimer = 0.0
 								n\PathStatus = 0
 								n\Target = n2
-								n\Reload = 70*5
+								n\Reload = TickRate*5
 								DebugLog "049-2 spotted :"+n\State2
 								If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
 								n\Sound = LoadSound_Strict("SFX\Character\MTF\049\Player0492_1.ogg")
@@ -5691,12 +5691,12 @@ Function UpdateMTFUnit(n.NPCs)
 								n\EnemyX = EntityX(n2\Collider,True)
 								n\EnemyY = EntityY(n2\Collider,True)
 								n\EnemyZ = EntityZ(n2\Collider,True)
-								n\State2 = 70*15.0
+								n\State2 = TickRate*15.0
 								n\State3 = 0.0
 								n\PathTimer = 0.0
 								n\PathStatus = 0
 								n\Target = n2
-								n\Reload = 70*5
+								n\Reload = TickRate*5
 								DebugLog "008 spotted :"+n\State2
 								;If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
 								;n\Sound = LoadSound_Strict("SFX\Character\MTF\049\Player0492_1.ogg")
@@ -5756,7 +5756,7 @@ Function UpdateMTFUnit(n.NPCs)
 								If n2\State = 0
 									If EntityDistance(n\Collider,n2\Collider)<6.0
 										n\PrevState = 1
-										n2\LastSeen = (70*Rnd(30,40))
+										n2\LastSeen = (TickRate*Rnd(30,40))
 										n2\LastDist = 1
 										
 										n2\State = 1
@@ -5816,8 +5816,8 @@ Function UpdateMTFUnit(n.NPCs)
 					
 					If n\PathTimer<=0.0 Then ;update path
 						n\PathStatus = FindPath(n,n\EnemyX,n\EnemyY+0.1,n\EnemyZ)
-						n\PathTimer = 70.0 * Rnd(6.0,10.0) ;search again after 6 seconds
-					ElseIf n\PathTimer<=70.0 * 2.5 Then
+						n\PathTimer = TickRate * Rnd(6.0,10.0) ;search again after 6 seconds
+					ElseIf n\PathTimer<=TickRate * 2.5 Then
 						n\PathTimer=n\PathTimer-FPSfactor
 						n\CurrSpeed = 0.0
 						If Rand(1,35)=1 Then
@@ -5868,7 +5868,7 @@ Function UpdateMTFUnit(n.NPCs)
 									EndIf
 									n\Path[n\PathLocation]\door\open = True
 									If n\Path[n\PathLocation]\door\MTFClose
-										n\Path[n\PathLocation]\door\timerstate = 70.0*5.0
+										n\Path[n\PathLocation]\door\timerstate = TickRate*5.0
 									EndIf
 								EndIf
 								
@@ -5911,7 +5911,7 @@ Function UpdateMTFUnit(n.NPCs)
 						EndIf
 					EndIf
 					
-					If n\MTFLeader=Null And n\LastSeen<70*30 And n\LastSeen+FPSfactor=>70*30 Then
+					If n\MTFLeader=Null And n\LastSeen<TickRate*30 And n\LastSeen+FPSfactor=>TickRate*30 Then
 						If Rand(2)=1 Then 
 							PlayMTFSound(LoadTempSound("SFX\Character\MTF\Searching"+Rand(1,6)+".ogg"),n)
 						EndIf
@@ -5945,7 +5945,7 @@ Function UpdateMTFUnit(n.NPCs)
 							n\EnemyX = EntityX(Curr173\Collider,True)
 							n\EnemyY = EntityY(Curr173\Collider,True)
 							n\EnemyZ = EntityZ(Curr173\Collider,True)
-							n\State2 = 70.0*15.0 ;give up after 15 seconds
+							n\State2 = TickRate*15.0 ;give up after 15 seconds
 							DebugLog "173 spotted :"+n\State2
 							If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
 							n\Sound = LoadSound_Strict("SFX\Character\MTF\173\Spotted3.ogg")
@@ -5964,7 +5964,7 @@ Function UpdateMTFUnit(n.NPCs)
 							n\EnemyX = EntityX(Curr106\Collider,True)
 							n\EnemyY = EntityY(Curr106\Collider,True)
 							n\EnemyZ = EntityZ(Curr106\Collider,True)
-							n\State2 = 70*15.0
+							n\State2 = TickRate*15.0
 							n\State3 = 0.0
 							n\PathTimer = 0.0
 							n\PathStatus = 0
@@ -5986,7 +5986,7 @@ Function UpdateMTFUnit(n.NPCs)
 							n\EnemyX = EntityX(Curr096\Collider,True)
 							n\EnemyY = EntityY(Curr096\Collider,True)
 							n\EnemyZ = EntityZ(Curr096\Collider,True)
-							n\State2 = 70*15.0
+							n\State2 = TickRate*15.0
 							n\State3 = 0.0
 							n\PathTimer = 0.0
 							n\PathStatus = 0
@@ -6008,7 +6008,7 @@ Function UpdateMTFUnit(n.NPCs)
 								n\EnemyX = EntityX(n2\Collider,True)
 								n\EnemyY = EntityY(n2\Collider,True)
 								n\EnemyZ = EntityZ(n2\Collider,True)
-								n\State2 = 70*15.0
+								n\State2 = TickRate*15.0
 								n\State3 = 0.0
 								n\PathTimer = 0.0
 								n\PathStatus = 0
@@ -6027,12 +6027,12 @@ Function UpdateMTFUnit(n.NPCs)
 								n\EnemyX = EntityX(n2\Collider,True)
 								n\EnemyY = EntityY(n2\Collider,True)
 								n\EnemyZ = EntityZ(n2\Collider,True)
-								n\State2 = 70*15.0
+								n\State2 = TickRate*15.0
 								n\State3 = 0.0
 								n\PathTimer = 0.0
 								n\PathStatus = 0
 								n\Target = n2
-								n\Reload = 70*5
+								n\Reload = TickRate*5
 								DebugLog "049-2 spotted :"+n\State2
 								;If n\MTFLeader=Null
 									If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
@@ -6065,7 +6065,7 @@ Function UpdateMTFUnit(n.NPCs)
 					
 					If curr173Dist<5.0 Then
 						If Curr173\Idle <> 2 Then Curr173\Idle = True
-						n\State2 = 70.0*15.0
+						n\State2 = TickRate*15.0
 						n\PathTimer = 0.0
 						Local tempDist# = 1.0
 						If n\MTFLeader<>Null Then tempDist = 2.0
@@ -6073,8 +6073,8 @@ Function UpdateMTFUnit(n.NPCs)
 							If n\MTFLeader = Null Then
 								n\State3=n\State3+FPSfactor
 								DebugLog "CONTAINING 173: "+n\State3
-								;If n\State3>=70.0*10.0 Then
-								If n\State3>=70.0*15.0 Then
+								;If n\State3>=TickRate*10.0 Then
+								If n\State3>=TickRate*15.0 Then
 									Curr173\Idle = 2
 									If n\MTFLeader = Null Then Curr173\Target = n
 									If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
@@ -6103,8 +6103,8 @@ Function UpdateMTFUnit(n.NPCs)
 						If Curr173\Idle <> 2 Then Curr173\Idle = False
 						If n\PathTimer<=0.0 Then ;update path
 							n\PathStatus = FindPath(n,EntityX(Curr173\Collider,True),EntityY(Curr173\Collider,True)+0.1,EntityZ(Curr173\Collider,True))
-							n\PathTimer = 70.0 * Rnd(6.0,10.0) ;search again after 6 seconds
-						ElseIf n\PathTimer<=70.0 * 2.5 Then
+							n\PathTimer = TickRate * Rnd(6.0,10.0) ;search again after 6 seconds
+						ElseIf n\PathTimer<=TickRate * 2.5 Then
 							n\PathTimer=n\PathTimer-FPSfactor
 							n\CurrSpeed = 0.0
 							If Rand(1,35)=1 Then
@@ -6155,7 +6155,7 @@ Function UpdateMTFUnit(n.NPCs)
 										EndIf
 										n\Path[n\PathLocation]\door\open = True
 										If n\Path[n\PathLocation]\door\MTFClose
-											n\Path[n\PathLocation]\door\timerstate = 70.0*5.0
+											n\Path[n\PathLocation]\door\timerstate = TickRate*5.0
 										EndIf
 									EndIf
 									
@@ -6199,7 +6199,7 @@ Function UpdateMTFUnit(n.NPCs)
 						If n\Path[n\PathLocation]\door <> Null Then
 							If n\Path[n\PathLocation]\door\open = False Then
 								n\Path[n\PathLocation]\door\open = True
-								n\Path[n\PathLocation]\door\timerstate = 8.0*70.0
+								n\Path[n\PathLocation]\door\timerstate = 8.0*TickRate
 								PlayMTFSound(MTFSFX(5),n)
 							EndIf
 						EndIf
@@ -6279,17 +6279,17 @@ Function UpdateMTFUnit(n.NPCs)
                 n\State2=n\State2-FPSfactor
 				If n\State2 > 0.0
 					If OtherNPCSeesMeNPC(n\Target,n)
-						n\State2 = 70*15
+						n\State2 = TickRate*15
 					EndIf
 					
 					If EntityDistance(n\Target\Collider,n\Collider)>HideDistance
-						If n\State2 > 70
-							n\State2 = 70
+						If n\State2 > TickRate
+							n\State2 = TickRate
 						EndIf
 					EndIf
 					
 					If EntityDistance(n\Target\Collider,n\Collider)<3.0 And n\State3 >= 0.0
-						n\State3 = 70*5
+						n\State3 = TickRate*5
 					EndIf
 					
 					If n\State3 > 0.0
@@ -6312,7 +6312,7 @@ Function UpdateMTFUnit(n.NPCs)
 						TurnEntity n\Collider,0,180,0
 						EntityPick(n\Collider, 1.0)
 						If PickedEntity() <> 0 Then
-							n\State3 = -70*2
+							n\State3 = -TickRate*2
 						EndIf
 						ShowEntity n\Collider
 						TurnEntity n\Collider,0,180,0
@@ -6352,7 +6352,7 @@ Function UpdateMTFUnit(n.NPCs)
 								EndIf
 							EndIf
 						EndIf
-						n\PathTimer = 70*10
+						n\PathTimer = TickRate*10
 					Else
 						If n\PathStatus=1 Then
 							If n\Path[n\PathLocation]=Null Then
@@ -6384,7 +6384,7 @@ Function UpdateMTFUnit(n.NPCs)
 									EndIf
 									n\Path[n\PathLocation]\door\open = True
 									If n\Path[n\PathLocation]\door\MTFClose
-										n\Path[n\PathLocation]\door\timerstate = 70.0*5.0
+										n\Path[n\PathLocation]\door\timerstate = TickRate*5.0
 									EndIf
 								EndIf
 								
@@ -6548,8 +6548,8 @@ Function UpdateMTFUnit(n.NPCs)
 							EndIf
 						EndIf
 					EndIf
-					n\PathTimer = 70.0 * Rnd(6.0,10.0) ;search again after 6-10 seconds
-                ElseIf (n\PathTimer<=70.0 * 2.5) And (n\MTFLeader=Null) Then
+					n\PathTimer = TickRate * Rnd(6.0,10.0) ;search again after 6-10 seconds
+                ElseIf (n\PathTimer<=TickRate * 2.5) And (n\MTFLeader=Null) Then
 					n\PathTimer=n\PathTimer-FPSfactor
 					n\CurrSpeed = 0.0
 					;If Rand(1,35)=1 Then
@@ -6600,7 +6600,7 @@ Function UpdateMTFUnit(n.NPCs)
 								EndIf
 								n\Path[n\PathLocation]\door\open = True
 								If n\Path[n\PathLocation]\door\MTFClose
-									n\Path[n\PathLocation]\door\timerstate = 70.0*5.0
+									n\Path[n\PathLocation]\door\timerstate = TickRate*5.0
 								EndIf
 							EndIf
                             
@@ -6648,7 +6648,7 @@ Function UpdateMTFUnit(n.NPCs)
 					n\Angle = EntityYaw(n\Collider)
 					
 					If EntityDistance(n\Target\Collider,n\Collider)<1.3
-						n\State3 = 70*2
+						n\State3 = TickRate*2
 					EndIf
 					
 					If n\State3 > 0.0
@@ -6725,7 +6725,7 @@ Function UpdateMTFUnit(n.NPCs)
 								EndIf
 							EndIf
 						EndIf
-						n\PathTimer = 70*10
+						n\PathTimer = TickRate*10
 					Else
 						If n\PathStatus=1 Then
 							If n\Path[n\PathLocation]=Null Then
@@ -6757,7 +6757,7 @@ Function UpdateMTFUnit(n.NPCs)
 									EndIf
 									n\Path[n\PathLocation]\door\open = True
 									If n\Path[n\PathLocation]\door\MTFClose
-										n\Path[n\PathLocation]\door\timerstate = 70.0*5.0
+										n\Path[n\PathLocation]\door\timerstate = TickRate*5.0
 									EndIf
 								EndIf
 								
@@ -6910,7 +6910,7 @@ Function Shoot(x#, y#, z#, hitProb# = 1.0, particles% = True, instaKill% = False
 			;Only updates the message if it's been more than two seconds.
 			If (MsgTimer < 64*4) Then
 				Msg = ShotMessageUpdate
-				MsgTimer = 70*6
+				MsgTimer = TickRate*6
 			EndIf
 
 			Injuries = Min(Injuries, 4.0)
@@ -6950,7 +6950,7 @@ Function Shoot(x#, y#, z#, hitProb# = 1.0, particles% = True, instaKill% = False
 					AlignToVector de\obj,-PickedNX(),-PickedNY(),-PickedNZ(),3
 					MoveEntity de\obj, 0,0,-0.001
 					EntityFX de\obj, 1
-					de\lifetime = 70*20
+					de\lifetime = TickRate*20
 					EntityBlend de\obj, 2
 					de\Size = Rnd(0.028,0.034)
 					ScaleSprite de\obj, de\Size, de\Size
