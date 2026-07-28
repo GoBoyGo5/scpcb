@@ -221,7 +221,7 @@ Function CreateSubtitleEntry.SubtitleEntry(key$, value$, clr.SubtitleColor, toke
 	Local e.SubtitleEntry = new SubtitleEntry
 
 	e\time = Float(key)
-	e\length = (5.0+1.0) * 70.0
+	e\length = 6 * TickRate
 
 	e\col = clr
 	e\entryType = isCaptionDefault Shl 1
@@ -355,7 +355,7 @@ End Function
 
 Function ApplySubtitleDataSetting%(key$, value$, e.SubtitleEntry)
 	If key = "length" Then
-		e\length = (Float(value)+1.0) * 70.0
+		e\length = (Float(value)+1.0) * TickRate
 		Return True
 	EndIf
 
@@ -764,7 +764,7 @@ Function TryCreateSubtitleMsg.SubtitleMsg(queue.QueuedSubtitleMsg, txt$="")
 
 	c\entry = queue\entry
 	c\txt = txt 
-	c\timeLeft = queue\entry\length+(SubtitleEarlyDelay*70.0)
+	c\timeLeft = queue\entry\length+(SubtitleEarlyDelay*TickRate)
 
 	If txt = "" Then
 		c\txt = c\entry\txt
@@ -925,10 +925,10 @@ Function DrawSubtitles()
 	For c.SubtitleMsg = Each SubtitleMsg
 		Local alpha# = 0.0
 		local t# = Max(c\entry\length-c\timeLeft, 0)
-		If c\timeLeft < SubtitleEarlyDelay*70.0 Then
-			alpha = c\timeLeft/(SubtitleFadeLength*70.0)
+		If c\timeLeft < SubtitleEarlyDelay*TickRate Then
+			alpha = c\timeLeft/(SubtitleFadeLength*TickRate)
 		ElseIf t > 0 Then
-			alpha = t/(SubtitleFadeLength*70.0)
+			alpha = t/(SubtitleFadeLength*TickRate)
 		EndIf
 		alpha = Max(Min(alpha, 1.0), 0.0)
 
