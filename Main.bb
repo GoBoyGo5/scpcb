@@ -298,7 +298,7 @@ Function UpdateHUDOffsets()
 	EndIf
 End Function
 
-Const HIT_MAP% = 1, HIT_PLAYER% = 2, HIT_ITEM% = 3, HIT_APACHE% = 4, HIT_178% = 5, HIT_DEAD% = 6
+Const HIT_MAP% = 1, HIT_PLAYER% = 2, HIT_ITEM% = 3, HIT_APACHE% = 4, HIT_DEAD% = 6
 SeedRnd MilliSecs()
 
 ;[End block]
@@ -1902,7 +1902,6 @@ Music(10) = "106"
 Music(11) = "Menu"
 Music(12) = "8601Cancer"
 Music(13) = "Intro"
-Music(14) = "178"
 Music(15) = "PDTrench"
 Music(16) = "205"
 Music(17) = "GateA"
@@ -3045,8 +3044,6 @@ Collisions HIT_PLAYER, HIT_MAP, 2, 2
 Collisions HIT_PLAYER, HIT_PLAYER, 1, 3
 Collisions HIT_ITEM, HIT_MAP, 2, 2
 Collisions HIT_APACHE, HIT_APACHE, 1, 2
-Collisions HIT_178, HIT_MAP, 2, 2
-Collisions HIT_178, HIT_178, 1, 3
 Collisions HIT_DEAD, HIT_MAP, 2, 2
 
 DrawLoading(90, True)
@@ -5627,10 +5624,6 @@ Function DrawGUI()
 						;BoH items
 					;Case "ring"
 					;	If Wearing714=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					;Case "scp178"
-					;	If Wearing178=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-					;Case "glasses"
-					;	If Wearing178=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "nvgoggles"
 						If WearingNightVision=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "supernv"
