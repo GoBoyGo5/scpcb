@@ -4899,8 +4899,8 @@ Function MouseLook()
 		TurnEntity Collider, 0.0, -the_yaw#, 0.0 ; Turn the user on the Y (yaw) axis.
 		user_camera_pitch# = user_camera_pitch# + the_pitch#
 		; -- Limit the user;s camera To within 180 degrees of pitch rotation. ;EntityPitch(); returns useless values so we need To use a variable To keep track of the camera pitch.
-		If user_camera_pitch# > 90.0 Then user_camera_pitch# = 90.0
-		If user_camera_pitch# < - 90.0 Then user_camera_pitch# = -90.0
+		If user_camera_pitch# > 70.0 Then user_camera_pitch# = 70.0
+		If user_camera_pitch# < - 70.0 Then user_camera_pitch# = -70.0
 		
 		RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake, CameraShake)), WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake, CameraShake)), roll ; Pitch the user;s camera up And down.
 		
