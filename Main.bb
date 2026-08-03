@@ -261,7 +261,7 @@ End Function
 
 SetBuffer(BackBuffer())
 
-Global CurTime%, PrevTime%, LoopDelay%, FPSfactor#, FPSfactor2#, PrevFPSFactor#
+Global CurTime%, PrevTime%, LoopDelay%, AccumulatedLoopDelay#, FPSfactor#, FPSfactor2#, PrevFPSFactor#
 Local CheckFPS%, ElapsedLoops%, FPS%
 
 Global Framelimit% = GetOptionInt("graphics", "framelimit")
@@ -3100,6 +3100,7 @@ FlushMouse()
 DrawLoading(100, True)
 
 LoopDelay = MilliSecs()
+AccumulatedLoopDelay = 0.0
 
 Global UpdateParticles_Time# = 0.0
 
@@ -3140,12 +3141,17 @@ While IsRunning
 	
 	CurTime = MilliSecs()
 	If Framelimit > 0 Then
-	    ;Framelimit
-		Local WaitingTime% = (1000.0 / Framelimit) - (MilliSecs() - LoopDelay)
-		Delay WaitingTime% - 1
-		
-		LoopDelay = MilliSecs()
-		CurTime = LoopDelay
+	    ; Capped to prevent lag spikes as a result of invalid values.
+		AccumulatedLoopDelay = Min(50, AccumulatedLoopDelay + 1000.0 / Framelimit - (CurTime - LoopDelay))
+		If AccumulatedLoopDelay > 0 Then
+			Delay AccumulatedLoopDelay
+			LoopDelay = MilliSecs()
+			AccumulatedLoopDelay = AccumulatedLoopDelay - (LoopDelay - CurTime)
+			CurTime = LoopDelay
+		Else
+			AccumulatedLoopDelay = 0
+			LoopDelay = CurTime
+		EndIf
 	EndIf
 
 	Local ElapsedTime% = CurTime - PrevTime
@@ -9571,8 +9577,8 @@ Function PlaySound2%(SoundHandle%, cam%, entity%, range# = 10, volume# = 1.0, us
 		s\Range = range
 		s\Volume = volume
 		s\UseSFXVolume = useSFXVolume
-		UpdateFireAndForgetSounds(s)
 		soundchn = s\Chn
+		UpdateFireAndForgetSounds(s)
 	EndIf
 	
 	Return soundchn
@@ -11836,12 +11842,9 @@ Function GetMeshExtents(Mesh%)
 End Function
 
 Function Graphics3DExt%(width%,height%,depth%=32,mode%=2)
-	;If FE_InitExtFlag = 1 Then DeInitExt() ;prevent FastExt from breaking itself
 	Graphics3D width,height,depth,mode
 	InitFastResize()
-	;InitExt()
 	AntiAlias GetOptionInt("graphics","antialias")
-	;TextureAnisotropy% (GetOptionInt("graphics","anisotropy"),-1)
 End Function
 
 Function ResizeImage2(image%, width%, height%)
@@ -12092,7 +12095,6 @@ Function InitFastResize()
 	ClsColor 0,0,0
 	Cls
 	SetBuffer(BackBuffer())
-	;TextureAnisotropy(fresize_texture)
 	EntityTexture spr, fresize_texture,0,0
 	EntityTexture spr, fresize_texture2,0,1
 	
