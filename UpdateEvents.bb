@@ -7792,8 +7792,6 @@ Function UpdateEvents()
 							EndIf
 							StopChannel e\SoundCHN
 							e\SoundCHN = 0
-							If e\Sound <> 0 Then FreeSound_Strict(e\Sound) : e\Sound = 0
-							e\Sound = LoadSound_Strict("SFX\Door\Airlock.ogg")
 							e\room\RoomDoors[0]\locked = False
 							e\room\RoomDoors[1]\locked = False
 							UseDoor(e\room\RoomDoors[0])
@@ -7860,7 +7858,11 @@ Function UpdateEvents()
 								Next
 								
 								FreeEntity pvt
-								If e\SoundCHN = 0 Then e\SoundCHN = PlaySound2(e\Sound,Camera,e\room\Objects[0],5)
+								If e\SoundCHN = 0 Then
+									If e\Sound <> 0 Then FreeSound_Strict(e\Sound) : e\Sound = 0
+									e\Sound = LoadSound_Strict("SFX\Door\Airlock.ogg")
+									e\SoundCHN = PlaySound2(e\Sound,Camera,e\room\Objects[0],5)
+								EndIf
 							EndIf
 						Else
 							e\EventState = 0.0
