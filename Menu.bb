@@ -1,3 +1,5 @@
+Include "StrictLoads.bb"
+
 Global MenuBack% = LoadImage_Strict("GFX\menu\back.jpg")
 Global MenuText% = LoadImage_Strict("GFX\menu\scptext.jpg")
 Global Menu173% = LoadImage_Strict("GFX\menu\173back.png")
@@ -34,7 +36,7 @@ Global IntroEnabled% = GetOptionInt("general", "intro enabled")
 
 Global SelectedInputBox%
 
-Global SavePath$ = "Saves\"
+Global SavePath$ = "Saves\"     
 Global SaveMSG$
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
@@ -268,6 +270,8 @@ Function UpdateMainMenu()
 					
 					UserTrackCheck% = 0
 					UserTrackCheck2% = 0
+					;NEW
+					UserTrackCheckDone% = False
 					
 					AntiAlias Opt_AntiAlias
 					UpdateHUDOffsets()
@@ -650,6 +654,8 @@ Function UpdateMainMenu()
 				If MainMenuTab <> 5
 					UserTrackCheck% = 0
 					UserTrackCheck2% = 0
+					;NEW
+					UserTrackCheckDone% = False
 				EndIf
 				
 				Local tx# = x+width
@@ -757,10 +763,12 @@ Function UpdateMainMenu()
 					;[End Block]
 				ElseIf MainMenuTab = 5 ;Audio
 					;[Block]
+
 					height = 225 * MenuScale
 					If HasDubbedAudio Then height = height + 50*MenuScale
 					If EnableUserTracks Then height = height + 65*MenuScale
-					If UserTrackCheck>0 Then height = height + 25*MenuScale
+					;NEW
+					If UserTrackCheckDone% Then height = height + 25*MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y = y + 20*MenuScale
@@ -849,9 +857,11 @@ Function UpdateMainMenu()
 						If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackmode")
 						EndIf
+
 						If DrawButton(x + 20 * MenuScale, y + 30 * MenuScale, 250 * MenuScale, 25 * MenuScale, I_Loc\OptionName_Usertrackscan,False)
 							DebugLog "User Tracks Check Started"
-							
+							;NEW
+							;UserTrackCheckDone% = True
 							UserTrackCheck% = 0
 							UserTrackCheck2% = 0
 							
@@ -860,26 +870,33 @@ Function UpdateMainMenu()
 								file$=NextFile(Dir)
 								If file$="" Then Exit
 								If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
-									UserTrackCheck = UserTrackCheck + 1
-									test = LoadSound("SFX\Radio\UserTracks\"+file$)
-									If test<>0
-										UserTrackCheck2 = UserTrackCheck2 + 1
-									EndIf
-									FreeSound test
+									For i=0 To SoundExtensionCount-1
+										If Lower(Right(file, 4)) = "." + SoundExtensions[i] Then
+											UserTrackCheck = UserTrackCheck + 1
+											test = LoadSound("SFX\Radio\UserTracks\"+file$)
+											If test<>0 Then UserTrackCheck2 = UserTrackCheck2 + 1
+											FreeSound test
+										EndIf
+									Next
 								EndIf
 							Forever
 							CloseDir Dir
-							
+
+							UserTrackCheckDone% = True
 							DebugLog "User Tracks Check Ended"
 						EndIf
 						If MouseOn(x+20*MenuScale,y+30*MenuScale,190*MenuScale,25*MenuScale) And OnSliderID=0
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackscan")
 						EndIf
-						If UserTrackCheck%>0
-							Text x + 20 * MenuScale, y + 70 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
+						If UserTrackCheckDone%
+							;If UserTrackCheck%>0
+								Text x + 20 * MenuScale, y + 70 * MenuScale, Format(I_Loc\OptionName_UsertrackscanFound, UserTrackCheck2, UserTrackCheck)
+							;EndIf
 						EndIf
 					Else
+						UserTrackCheck2%=0
 						UserTrackCheck%=0
+						UserTrackCheckDone% = False
 					EndIf
 					;[End Block]
 				ElseIf MainMenuTab = 6 ;Controls

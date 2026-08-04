@@ -270,6 +270,12 @@ Type LocalizationTable
     Field MessageButton_ElevatorFaster$
     Field MessageButton_ElevatorMav$
     Field MessageButton_ElevatorBroken$
+    Field MessageButton_005KeySuccess$
+    Field MessageButton_005KeyFail$
+    Field MessageButton_005DnaSuccess$
+    Field MessageButton_005DnaFail$
+    Field MessageButton_005KeypadSuccess$
+    Field MessageButton_005KeypadFail$
     Field MessageItem_Full$
     Field MessageItem_Cantcombine$
     Field MessageItem_WalletFull$
@@ -802,6 +808,12 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "elevator.faster" If loc\MessageButton_ElevatorFaster = "" Then loc\MessageButton_ElevatorFaster = value
                             Case "elevator.mav" If loc\MessageButton_ElevatorMav = "" Then loc\MessageButton_ElevatorMav = value
                             Case "elevator.broken" If loc\MessageButton_ElevatorBroken = "" Then loc\MessageButton_ElevatorBroken = value
+                            Case "005.key.success" If loc\MessageButton_005KeySuccess = "" Then loc\MessageButton_005KeySuccess = value
+                            Case "005.key.fail" If loc\MessageButton_005KeyFail = "" Then loc\MessageButton_005KeyFail = value
+                            Case "005.dna.success" If loc\MessageButton_005DnaSuccess = "" Then loc\MessageButton_005DnaSuccess = value
+                            Case "005.dna.fail" If loc\MessageButton_005DnaFail = "" Then loc\MessageButton_005DnaFail = value
+                            Case "005.keypad.success" If loc\MessageButton_005KeypadSuccess = "" Then loc\MessageButton_005KeypadSuccess = value
+                            Case "005.keypad.fail" If loc\MessageButton_005KeypadFail = "" Then loc\MessageButton_005KeypadFail = value
                         End Select
                     Case "Message Item"
                         Select key
