@@ -2584,7 +2584,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					temp = 5
 				Case "key6"
 					temp = 6
-				Case "scp005" ; NEW - goboy	
+				Case "scp005"
 					temp = 7
 				Default 
 					temp = -1
@@ -2643,7 +2643,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 	ElseIf d\KeyCard < 0
 		;I can't find any way to produce short circuited boolean expressions so work around this by using a temporary variable - risingstar64
 		If SelectedItem <> Null Then
-			temp = (SelectedItem\itemtemplate\name = "hand" And d\KeyCard=-1) Or (SelectedItem\itemtemplate\name = "hand2" And d\KeyCard=-2) Or SelectedItem\itemtemplate\name = "scp005" ; NEW - goboy
+			temp = (SelectedItem\itemtemplate\name = "hand" And d\KeyCard=-1) Or (SelectedItem\itemtemplate\name = "hand2" And d\KeyCard=-2) Or SelectedItem\itemtemplate\name = "scp005"
 			If SelectedItem\itemtemplate\name = "scp005" Then temp = 7 ; VERY HACKY STUFF
 		EndIf
 		SelectedItem = Null
@@ -5191,7 +5191,7 @@ Function DrawGUI()
 			If ClosestDoor <> Null Then 
 				If ClosestDoor\Code <> "" Then
 					SelectedDoor = ClosestDoor
-					If SelectedItem <> Null And SelectedItem\itemtemplate\name = "scp005" And ClosestDoor\Code <> "ABCD" And ClosestDoor\Code <> "GEAR" Then ; NEW - goboy
+					If SelectedItem <> Null And SelectedItem\itemtemplate\name = "scp005" And ClosestDoor\Code <> "ABCD" And ClosestDoor\Code <> "GEAR" Then
 						SelectedItem = Null
 
 						PlaySound_Strict ScannerSFX1
@@ -5813,7 +5813,7 @@ Function DrawGUI()
 						Local groupSelector$ = ""
 						If SelectedItem\itemtemplate\group = "paper" Lor SelectedItem\itemtemplate\group = "misc" Then groupSelector = SelectedItem\itemtemplate\name
 						Select SelectedItem\itemtemplate\name
-							Case groupSelector,"key1","key2","key3","key4","key5","key6","oldpaper","badge","oldbadge","ticket","25ct","coin","key","scp860","scp005" ; NEW - goboy
+							Case groupSelector,"key1","key2","key3","key4","key5","key6","oldpaper","badge","oldbadge","ticket","25ct","coin","key","scp860","scp005"
 								;[Block]
 								If Inventory(MouseSlot)\itemtemplate\name = "clipboard" Then
 									;Add an item to clipboard
@@ -6087,7 +6087,7 @@ Function DrawGUI()
 						Next
 					EndIf
 					;[End Block]
-				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct", "scp005" ; NEW - goboy
+				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct", "scp005"
 					;[Block]
 					DrawImage(SelectedItem\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
 					;[End Block]
@@ -10452,9 +10452,9 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 						it2 = CreateItem("playingcard", x, y, z)			
 					EndIf	
 				Case "fine", "very fine"
-					it2 = CreateItem("scp005", x, y, z) ; NEW - goboy
+					it2 = CreateItem("scp005", x, y, z)
 			End Select
-		Case "scp005" ; NEW - goboy
+		Case "scp005"
 			Select setting
 				Case "rough"
 					it2 = CreateItem("key5", x, y, z)

@@ -270,7 +270,6 @@ Function UpdateMainMenu()
 					
 					UserTrackCheck% = 0
 					UserTrackCheck2% = 0
-					;NEW
 					UserTrackCheckDone% = False
 					
 					AntiAlias Opt_AntiAlias
@@ -654,7 +653,6 @@ Function UpdateMainMenu()
 				If MainMenuTab <> 5
 					UserTrackCheck% = 0
 					UserTrackCheck2% = 0
-					;NEW
 					UserTrackCheckDone% = False
 				EndIf
 				
@@ -767,7 +765,6 @@ Function UpdateMainMenu()
 					height = 225 * MenuScale
 					If HasDubbedAudio Then height = height + 50*MenuScale
 					If EnableUserTracks Then height = height + 65*MenuScale
-					;NEW
 					If UserTrackCheckDone% Then height = height + 25*MenuScale
 					DrawFrame(x, y, width, height)
 					
@@ -860,8 +857,6 @@ Function UpdateMainMenu()
 
 						If DrawButton(x + 20 * MenuScale, y + 30 * MenuScale, 250 * MenuScale, 25 * MenuScale, I_Loc\OptionName_Usertrackscan,False)
 							DebugLog "User Tracks Check Started"
-							;NEW
-							;UserTrackCheckDone% = True
 							UserTrackCheck% = 0
 							UserTrackCheck2% = 0
 							

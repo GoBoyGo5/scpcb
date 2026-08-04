@@ -4824,7 +4824,7 @@ Function UpdateEvents()
 							EndIf
 							
 							If e\room\RoomDoors[4]\open = False
-								If UpdateLever(e\room\Levers[0]) Lor UpdateLever(e\room\Levers[1])
+								If UpdateLever(e\room\Levers[0]) Or UpdateLever(e\room\Levers[1])
 									e\room\RoomDoors[4]\open = True
 									If e\Sound2 <> 0 Then FreeSound_Strict e\Sound2 : e\Sound2=0
 									e\Sound2 = LoadSound_Strict("SFX\Door\Door2Open1_dist.ogg")

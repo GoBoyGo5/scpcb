@@ -7195,8 +7195,7 @@ Function Console_SpawnNPC(c_input$, c_state$ = "")
 			Curr173 = n
 			If (Curr173\Idle = 3) Then Curr173\Idle = False
 		Case NPCType860, NPCtype939
-			;CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be spawned with the console. Sorry!", 255, 0, 0) : Return
-			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider) + 0.5, EntityZ(Collider))
+			CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be spawned with the console. Sorry!", 255, 0, 0) : Return
 		Case NPCtypeTentacle
 			n.NPCs = CreateNPC(npcType, EntityX(Collider), EntityY(Collider), EntityZ(Collider))
 		Default
@@ -7216,8 +7215,8 @@ Function Console_ChangeNPCSpeed(c_input$, c_speed#)
 	Local npcType% = Console_NPCNameToType(c_input)
 
 	Select npcType
-		;Case NPCtype372, NPCtype5131, NPCtypeApache, NPCtypeTentacle, NPCtype1048a
-		;	CreateConsoleMsg(Console_NPCTypeToName(npcType) + " speed cannot be changed with the console. Sorry!", 255, 0, 0) : Return
+		Case NPCtype372, NPCtype5131, NPCtypeApache, NPCtypeTentacle, NPCtype1048a
+			CreateConsoleMsg(Console_NPCTypeToName(npcType) + " speed cannot be changed with the console. Sorry!", 255, 0, 0) : Return
 		Case -1
 			CreateConsoleMsg("NPC type not found.", 255, 0, 0) : Return
 	End Select
@@ -7261,8 +7260,7 @@ Function Console_CheckCanToggleNPC(npcType%)
 		Case NPCtypeOldMan, NPCtype173
 			Return True
 		Default
-			;CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be enabled/disabled with the console. Sorry!", 255, 0, 0) : Return False
-			Return True
+			CreateConsoleMsg(Console_NPCTypeToName(npcType, True) + " cannot be enabled/disabled with the console. Sorry!", 255, 0, 0) : Return False
 	End Select
 End Function
 

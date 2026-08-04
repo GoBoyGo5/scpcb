@@ -57,7 +57,7 @@ Global Achv1048.Achievements = CreateAchievement("1048", True)
 Global Achv1123.Achievements = CreateAchievement("1123", True)
 Global Achv1162.Achievements = CreateAchievement("1162", True)
 Global Achv1499.Achievements = CreateAchievement("1499", True)
-Global Achv005.Achievements = CreateAchievement("005", True) ; NEW - goboy
+Global Achv005.Achievements = CreateAchievement("005", True)
 
 Global AchvMaynard.Achievements = CreateAchievement("Maynard")
 Global AchvHarp.Achievements = CreateAchievement("Harp")
