@@ -3605,30 +3605,32 @@ While IsRunning
 		EndIf
 		
 		If MsgTimer > 0 Then
-			;If temp = True -> move the message below
-			Local temp% = False
-			If (Not InvOpen And OtherOpen = Null) Then
-				If SelectedItem <> Null
-					If SelectedItem\itemtemplate\group = "paper" Or SelectedItem\itemtemplate\name = "oldpaper"
-						temp% = True
+			If HUDenabled Then
+				;If temp = True -> move the message below
+				Local temp% = False
+				If (Not InvOpen And OtherOpen = Null) Then
+					If SelectedItem <> Null
+						If SelectedItem\itemtemplate\group = "paper" Or SelectedItem\itemtemplate\name = "oldpaper"
+							temp% = True
+						EndIf
 					EndIf
 				EndIf
-			EndIf
-			
-			Local messageOpacity% = Min(MsgTimer / 2, 255)
-			If (Not temp%)
-				; Push text up if subtitles box has lots of text.
-				Local h# = (GraphicHeight / 2) + 200
-				If SubtitlesEnabled Then h = Min(h, SubBox\curTop-SubtitleTextHeight*2)
-				Color 0,0,0
-				Text((GraphicWidth / 2)+1, h+1, Msg, True, False)
-				Color messageOpacity, messageOpacity, messageOpacity
-				Text((GraphicWidth / 2), h, Msg, True, False)
-			Else
-				Color 0,0,0
-				Text((GraphicWidth / 2)+1, (GraphicHeight * 0.94) + 1, Msg, True, False)
-				Color messageOpacity, messageOpacity, messageOpacity
-				Text((GraphicWidth / 2), (GraphicHeight * 0.94), Msg, True, False)
+				
+				Local messageOpacity% = Min(MsgTimer / 2, 255)
+				If (Not temp%)
+					; Push text up if subtitles box has lots of text.
+					Local h# = (GraphicHeight / 2) + 200
+					If SubtitlesEnabled Then h = Min(h, SubBox\curTop-SubtitleTextHeight*2)
+					Color 0,0,0
+					Text((GraphicWidth / 2)+1, h+1, Msg, True, False)
+					Color messageOpacity, messageOpacity, messageOpacity
+					Text((GraphicWidth / 2), h, Msg, True, False)
+				Else
+					Color 0,0,0
+					Text((GraphicWidth / 2)+1, (GraphicHeight * 0.94) + 1, Msg, True, False)
+					Color messageOpacity, messageOpacity, messageOpacity
+					Text((GraphicWidth / 2), (GraphicHeight * 0.94), Msg, True, False)
+				EndIf
 			EndIf
 			MsgTimer=MsgTimer-FPSfactor2 
 		End If
@@ -4149,7 +4151,7 @@ Function DrawEnding()
 	Local itt.ItemTemplates, r.Rooms
 	
 	Select Lower(SelectedEnding)
-		Case "b2", "a1"
+		Case "b1", "a1"
 			ClsColor Max(255+(EndingTimer)*2.8,0), Max(255+(EndingTimer)*2.8,0), Max(255+(EndingTimer)*2.8,0)
 		Default
 			ClsColor 0,0,0
@@ -4202,8 +4204,10 @@ Function DrawEnding()
 				Select Lower(SelectedEnding)
 					Case "a1", "a2"
 						PlaySound_Strict LoadTempSound("SFX\Ending\GateA\Ending"+SelectedEnding+".ogg")
-					Case "b1", "b2", "b3"
-						PlaySound_Strict LoadTempSound("SFX\Ending\GateB\Ending"+SelectedEnding+".ogg")
+					Case "b1", "b2"
+						PlaySound_Strict LoadTempSound("SFX\Ending\GateB\EndingB"+Str(Int(Right(SelectedEnding,1))+1)+".ogg")
+					Case "b3"
+						PlaySound_Strict LoadTempSound("SFX\Ending\GateB\EndingB1.ogg")
 				End Select
 			EndIf			
 			
@@ -5153,20 +5157,22 @@ Function DrawGUI()
 	
 	
 	If ClosestButton <> 0 And (Not IsPaused()) Then
-		temp% = CreatePivot()
-		PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
-		PointEntity temp, ClosestButton
-		yawvalue# = WrapAngle(EntityYaw(Camera) - EntityYaw(temp))
-		If yawvalue > 90 And yawvalue <= 180 Then yawvalue = 90
-		If yawvalue > 180 And yawvalue < 270 Then yawvalue = 270
-		pitchvalue# = WrapAngle(EntityPitch(Camera) - EntityPitch(temp))
-		If pitchvalue > 90 And pitchvalue <= 180 Then pitchvalue = 90
-		If pitchvalue > 180 And pitchvalue < 270 Then pitchvalue = 270
-		
-		FreeEntity (temp)
-		
-		DrawImage(HandIcon, GraphicWidth / 2 + Sin(yawvalue) * (GraphicWidth / 3) - 32 * HUDScale, GraphicHeight / 2 - Sin(pitchvalue) * (GraphicHeight / 3) - 32 * HUDScale)
-		
+		If HUDenabled Then
+			temp% = CreatePivot()
+			PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
+			PointEntity temp, ClosestButton
+			yawvalue# = WrapAngle(EntityYaw(Camera) - EntityYaw(temp))
+			If yawvalue > 90 And yawvalue <= 180 Then yawvalue = 90
+			If yawvalue > 180 And yawvalue < 270 Then yawvalue = 270
+			pitchvalue# = WrapAngle(EntityPitch(Camera) - EntityPitch(temp))
+			If pitchvalue > 90 And pitchvalue <= 180 Then pitchvalue = 90
+			If pitchvalue > 180 And pitchvalue < 270 Then pitchvalue = 270
+			
+			FreeEntity (temp)
+			
+			DrawImage(HandIcon, GraphicWidth / 2 + Sin(yawvalue) * (GraphicWidth / 3) - 32 * HUDScale, GraphicHeight / 2 - Sin(pitchvalue) * (GraphicHeight / 3) - 32 * HUDScale)
+		EndIf
+
 		If MouseUp1 Then
 			MouseUp1 = False
 			If ClosestDoor <> Null Then 
@@ -5180,39 +5186,41 @@ Function DrawGUI()
 		EndIf
 	EndIf
 	
-	If ClosestItem <> Null Then
-		yawvalue# = -DeltaYaw(Camera, ClosestItem\collider)
-		If yawvalue > 90 And yawvalue <= 180 Then yawvalue = 90
-		If yawvalue > 180 And yawvalue < 270 Then yawvalue = 270
-		pitchvalue# = -DeltaPitch(Camera, ClosestItem\collider)
-		If pitchvalue > 90 And pitchvalue <= 180 Then pitchvalue = 90
-		If pitchvalue > 180 And pitchvalue < 270 Then pitchvalue = 270
-		
-		DrawImage(HandIcon2, GraphicWidth / 2 + Sin(yawvalue) * (GraphicWidth / 3) - 32 * HUDScale, GraphicHeight / 2 - Sin(pitchvalue) * (GraphicHeight / 3) - 32 * HUDScale)
-	EndIf
+	If HUDenabled Then
+		If ClosestItem <> Null Then
+			yawvalue# = -DeltaYaw(Camera, ClosestItem\collider)
+			If yawvalue > 90 And yawvalue <= 180 Then yawvalue = 90
+			If yawvalue > 180 And yawvalue < 270 Then yawvalue = 270
+			pitchvalue# = -DeltaPitch(Camera, ClosestItem\collider)
+			If pitchvalue > 90 And pitchvalue <= 180 Then pitchvalue = 90
+			If pitchvalue > 180 And pitchvalue < 270 Then pitchvalue = 270
+			
+			DrawImage(HandIcon2, GraphicWidth / 2 + Sin(yawvalue) * (GraphicWidth / 3) - 32 * HUDScale, GraphicHeight / 2 - Sin(pitchvalue) * (GraphicHeight / 3) - 32 * HUDScale)
+		EndIf
 	
-	If DrawHandIcon Then DrawImage(HandIcon, GraphicWidth / 2 - 32 * HUDScale, GraphicHeight / 2 - 32 * HUDScale)
-	For i = 0 To 3
-		If DrawArrowIcon(i) Then
-			x = GraphicWidth / 2 - 32 * HUDScale
-			y = GraphicHeight / 2 - 32 * HUDScale	
-			Select i
-				Case 0
-					y = y - 64 * HUDScale - 5
-				Case 1
-					x = x + 64 * HUDScale + 5
-				Case 2
-					y = y + 64 * HUDScale + 5
-				Case 3
-					x = x - 5 - 64 * HUDScale
-			End Select
-			DrawImage(HandIcon, x, y)
-			Color 0, 0, 0
-			Rect(x + 4, y + 4, 64 * HUDScale - 8, 64 * HUDScale - 8)
-			DrawImage(ArrowIMG(i), x + 21 * HUDScale, y + 21 * HUDScale)
-			DrawArrowIcon(i) = False
-		End If
-	Next
+		If DrawHandIcon Then DrawImage(HandIcon, GraphicWidth / 2 - 32 * HUDScale, GraphicHeight / 2 - 32 * HUDScale)
+		For i = 0 To 3
+			If DrawArrowIcon(i) Then
+				x = GraphicWidth / 2 - 32 * HUDScale
+				y = GraphicHeight / 2 - 32 * HUDScale	
+				Select i
+					Case 0
+						y = y - 64 * HUDScale - 5
+					Case 1
+						x = x + 64 * HUDScale + 5
+					Case 2
+						y = y + 64 * HUDScale + 5
+					Case 3
+						x = x - 5 - 64 * HUDScale
+				End Select
+				DrawImage(HandIcon, x, y)
+				Color 0, 0, 0
+				Rect(x + 4, y + 4, 64 * HUDScale - 8, 64 * HUDScale - 8)
+				DrawImage(ArrowIMG(i), x + 21 * HUDScale, y + 21 * HUDScale)
+				DrawArrowIcon(i) = False
+			End If
+		Next
+	EndIf
 	
 	If Using294 Then Use294()
 	
@@ -5480,9 +5488,7 @@ Function DrawGUI()
 		
 		If SelectedItem <> Null Then
 			If MouseDown1 Then
-				If MouseSlot = 66 Then
-					DrawImage(SelectedItem\invimg, ScaledMouseX() - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, ScaledMouseY() - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
-				ElseIf SelectedItem <> PrevOtherOpen\Inventory\Items[MouseSlot]
+				If MouseSlot = 66 Lor SelectedItem <> PrevOtherOpen\Inventory\Items[MouseSlot] Then
 					DrawImage(SelectedItem\invimg, ScaledMouseX() - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, ScaledMouseY() - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
 				EndIf
 			Else
@@ -5714,9 +5720,7 @@ Function DrawGUI()
 		
 		If SelectedItem <> Null Then
 			If MouseDown1 Then
-				If MouseSlot = 66 Then
-					DrawImage(SelectedItem\invimg, ScaledMouseX() - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, ScaledMouseY() - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
-				ElseIf SelectedItem <> Inventory(MouseSlot)
+				If MouseSlot = 66 Lor SelectedItem <> Inventory(MouseSlot) Then
 					DrawImage(SelectedItem\invimg, ScaledMouseX() - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, ScaledMouseY() - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
 				EndIf
 			Else
@@ -6031,7 +6035,7 @@ Function DrawGUI()
 					;[End Block]
 				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct"
 					;[Block]
-					DrawImage(SelectedItem\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
+					DrawItemImg(SelectedItem)
 					;[End Block]
 				Case "scp513"
 					;[Block]
@@ -6162,9 +6166,9 @@ Function DrawGUI()
 							CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
 							Crouch = True
 							
-							DrawImage(SelectedItem\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
+							DrawItemImg(SelectedItem)
 							
-							DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 + 80 * HUDScale, 300 * HUDScale, SelectedItem\state / 100.0, True)
+							DrawItemUseProgress(SelectedItem)
 							
 							SelectedItem\state = Min(SelectedItem\state+(FPSfactor/5.0),100)			
 							
@@ -6832,9 +6836,9 @@ Function DrawGUI()
 					If WearingVest = 0 Then
 						CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
 						
-						DrawImage(SelectedItem\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
+						DrawItemImg(SelectedItem)
 						
-						DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 + 80 * HUDScale, 300 * HUDScale, SelectedItem\state / 100.0, True)
+						DrawItemUseProgress(SelectedItem)
 						
 						SelectedItem\state = Min(SelectedItem\state+(FPSfactor/4.0),100)
 						
@@ -6867,9 +6871,7 @@ Function DrawGUI()
 					;[Block]
 					CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
 					
-					DrawImage(SelectedItem\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
-					
-					DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 + 80 * HUDScale, 300 * HUDScale, SelectedItem\state / 100.0, True)
+					DrawItemUseProgress(SelectedItem)
 
 					SelectedItem\state = Min(SelectedItem\state+(FPSfactor/(2.0+(0.5*(SelectedItem\itemtemplate\name="finevest")))),100)
 					
@@ -7147,9 +7149,7 @@ Function DrawGUI()
 					
 					CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
 					
-					DrawImage(SelectedItem\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
-					
-					DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 + 80 * HUDScale, 300 * HUDScale, SelectedItem\state / 100.0, True)
+					DrawItemUseProgress(SelectedItem)
 					
 					SelectedItem\state = Min(SelectedItem\state+(FPSfactor),100)
 					
@@ -7283,7 +7283,7 @@ Function DrawGUI()
 					Msg = ""
 					
 					SelectedItem\state = 1
-					DrawImage(SelectedItem\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(SelectedItem\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem\itemtemplate\invimg) / 2)
+					DrawItemImg(SelectedItem)
 					;[End Block]
 				Case "scp427"
 					;[Block]
@@ -7461,6 +7461,17 @@ Function DrawGUI()
 	DrawHUD()
 	
 	CatchErrors("DrawGUI")
+End Function
+
+Function DrawItemImg(i.Items)
+	If Not HUDenabled Then Return
+	DrawImage(i\itemtemplate\invimg, GraphicWidth / 2 - ImageWidth(i\itemtemplate\invimg) / 2, GraphicHeight / 2 - ImageHeight(i\itemtemplate\invimg) / 2)
+End Function
+
+Function DrawItemUseProgress(i.Items)
+	If Not HUDenabled Then Return
+	DrawItemImg(i)
+	DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 + 80 * HUDScale, 300 * HUDScale, i\state / 100.0, True)
 End Function
 
 Function ResetDiseases()
@@ -9513,6 +9524,8 @@ Function NullGame(playbuttonsfx%=True)
 	NTF_1499Z# = 0.0
 	Wearing1499% = False
 	DeleteChunks()
+
+	Delete Each Dummy1499
 	
 	DeleteElevatorObjects()
 	
