@@ -464,6 +464,7 @@ Function UpdateMainMenu()
 					
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
 					
+					Return
 				EndIf
 				
 				;[End Block]
