@@ -71,6 +71,22 @@ difficulties[CUSTOM]\r = 255
 difficulties[CUSTOM]\g = 255
 difficulties[CUSTOM]\b = 255
 
+Function CreateDifficulty(name$, localName$, description$, permaDeath%, aggressiveNPCs, saveType%, otherFactors%, r%, g%, b%, customizable%=False)
+	d.Difficulty = New Difficulty
+	d\name = name$
+	d\localName = localName$
+	d\description = description$
+	d\permaDeath = permaDeath%
+	d\aggressiveNPCs = aggressiveNPCs
+	d\saveType = saveType%
+	d\otherFactors = otherFactors%
+	d\r = r%
+	d\g = g%
+	d\b = b%
+	d\customizable = customizable%
+	Return d
+End Function
+
 SelectedDifficulty = difficulties[SAFE]
 ;~IDEal Editor Parameters:
 ;~F#0
