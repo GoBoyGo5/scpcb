@@ -6767,7 +6767,7 @@ Function UpdateEvents()
 							MoveEntity e\room\Objects[7],0,-0.008*FPSfactor,0
 							TFormPoint EntityX(e\room\Objects[7]),EntityY(e\room\Objects[7]),EntityZ(e\room\Objects[7]),0,e\room\obj
 							
-							If Abs(TFormedX())>725 Then
+							If Abs(TFormedX())>725 Lor e\room\RoomDoors[0]\open Then
 								FreeEntity(e\room\Objects[7])
 								e\room\Objects[7]=0
 								e\EventState = e\EventState *2
