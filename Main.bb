@@ -8850,12 +8850,17 @@ Function LoadEntities()
 			file$=NextFile(Dir)
 			If file$="" Then Exit
 			If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
-				test = LoadSound("SFX\Radio\UserTracks\"+file$)
-				If test<>0
-					UserTrackName$(UserTrackMusicAmount%) = file$
-					UserTrackMusicAmount% = UserTrackMusicAmount% + 1
-				EndIf
-				FreeSound test
+				Local ext$ = File_GetExtension(file$)
+				For i=1 To SoundExtensionCount
+					If ext = SoundExtensions[i-1] Then
+						test = LoadSound("SFX\Radio\UserTracks\"+file$)
+						If test<>0
+							UserTrackName$(UserTrackMusicAmount%) = file$
+							UserTrackMusicAmount% = UserTrackMusicAmount% + 1
+						EndIf
+						FreeSound test
+					EndIf
+				Next
 			EndIf
 		Forever
 		CloseDir Dir
