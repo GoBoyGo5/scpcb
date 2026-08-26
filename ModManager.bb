@@ -100,7 +100,7 @@ Function ReloadMods()
 
     If FileType(ModsFile) = 1 Then
         Local mods% = OpenFile(ModsFile)
-        Local firstSorted.Mods = First Mods
+        Local firstSorted.Mods = Last Mods
         While Not Eof(mods)
             l$ = Trim(ReadLine(mods))
             If l <> "" And Instr(l, "#") <> 1 And Instr(l, ";") <> 1 Then
