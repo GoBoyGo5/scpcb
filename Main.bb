@@ -5632,9 +5632,7 @@ Function DrawGUI()
 						If WearingVest=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "scp714"
 						If Wearing714=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
-						;BoH items
-					;Case "ring"
-					;	If Wearing714=2 Then Rect(x - 3, y - 3, width + 6, height + 6)
+					;BoH items
 					Case "nvgoggles"
 						If WearingNightVision=1 Then Rect(x - 3, y - 3, width + 6, height + 6)
 					Case "supernv"
@@ -8852,12 +8850,17 @@ Function LoadEntities()
 			file$=NextFile(Dir)
 			If file$="" Then Exit
 			If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
-				test = LoadSound("SFX\Radio\UserTracks\"+file$)
-				If test<>0
-					UserTrackName$(UserTrackMusicAmount%) = file$
-					UserTrackMusicAmount% = UserTrackMusicAmount% + 1
-				EndIf
-				FreeSound test
+				Local ext$ = File_GetExtension(file$)
+				For i=1 To SoundExtensionCount
+					If ext = SoundExtensions[i-1] Then
+						test = LoadSound("SFX\Radio\UserTracks\"+file$)
+						If test<>0
+							UserTrackName$(UserTrackMusicAmount%) = file$
+							UserTrackMusicAmount% = UserTrackMusicAmount% + 1
+						EndIf
+						FreeSound test
+					EndIf
+				Next
 			EndIf
 		Forever
 		CloseDir Dir
