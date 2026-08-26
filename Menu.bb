@@ -1214,12 +1214,10 @@ Function UpdateMainMenu()
 				If ModCount = 0 Then
 					Text (x + 20 * MenuScale, y + 20 * MenuScale, I_Loc\Mods_Nomods)
 				Else
-					x = x + 10 * MenuScale
+					x = x + 35 * MenuScale
 					y = y + (20 + (EntriesPerPage-1) * 80) * MenuScale
 					
 					UpdateUpdatingMod()
-
-					Local xStart = x
 
 					Local milis% = MilliSecs()
 					i% = ModCount
@@ -1227,18 +1225,40 @@ Function UpdateMainMenu()
 					Local drawn% = 0
 					Local m.Mods = Last Mods
 					Repeat
+						Local nextM.Mods = Before m
 						If i <= (EntriesPerPage+(EntriesPerPage*CurrLoadGamePage)) Then
 							If i <= ModCount Then
-								x = xStart
+								If KeyDown(29) Then
+									If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "◄", False, False, i = 1) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m Before First Mods
+									EndIf
+									
+									If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "►", False, False, i = ModCount) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m After Last Mods
+									EndIf
+								Else
+									If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "▲", False, False, i = 1) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m Before Before m
+										nextM = m
+										m = After m
+									EndIf
+									
+									If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "▼", False, False, i = ModCount) Then
+										If m\IsActive And m\RequiresReload Then ModsDirty = True
+										Insert m After After m
+									EndIf
+								EndIf
 
-								Local mActive = DrawTick(x, y + 25 * MenuScale, m\IsActive)
+
+								Local mActive = DrawTick(x - 25 * MenuScale, y + 25 * MenuScale, m\IsActive)
 								If mActive <> m\IsActive Then
 									m\IsActive = mActive
 									m\IsNew = False
 									If m\RequiresReload Then ModsDirty = True
 								EndIf
-
-								x = x + 25 * MenuScale
 
 								DrawFrame(x,y,490* MenuScale, 70 * MenuScale)
 								If m\Icon = 0 And m\Iconpath <> "" Then
@@ -1265,18 +1285,6 @@ Function UpdateMainMenu()
 								Text(x + 85 * MenuScale, y + 10 * MenuScale, EllipsisLeft(m\Name, 24))
 								Text(x + 85 * MenuScale, y + (10+18) * MenuScale, EllipsisLeft(m\Description, 24))
 								Text(x + 85 * MenuScale, y + (10+18*2) * MenuScale, EllipsisLeft(m\Author, 24))
-
-								If DrawButton(x + 500 * MenuScale, y + 10 * MenuScale, 30 * MenuScale, 20 * MenuScale, "▲", False, False, i = 1) Then
-									Insert m Before Before m
-									m = After m
-									If m\IsActive And m\RequiresReload Then ModsDirty = True
-								EndIf
-								
-								If DrawButton(x + 500 * MenuScale, y + (70 - 30) * MenuScale, 30 * MenuScale, 20 * MenuScale, "▼", False, False, i = ModCount) Then
-									Insert m After After m
-									m = Before m
-									If m\IsActive And m\RequiresReload Then ModsDirty = True
-								EndIf
 
 								If UpdatingMod = m Then
 									Local strr$ = ""
@@ -1335,7 +1343,7 @@ Function UpdateMainMenu()
 							y = y - 80 * MenuScale
 							drawn = drawn + 1
 						EndIf
-						If i <= ModCount Then m = Before m
+						If i <= ModCount Then m = nextM
 						i = i - 1
 					Until i <= 0 Lor drawn => EntriesPerPage
 
