@@ -4708,7 +4708,7 @@ Function UpdateEvents()
 							EndIf
 							e\SoundCHN = LoopSound2(e\Sound, e\SoundCHN, Camera, e\room\NPC[0]\obj);
 							If e\EventState < 30 Then
-								TempLightVolume = TempLightVolume*0.4
+								TempLightVolume = TempLightVolume*0.8
 							ElseIf e\EventState > 60
 								AnimateNPC(e\room\NPC[0], 80, 61, -0.02, False)
 								
