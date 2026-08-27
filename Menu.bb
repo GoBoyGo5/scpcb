@@ -1,5 +1,3 @@
-Include "StrictLoads.bb"
-
 Global MenuBack% = LoadImage_Strict("GFX\menu\back.jpg")
 Global MenuText% = LoadImage_Strict("GFX\menu\scptext.jpg")
 Global Menu173% = LoadImage_Strict("GFX\menu\173back.png")
@@ -36,7 +34,7 @@ Global IntroEnabled% = GetOptionInt("general", "intro enabled")
 
 Global SelectedInputBox%
 
-Global SavePath$ = "Saves\"     
+Global SavePath$ = "Saves\"
 Global SaveMSG$
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
@@ -270,7 +268,6 @@ Function UpdateMainMenu()
 					
 					UserTrackCheck% = -1
 					UserTrackCheck2% = 0
-					UserTrackCheckDone% = False
 					
 					AntiAlias Opt_AntiAlias
 					UpdateHUDOffsets()
@@ -654,7 +651,6 @@ Function UpdateMainMenu()
 				If MainMenuTab <> 5
 					UserTrackCheck% = -1
 					UserTrackCheck2% = 0
-					UserTrackCheckDone% = False
 				EndIf
 				
 				Local tx# = x+width
@@ -879,7 +875,6 @@ Function UpdateMainMenu()
 							Forever
 							CloseDir Dir
 
-							UserTrackCheckDone% = True
 							DebugLog "User Tracks Check Ended"
 						EndIf
 						If MouseOn(x+20*MenuScale,y+30*MenuScale,190*MenuScale,25*MenuScale) And OnSliderID=0

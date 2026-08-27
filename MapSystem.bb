@@ -2927,9 +2927,11 @@ Function FillRoom(r.Rooms)
 			d\AutoClose = False : d\open = False	
 			
 			it = CreateItem("mysteriousnote", r\x + 736.0 * RoomScale, r\y + 224.0 * RoomScale, r\z + 544.0 * RoomScale)
-			EntityParent(it\collider, r\obj)	
+			EntityParent(it\collider, r\obj)
 			it = CreateItem("vest", r\x + 608.0 * RoomScale, r\y + 112.0 * RoomScale, r\z + 32.0 * RoomScale)
 			EntityParent(it\collider, r\obj) : RotateEntity(it\collider, 0, 90, 0)
+			it = CreateItem("scp005", r\x + 736.0 * RoomScale, r\y + 224.0 * RoomScale, r\z + 750.0 * RoomScale)
+			EntityParent(it\collider, r\obj)
 			
 			it = CreateItem("docIR106", r\x + 704.0 * RoomScale, r\y + 183.0 * RoomScale, r\z - 576.0 * RoomScale)
 			EntityParent(it\collider, r\obj)
@@ -5560,6 +5562,14 @@ Function FillRoom(r.Rooms)
 			r\Levers[0] = CreatePivot()
 			PositionEntity r\Levers[0],r\x+205.0*RoomScale,r\y+200.0*RoomScale,r\z+2287.0*RoomScale
 			EntityParent r\Levers[0],r\obj
+			;[End Block]
+		Case "room2scps3"
+			;[Block]
+			PositionEntity(d\buttons[0], r\x + 320.0 * RoomScale, EntityY(d\buttons[0],True), EntityZ(d\buttons[0],True), True)
+			PositionEntity(d\buttons[1], r\x + 224.0 * RoomScale, EntityY(d\buttons[1],True), EntityZ(d\buttons[1],True), True)
+			
+			PositionEntity(d\buttons[0], r\x - 320.0 * RoomScale, EntityY(d\buttons[0],True), EntityZ(d\buttons[0],True), True)
+			PositionEntity(d\buttons[1], r\x - 224.0 * RoomScale, EntityY(d\buttons[1],True), EntityZ(d\buttons[1],True), True)
 			;[End Block]
 	End Select
 	
