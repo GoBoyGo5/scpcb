@@ -2132,7 +2132,7 @@ Function DrawLoading(percent%, shortloading=False)
 		EndIf
 		
 		Color 0,0,0
-		Text(GraphicWidth / 2 + Max(1, enuScale), GraphicHeight / 2 - 100 * MenuScale + Max(1, MenuScale), Format(I_Loc\Menu_Loading, percent), True, True)
+		Text(GraphicWidth / 2 + Max(1, MenuScale), GraphicHeight / 2 - 100 * MenuScale + Max(1, MenuScale), Format(I_Loc\Menu_Loading, percent), True, True)
 		Color 255,255,255
 		Text(GraphicWidth / 2, GraphicHeight / 2 - 100 * MenuScale, Format(I_Loc\Menu_Loading, percent), True, True)
 		
