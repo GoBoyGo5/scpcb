@@ -5714,6 +5714,7 @@ Function UpdateMTFUnit(n.NPCs)
                 If MeNPCSeesPlayer(n) = True Then
 					
 					;if close enough, start shooting at the player
+					Local playerDist# = EntityDistance(n\Collider,Collider)
 					If playerDist < 4.0 Then
 						
 						Local angle# = VectorYaw(EntityX(Collider)-EntityX(n\Collider),0,EntityZ(Collider)-EntityZ(n\Collider))
