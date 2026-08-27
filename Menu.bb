@@ -205,7 +205,7 @@ Function UpdateMainMenu()
 							RandomSeed = "whatpumpkin"
 					End Select
 				Else
-					n = Rand(4,8)
+					Local n = Rand(4,8)
 					For i = 1 To n
 						If Rand(3)=1 Then
 							RandomSeed = RandomSeed + Rand(0,9)
@@ -856,16 +856,16 @@ Function UpdateMainMenu()
 							UserTrackCheck% = 0
 							UserTrackCheck2% = 0
 							
-							Dir=ReadDir("SFX\Radio\UserTracks\")
+							Local Dir=ReadDir("SFX\Radio\UserTracks\")
 							Repeat
-								file$=NextFile(Dir)
+								Local file$=NextFile(Dir)
 								If file$="" Then Exit
 								If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
 									Local ext$ = File_GetExtension(file$)
 									For i=1 To SoundExtensionCount
 										If ext = SoundExtensions[i-1] Then
 											UserTrackCheck = UserTrackCheck + 1
-											test = LoadSound("SFX\Radio\UserTracks\"+file$)
+											Local test = LoadSound("SFX\Radio\UserTracks\"+file$)
 											If test<>0 Then UserTrackCheck2 = UserTrackCheck2 + 1
 											FreeSound test
 										EndIf
@@ -950,6 +950,7 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
 					EndIf
 					
+					Local key
 					For i = 0 To 227
 						If KeyHit(i) Then key = i : Exit
 					Next
@@ -1560,7 +1561,7 @@ Function UpdateLauncher()
 	AspectRatioRatio = 1.0
 
 	MenuScale = 1
-	
+
 	Graphics3DExt(LauncherWidth, LauncherHeight, 0, 2)
 
 	;InitExt
@@ -1578,7 +1579,7 @@ Function UpdateLauncher()
 	Local SelectedGfxMode% = -1, AspectRatioCount%
 	Local SelectedAspectRatio% = -1
 	Local nativeGdc% = GreatestCommonDivisor(DesktopWidth(), DesktopHeight())
-	Local NativeAspectRatioWidth = DesktopWidth() / nativeGdc : NativeAspectRatioHeight = DesktopHeight() / nativeGdc
+	Local NativeAspectRatioWidth = DesktopWidth() / nativeGdc, NativeAspectRatioHeight = DesktopHeight() / nativeGdc
 	Local nativeAspectRatio%, nativeGfxMode
 
 	Dim AspectRatioWidths%(TotalGfxModes), AspectRatioHeights%(TotalGfxModes)
@@ -1748,7 +1749,7 @@ Function UpdateLauncher()
 		BorderlessWindowed = DrawTick(40 + 430 - 15, 260 - 55 + 35, BorderlessWindowed)
 		If BorderlessWindowed Then Fullscreen = False
 
-		lock% = False
+		Local lock% = False
 
 		If BorderlessWindowed Or (Not Fullscreen) Then lock% = True
 		Bit16Mode = DrawTick(40 + 430 - 15, 260 - 55 + 65 + 8, Bit16Mode,lock%)
@@ -1981,7 +1982,7 @@ Function DrawLoading(percent%, shortloading=False)
 	If percent = 0 Then
 		LoadingScreenStartTime = MilliSecs()
 		
-		temp = Rand(1,LoadingScreenAmount)
+		Local temp = Rand(1,LoadingScreenAmount)
 		For ls.loadingscreens = Each LoadingScreens
 			If ls\id = temp Then
 				If ls\img=0 Then
@@ -1995,7 +1996,7 @@ Function DrawLoading(percent%, shortloading=False)
 		Next
 	EndIf	
 	
-	firstloop = True
+	Local firstloop = True
 	Repeat 
 		
 		;Color 0,0,0
@@ -2059,7 +2060,7 @@ Function DrawLoading(percent%, shortloading=False)
 			EndIf
 			
 			SetFont Font2
-			strtemp$ = ""
+			Local strtemp$ = ""
 			temp = Rand(2,9)
 			For i = 0 To temp
 				strtemp$ = STRTEMP + RandomDefaultWidthChar(48,122,"?")
