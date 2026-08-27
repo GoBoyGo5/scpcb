@@ -63,7 +63,7 @@ End Function
 
 Function ReloadMods()
     For m.Mods = Each Mods
-        If Icon <> 0 Then FreeImage(Icon)
+        If m\Icon <> 0 Then FreeImage(m\Icon)
     Next
     Delete Each Mods
     ModCount = 0
