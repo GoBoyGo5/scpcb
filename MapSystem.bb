@@ -2203,8 +2203,8 @@ Function FillRoom(r.Rooms)
 ;			CameraFogMode dp\cam,1
 			
 			;doors to observation booth
-			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z + 640.0 * RoomScale,0,r,False,False,False,"ABCD")
-			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z - 640.0 * RoomScale,0,r,True,False,False,"ABCD")
+			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z + 640.0 * RoomScale,0,r,False,False,False,"FOREST")
+			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z - 640.0 * RoomScale,0,r,True,False,False,"FOREST")
 			d\AutoClose = False : d\MTFClose = False : d\DisableWaypoint = True
 			
 			;doors to the room itself
@@ -5554,27 +5554,27 @@ Function FillRoom(r.Rooms)
 			
 			; Maintenance Room
 			d.Doors = CreateDoor(r\zone, r\x + 264.0 * RoomScale, 0, r\z, 90, r, False, False, 1)
-			d\AutoClose = False; : d\open = False
+			d\AutoClose = False
 			PositionEntity(d\buttons[0], r\x + 320.0 * RoomScale, EntityY(d\buttons[0],True), EntityZ(d\buttons[0],True), True)
 			PositionEntity(d\buttons[1], r\x + 224.0 * RoomScale, EntityY(d\buttons[1],True), EntityZ(d\buttons[1],True), True)
 			
 			; SCP room
 			d.Doors = CreateDoor(r\zone, r\x - 264.0 * RoomScale, 0, r\z, 270, r, False, False, 3)
-			d\AutoClose = False; : d\open = False
+			d\AutoClose = False
 			PositionEntity(d\buttons[0], r\x - 320.0 * RoomScale, EntityY(d\buttons[0],True), EntityZ(d\buttons[0],True), True)
 			PositionEntity(d\buttons[1], r\x - 224.0 * RoomScale, EntityY(d\buttons[1],True), EntityZ(d\buttons[1],True), True)
 			
 			; Left door SCP room
 			r\RoomDoors[1] = CreateDoor(r\zone, r\x-560.0 * RoomScale, 0, r\z - 272.0 * RoomScale, 0, r)
-			r\RoomDoors[1]\AutoClose = False; : r\RoomDoors[1]\open = False
+			r\RoomDoors[1]\AutoClose = False
 			
 			; Right door SCP room
 			r\RoomDoors[2] = CreateDoor(r\zone, r\x-560.0 * RoomScale, 0, r\z + 272.0 * RoomScale, 180, r)
-            r\RoomDoors[2]\AutoClose = False; : r\RoomDoors[2]\open = False
+            r\RoomDoors[2]\AutoClose = False
             
             ; Center door SCP room (SCP-005)
             r\RoomDoors[3] = CreateDoor(r\zone, r\x-816.0 * RoomScale, 0, r\z, 270, r, False, False, 4)
-            r\RoomDoors[3]\AutoClose = False; : r\RoomDoors[3]\open = False
+            r\RoomDoors[3]\AutoClose = False
 			
 			; maynard's note
 			it = CreateItem("maynard005note", r\x - 1152.0 * RoomScale, r\y + 224.0 * RoomScale, r\z)
