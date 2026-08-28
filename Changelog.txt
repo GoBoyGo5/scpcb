@@ -1,4 +1,10 @@
-﻿v0.0.3
+﻿v0.0.4.1
+- Changed SCP-914 outputs for SCP-005, Omni keycard
+- Added placeholder SCP-004 keys
+
+----------------------------------------------------------------------------------
+
+v0.0.3
 - SCP-005 now can open all doors in room860
 - Changed room2scps3 room spawn chance
 - indev folder added for concept art
@@ -16,8 +22,8 @@ v0.0.2
 ----------------------------------------------------------------------------------
 
 v0.0.1
-- Replace placeholder SCP-005 textures & models for the ones from Box of Horrors
-- Add containment chamber for SCP-005
+- Replaced placeholder SCP-005 textures & models for the ones from Box of Horrors
+- Added containment chamber for SCP-005
 
 ----------------------------------------------------------------------------------
 

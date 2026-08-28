@@ -6477,7 +6477,7 @@ Function UpdateEvents()
 								ElseIf SelectedItem\itemtemplate\name="scp005"
 									If MouseHit1 Then
 									
-										PlaySound_Strict(LoadTempSound("SFX\Door\1123DoorOpen.ogg")) ; TODO: replace with new sound (860 sound door open&close without extra sfx)
+										PlaySound_Strict(LoadTempSound("SFX\Door\1123DoorOpen.ogg"))
 										SelectedItem = Null
 										BlinkTimer = -10
 										

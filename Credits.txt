@@ -5,7 +5,7 @@
 
 *Special Thanks
 
-		Helena ("helenathemeh")
+		helenathemeh
 
 *Everything else
 
@@ -20,6 +20,9 @@ by "far2"
 
 		SCP-005 is based on "SCP-005 - Skeleton Key"
 author unknown
+
+		SCP-004 is based on "SCP-004 - The 12 Rusty Keys and the Door"
+by "deusprogrammer"
 
 		SCP-008 is based on "SCP-008 - Zombie Plague"
 author unknown

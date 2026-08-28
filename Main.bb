@@ -5816,7 +5816,7 @@ Function DrawGUI()
 						Local groupSelector$ = ""
 						If SelectedItem\itemtemplate\group = "paper" Lor SelectedItem\itemtemplate\group = "misc" Then groupSelector = SelectedItem\itemtemplate\name
 						Select SelectedItem\itemtemplate\name
-							Case groupSelector,"key1","key2","key3","key4","key5","key6","oldpaper","badge","oldbadge","ticket","25ct","coin","key","scp860","scp005"
+							Case groupSelector,"key1","key2","key3","key4","key5","key6","oldpaper","badge","oldbadge","ticket","25ct","coin","key","scp860","scp005","scp004_2","scp004_3","scp004_4","scp004_5","scp004_6","scp004_7","scp004_8","scp004_9","scp004_10","scp004_11","scp004_12","scp004_13"
 								;[Block]
 								If Inventory(MouseSlot)\itemtemplate\name = "clipboard" Then
 									;Add an item to clipboard
@@ -6090,7 +6090,8 @@ Function DrawGUI()
 						Next
 					EndIf
 					;[End Block]
-				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct", "scp005"
+				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct", "scp005","scp004_2","scp004_3","scp004_4","scp004_5","scp004_6","scp004_7","scp004_8","scp004_9","scp004_10","scp004_11","scp004_12","scp004_13"
+
 					;[Block]
 					DrawItemImg(SelectedItem)
 					;[End Block]
@@ -10468,26 +10469,11 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					If Rand(2)=1 Then
 						it2 = CreateItem("mastercard", x, y, z)
 					Else
-						it2 = CreateItem("playingcard", x, y, z)			
+						it2 = CreateItem("playingcard", x, y, z)
 					EndIf	
 				Case "fine", "very fine"
-					it2 = CreateItem("scp005", x, y, z)
-			End Select
-		Case "scp005"
-			Select setting
-				Case "rough"
-					it2 = CreateItem("key5", x, y, z)
-				Case "coarse"
 					it2 = CreateItem("key6", x, y, z)
-				Case "1:1"
-					If Rand(2)=1 Then
-						it2 = CreateItem("mastercard", x, y, z)
-					Else
-						it2 = CreateItem("playingcard", x, y, z)			
-					EndIf
-				Case "fine", "very fine"
-					it2 = CreateItem("scp005", x, y, z)
-			End Select
+			End Select			
 			
 			RemoveItem(item)
 		Case "playingcard", "coin", "25ct"
@@ -10725,6 +10711,37 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 						ExplosionTimer = 135
 					EndIf
 			End Select	
+			
+			RemoveItem(item)
+		Case "scp005"
+			Select setting
+				Case "rough", "coarse"
+					d.Decals = CreateDecal(0, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
+					d\Size = 0.07 : ScaleSprite(d\obj, d\Size, d\Size)
+				Case "1:1"
+					If Rand(2)=1 Then
+						it2 = CreateItem("mastercard", x, y, z)
+					Else
+						it2 = CreateItem("playingcard", x, y, z)
+					EndIf
+				Case "fine", "very fine"
+					d.Decals = CreateDecal(0, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
+					d\Size = 0.07 : ScaleSprite(d\obj, d\Size, d\Size)
+			End Select
+			
+			RemoveItem(item)
+		Case "key", "scp860"
+			Select setting 
+				Case "1:1"
+					it2 = CreateItem("scp004_"+Str(Rand(2,13)), x, y, z)
+			End Select
+			
+			RemoveItem(item)
+		Case "scp004_2","scp004_3","scp004_4","scp004_5","scp004_6","scp004_7","scp004_8","scp004_9","scp004_10","scp004_11","scp004_12","scp004_13"
+			Select setting 
+				Case "fine", "very fine"
+					it2 = CreateItem("scp860", x, y, z)
+			End Select
 			
 			RemoveItem(item)
 		Default
