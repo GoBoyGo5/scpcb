@@ -1,35 +1,11 @@
-﻿v0.0.5-dev.4
-- Remove redundant check
-- Add latest commit SHA for each version in changelog
-
-REPLACE WITH COMMIT
-
-----------------------------------------------------------------------------------
-
-v0.0.5-dev.3
-- Change order of achievements initialization
-- Add more details to credits (and samples.txt)
-
-b76bc6317163329534d8c756512fef71742143d4
-
-----------------------------------------------------------------------------------
-
-v0.0.5-dev.2
-- Removed 50 US dollar bill from indev folder
-- Removed extra lightmap textures from room2hangar
-- Changed the order of localization strings
-
-4bb411712fab656c975350f73c7dd89b027fa946
-
-----------------------------------------------------------------------------------
-
-v0.0.5-dev.1
+﻿v0.0.5
+- Remove redundant check for SCP-005 on scanners
+- Add more details to credits
+- Changed the order of localization & achievement
 - Removed SCP-004
 - (HALF-IMPLEMENTED) Added SCP-002
 - Added a secret achievement related to radio
 - Added more stuff into indev folder
-
-a931749b3718cb7a27ab50fc0a16a2db4901bcf2
 
 ----------------------------------------------------------------------------------
 
@@ -37,48 +13,27 @@ v0.0.4.1
 - Changed SCP-914 outputs for SCP-005, Omni keycard
 - Added placeholder SCP-004 keys
 
-d23bcdf4b206b9e4fedbe64ee379b47eb705063f
-
 ----------------------------------------------------------------------------------
 
 v0.0.3
 - SCP-005 now can open all doors in room860
 - Changed room2scps3 room spawn chance
-- indev folder added for concept art
-- Edited Credits.txt to include actual people for the mod
-- Edited Changelog.txt to include every version
-- Removed Game.exe from .gitignore
-
-5def68582f076ac676ad0090254a12ffdde84b7f
+- Added 'indev' folder
+- Replaced base Credits.txt and Changelog.txt to the mod-specific ones
 
 ----------------------------------------------------------------------------------
 
 v0.0.2
-- Added maynard's note from Box of Horrors
-- Replaced SCP-005's containment chamber with multiple SCPs room
-- Reverted even more old code from scpcbcpp
-
-b11611d276e42c23b309649f7fc1e5598a66241c
+- Added maynard's note
+- Replaced room005 with room2scps3
 
 ----------------------------------------------------------------------------------
 
 v0.0.1
-- Replaced placeholder SCP-005 textures & models for the ones from Box of Horrors
+- Replaced placeholder SCP-005 textures
 - Added containment chamber for SCP-005
 
-0fd390c4a45a38a7d95e0a8619f9d17df24ee057
-
 ----------------------------------------------------------------------------------
 
-v0.0.0-dev.2
-- Removed unnecessary comments
-- Reverted old code from scpcbcpp
-
-f9b835432d1edb86d61a37d39bcc9a1ae754ced4
-
-----------------------------------------------------------------------------------
-
-v0.0.0-dev.1
+v0.0.0
 - Added SCP-005
-
-0c25f53dd0c92c7e3f044e4e41b952b7be3f6e26
