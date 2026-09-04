@@ -264,6 +264,8 @@ SetBuffer(BackBuffer())
 Global CurTime%, PrevTime%, LoopDelay%, AccumulatedLoopDelay#, FPSfactor#, FPSfactor2#, PrevFPSFactor#
 Local CheckFPS%, ElapsedLoops%, FPS%
 
+Global RadioElapsedTime% = 0
+
 Global Framelimit% = GetOptionInt("graphics", "framelimit")
 Global Vsync% = GetOptionInt("graphics", "vsync")
 
@@ -1912,6 +1914,7 @@ Music(22) = "914"
 Music(23) = "Ending"
 Music(24) = "Credits"
 Music(25) = "SaveMeFrom"
+Music(26) = "002"
 
 Global MusicVolume# = GetOptionFloat("audio", "music volume")
 ;Global MusicCHN% = StreamSound_Strict("SFX\Music\"+Music(2)+".ogg", MusicVolume, CurrMusicStream)
@@ -3052,6 +3055,8 @@ Function InitEvents()
 	
 	CreateEvent("room1archive", "room1archive", 0, 1.0)
 	
+	CreateEvent("room2hangar", "room2hangar", 0, 1.0)
+	
 End Function
 
 Include "UpdateEvents.bb"
@@ -3216,6 +3221,8 @@ While IsRunning
 	Else
 		Input_ResetTime = Max(Input_ResetTime-FPSfactor2,0.0)
 	EndIf
+	
+	If RadioState4(3) = True And (Not (MainMenuOpen Lor MenuOpen)) And SelectedEnding="" And TimerStopped=0 Then RadioElapsedTime = RadioElapsedTime + ElapsedTime
 	
 	UpdateMusic()
 	If EnableSFXRelease Then AutoReleaseSounds()
@@ -4171,6 +4178,7 @@ Function DrawEnding()
 	GiveAchievement(Achv055)
 	If (Not UsedConsole) Then GiveAchievement(AchvConsole)
 	If SelectedDifficulty = difficulties[KETER] Then GiveAchievement(AchvKeter)
+	If RadioElapsedTime < 60*5*1000 Then GiveAchievement(AchvBucks)
 	Local x,y,width,height, temp
 	Local itt.ItemTemplates, r.Rooms
 	
@@ -5816,7 +5824,7 @@ Function DrawGUI()
 						Local groupSelector$ = ""
 						If SelectedItem\itemtemplate\group = "paper" Lor SelectedItem\itemtemplate\group = "misc" Then groupSelector = SelectedItem\itemtemplate\name
 						Select SelectedItem\itemtemplate\name
-							Case groupSelector,"key1","key2","key3","key4","key5","key6","oldpaper","badge","oldbadge","ticket","25ct","coin","key","scp860","scp005","scp004_2","scp004_3","scp004_4","scp004_5","scp004_6","scp004_7","scp004_8","scp004_9","scp004_10","scp004_11","scp004_12","scp004_13"
+							Case groupSelector,"key1","key2","key3","key4","key5","key6","oldpaper","badge","oldbadge","ticket","25ct","coin","key","scp860","scp005"
 								;[Block]
 								If Inventory(MouseSlot)\itemtemplate\name = "clipboard" Then
 									;Add an item to clipboard
@@ -6090,7 +6098,7 @@ Function DrawGUI()
 						Next
 					EndIf
 					;[End Block]
-				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct", "scp005","scp004_2","scp004_3","scp004_4","scp004_5","scp004_6","scp004_7","scp004_8","scp004_9","scp004_10","scp004_11","scp004_12","scp004_13"
+				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct", "scp005"
 
 					;[Block]
 					DrawItemImg(SelectedItem)
@@ -6411,7 +6419,7 @@ Function DrawGUI()
 						Injuries = Max(Injuries + GetINIInt2(iniStr, loc, "damage") + GetINIInt2(iniStr, loc, "injuries"), 0);*temp
 						Bloodloss = Max(Bloodloss + GetINIInt2(iniStr, loc, "blood loss"), 0);*temp
 						
-						If GetINIInt2(iniStr, loc, "stomachache") Then SCP1025state[3]=Max(1, SCP1025state[3])
+						If GetINIInt2(iniStr, loc, "stomachache") Lor GetINIInt2(iniStr, loc, "stomach ache") Then SCP1025state[3]=Max(1, SCP1025state[3])
 						
 						;the state of refined drinks is more than 1.0 (fine setting increases it by 1, very fine doubles it)
 						strtemp = GetINIString2(iniStr, loc, "blink effect")
@@ -10730,22 +10738,7 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 			End Select
 			
 			RemoveItem(item)
-		Case "key", "scp860"
-			Select setting 
-				Case "1:1"
-					it2 = CreateItem("scp004_"+Str(Rand(2,13)), x, y, z)
-			End Select
-			
-			RemoveItem(item)
-		Case "scp004_2","scp004_3","scp004_4","scp004_5","scp004_6","scp004_7","scp004_8","scp004_9","scp004_10","scp004_11","scp004_12","scp004_13"
-			Select setting 
-				Case "fine", "very fine"
-					it2 = CreateItem("scp860", x, y, z)
-			End Select
-			
-			RemoveItem(item)
 		Default
-			
 			If item\itemtemplate\group = "paper" Then
 				Select setting
 					Case "rough", "coarse"

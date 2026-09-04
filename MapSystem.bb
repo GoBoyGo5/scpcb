@@ -5600,6 +5600,15 @@ Function FillRoom(r.Rooms)
             TurnEntity(sc\CameraObj, 30, 0, 0)
             EntityParent(sc\obj, r\obj)
 			;[End Block]
+		Case "room2hangar"
+			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 1280.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 608.0 * RoomScale, 270, r)
+			r\RoomDoors[0]\AutoClose = False
+			
+			r\RoomDoors[1] = CreateDoor(r\zone, r\x - 2336.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 384.0 * RoomScale, 270, r, False, True, 3)
+			r\RoomDoors[1]\AutoClose = False
+			
+			d = CreateDoor(r\zone, r\x - 1920.0 * RoomScale, r\y - 448.0 * RoomScale, r\z + 76.0 * RoomScale, 180, r, False, False, 3)
+			d\AutoClose = False
 	End Select
 	
 	For lt.lighttemplates = Each LightTemplates
