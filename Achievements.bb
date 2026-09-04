@@ -27,8 +27,6 @@ Function CreateAchievement.Achievements(name$, isSCP% = False)
 	Return a
 End Function
 
-Global Achv002.Achievements = CreateAchievement("002", True)
-Global Achv005.Achievements = CreateAchievement("005", True)
 Global Achv008.Achievements = CreateAchievement("008", True)
 Global Achv012.Achievements = CreateAchievement("012", True)
 Global Achv035.Achievements = CreateAchievement("035", True)
@@ -66,10 +64,17 @@ Global AchvSNAV.Achievements = CreateAchievement("SNAV")
 Global AchvOmni.Achievements = CreateAchievement("Omni")
 Global AchvTesla.Achievements = CreateAchievement("Tesla")
 Global AchvPD.Achievements = CreateAchievement("PD")
-Global AchvBucks.Achievements = CreateAchievement("Bucks")
 
 Global AchvConsole.Achievements = CreateAchievement("Console")
 Global AchvKeter.Achievements = CreateAchievement("Keter")
+
+; MOD
+
+Global Achv002.Achievements = CreateAchievement("002", True)
+Global Achv005.Achievements = CreateAchievement("005", True)
+Global AchvBucks.Achievements = CreateAchievement("Bucks")
+
+; MOD END
 
 Global UsedConsole
 

@@ -1,4 +1,10 @@
-﻿v0.0.5-dev.2
+﻿v0.0.5-dev.3
+- Change order of achievements initialization
+- Add more details to credits (and samples.txt)
+
+----------------------------------------------------------------------------------
+
+v0.0.5-dev.2
 - Removed 50 US dollar bill from indev folder
 - Removed extra lightmap textures from room2hangar
 - Changed the order of localization strings
