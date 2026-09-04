@@ -10944,7 +10944,7 @@ Function Use294()
 					GiveAchievement(Achv294)
 
 					strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
-					If strtemp="" Then
+					If strtemp<>"" Then
 						PlayerRoom\SoundCHN = PlaySound_Strict (LoadTempSound(strtemp))
 					EndIf
 					If PlayerRoom\SoundCHN=0 Then
