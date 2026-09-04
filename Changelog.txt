@@ -1,4 +1,11 @@
-﻿v0.0.5-dev.1
+﻿v0.0.5-dev.2
+- Removed 50 US dollar bill from indev folder
+- Removed extra lightmap textures from room2hangar
+- Changed the order of localization strings
+
+----------------------------------------------------------------------------------
+
+v0.0.5-dev.1
 - Removed SCP-004
 - (HALF-IMPLEMENTED) Added SCP-002
 - Added a secret achievement related to radio
