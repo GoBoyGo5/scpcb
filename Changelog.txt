@@ -9,7 +9,7 @@
 
 ----------------------------------------------------------------------------------
 
-v0.0.4.1
+v0.0.4
 - Changed SCP-914 outputs for SCP-005, Omni keycard
 - Added placeholder SCP-004 keys
 
