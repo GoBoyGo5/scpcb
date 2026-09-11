@@ -8539,26 +8539,26 @@ Function UpdateEvents()
 				;[End Block]
 			Case "room2hangar"
 				;[Block]
-				If PlayerRoom=e\room Then
 				
+				If PlayerRoom=e\room Then
 					; Walked past the first door
 					If EntityX(Collider) < (e\room\x - 1280.0 * RoomScale) Then
 					
 						If e\room\RoomDoors[1]\open Then
-							e\EventState = 1
 							GiveAchievement(Achv002)
 						EndIf
 						
-						If e\EventState = 1 Then
+						If Achv002\Unlocked Then
 							ShouldPlay = 22
 						EndIf
 					EndIf
 				EndIf
+				
 				;[End Block]
 		End Select
 	Next
 	
-	;This here is necessary because the 294 drinks with explosion effect didn't worked anymore - ENDSHN
+	;This here is necessary because the 294 drinks with explosion effect didn't work anymore - ENDSHN
 	If ExplosionTimer > 0 Then
 		ExplosionTimer = ExplosionTimer+FPSfactor
 		

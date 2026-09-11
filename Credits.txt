@@ -3,25 +3,30 @@
 
 		Viktor Zhabinskyi ("GoBoyGo5")
 
+*Resources taken from
+
+		Wikipedia
+https://www.wikipedia.org/
+
+		Magnific
+https://www.magnific.com/
+
+		SCP – Containment Breach
+https://scpcbgame.com/
+https://github.com/Regalis11/scpcb
+https://github.com/SCP-CB-CPP/scpcb
+
+		Box of Horrors
+https://undertowgames.com/forum/viewtopic.php?t=3404
+
+		Ultimate Edition
+https://github.com/Jabka666/scpcb-ue-my
+https://github.com/Jabka666/scpcb-ue-rooms
+
 *Special Thanks
 
 		helenathemeh
 for help with mapping
-
-		Stefan Koch ("Salvage")
-for SCP Containment Breach Community Preservation Project
-
-		Chris A. ("krimbopple")
-for BlitzX3D
-
-		Containment Breach Team
-for any assets used
-
-		Box of Horrors Team
-for any assets used
-
-		Ultimate Edition Team
-for easy-to-edit rooms
 
 -
 

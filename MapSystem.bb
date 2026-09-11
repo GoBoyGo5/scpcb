@@ -5601,14 +5601,29 @@ Function FillRoom(r.Rooms)
             EntityParent(sc\obj, r\obj)
 			;[End Block]
 		Case "room2hangar"
+		
+			; Door to chamber
 			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 1280.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 608.0 * RoomScale, 270, r)
 			r\RoomDoors[0]\AutoClose = False
 			
+			; Big door to hangar
 			r\RoomDoors[1] = CreateDoor(r\zone, r\x - 2336.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 384.0 * RoomScale, 270, r, False, True, 3)
 			r\RoomDoors[1]\AutoClose = False
+			FreeEntity r\RoomDoors[1]\buttons[0] : r\RoomDoors[1]\buttons[0]=0
+			FreeEntity r\RoomDoors[1]\buttons[1] : r\RoomDoors[1]\buttons[1]=0
 			
+			; Door to window
 			d = CreateDoor(r\zone, r\x - 1920.0 * RoomScale, r\y - 448.0 * RoomScale, r\z + 76.0 * RoomScale, 180, r, False, False, 3)
 			d\AutoClose = False
+			
+			; Big door at the end of hangar
+			d = CreateDoor(r\zone, r\x - 6560.0 * RoomScale, r\y - 448.0 * RoomScale, r\z, 270, r, False, True)
+			d\AutoClose = False
+			; Remove the buttons
+			FreeEntity d\buttons[0] : d\buttons[0]=0
+			FreeEntity d\buttons[1] : d\buttons[1]=0
+			
+			;
 	End Select
 	
 	For lt.lighttemplates = Each LightTemplates

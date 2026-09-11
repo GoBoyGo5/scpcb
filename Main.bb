@@ -3054,6 +3054,8 @@ Function InitEvents()
 	CreateEvent("room2pit106", "room2pit", 0, 0.07 + (0.1*SelectedDifficulty\aggressiveNPCs))
 	
 	CreateEvent("room1archive", "room1archive", 0, 1.0)
+
+	; MOD
 	
 	CreateEvent("room2hangar", "room2hangar", 0, 1.0)
 	
@@ -4178,7 +4180,7 @@ Function DrawEnding()
 	GiveAchievement(Achv055)
 	If (Not UsedConsole) Then GiveAchievement(AchvConsole)
 	If SelectedDifficulty = difficulties[KETER] Then GiveAchievement(AchvKeter)
-	If RadioElapsedTime < 60*5*1000 Then GiveAchievement(AchvBucks)
+	If (RadioState4(3) = True) And (RadioElapsedTime < 60*5*1000) Then GiveAchievement(AchvBucks)
 	Local x,y,width,height, temp
 	Local itt.ItemTemplates, r.Rooms
 	
@@ -4204,6 +4206,8 @@ Function DrawEnding()
 		;EndIf
 		
 		If EndingScreen = 0 Then
+			KillSounds()
+		
 			SubBox\screenTop = GraphicHeight * 0.9
 			RecalculateSubtitleBoxTarget()
 

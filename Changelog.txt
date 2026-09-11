@@ -1,11 +1,12 @@
 ﻿v0.0.5
 - Remove redundant check for SCP-005 on scanners
 - Add more details to credits
-- Changed the order of localization & achievement
+- Changed the order of localization
 - Removed SCP-004
 - (HALF-IMPLEMENTED) Added SCP-002
-- Added a secret achievement related to radio
-- Added more stuff into indev folder
+- Added a secret achievement
+- Fixed Replacement Note document not appearing
+- Added SCP-006 as SCP-294 drink
 
 ----------------------------------------------------------------------------------
 
