@@ -8500,7 +8500,7 @@ Function UpdateEvents()
 		End Select
 	Next
 	
-	;This here is necessary because the 294 drinks with explosion effect didn't worked anymore - ENDSHN
+	;This here is necessary because the 294 drinks with explosion effect didn't work anymore - ENDSHN
 	If ExplosionTimer > 0 Then
 		ExplosionTimer = ExplosionTimer+FPSfactor
 		
