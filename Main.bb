@@ -2178,7 +2178,6 @@ Dim NavImages(5)
 For i = 0 To 3
 	NavImages(i) = LoadImageHUDScaled("GFX\navigator\roomborder"+i+".png")
 Next
-Global NavSize% = ImageWidth(NavImages(0))
 NavImages(4) = LoadImageHUDScaled("GFX\navigator\batterymeter.png")
 
 Global NavBG%
@@ -7015,7 +7014,8 @@ Function DrawGUI()
 							yy = yy + 70 * HUDScale
 							Local screenWidth% = 270*HUDScale
 
-							Local roomHalf% = NavSize / 2
+							Local navSize = ImageWidth(NavImages(0))
+							Local roomHalf% = navSize / 2
 							
 							x = x - roomHalf + (((EntityX(Collider)-4.0)+8.0) Mod 8.0)*3*HUDScale
 							y = y + roomHalf - (((EntityZ(Collider)-4.0)+8.0) Mod 8.0)*3*HUDScale
@@ -7024,7 +7024,7 @@ Function DrawGUI()
 									
 									If CoffinDistance > 16.0 Or Rnd(16.0)<CoffinDistance Then 
 										If MapTemp(x2, z2)>0 And (MapFound(x2, z2) > 0 Or SelectedItem\itemtemplate\name = "snav310" Or SelectedItem\itemtemplate\name = "snavulti") Then
-											Local drawx% = x + (PlayerX - 1 - x2) * NavSize , drawy% = y - (PlayerZ - 1 - z2) * NavSize
+											Local drawx% = x + (PlayerX - 1 - x2) * navSize , drawy% = y - (PlayerZ - 1 - z2) * navSize
 											
 											If x2+1<=MapWidth Then
 												If MapTemp(x2+1,z2)=False
