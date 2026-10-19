@@ -1153,7 +1153,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										
 										;EntityAutoFade(detail_entity,4.0,6.0)
 									Case 7 ;add a rock
-										detail_entity=CopyEntity(fr\DetailMesh[2])
+										detail_entity=CopyEntity(fr\DetailMesh[1])
 										;EntityType detail_entity,HIT_MAP
 										tempf2=Rnd(0.01,0.012)
 										;ScaleEntity detail_entity,tempf2,tempf2*Rnd(1.0,2.0),tempf2,True
@@ -1163,13 +1163,6 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 										EntityFX detail_entity, 1
 										
 										RotateEntity detail_entity,0.0,Rnd(360.0),0.0,True
-									Case 6 ;add a stump
-										detail_entity=CopyEntity(fr\DetailMesh[1])
-										;EntityType detail_entity,HIT_MAP
-										tempf2=Rnd(0.1,0.12)
-										ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
-										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 								End Select
 								
 								EntityFX detail_entity, 1
@@ -1374,7 +1367,7 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										
 										;EntityAutoFade(detail_entity,4.0,6.0)
 									Case 7 ;add a rock
-										detail_entity=CopyEntity(fr\DetailMesh[2])
+										detail_entity=CopyEntity(fr\DetailMesh[1])
 										;EntityType detail_entity,HIT_MAP
 										tempf2=Rnd(0.01,0.012)
 										;ScaleEntity detail_entity,tempf2,tempf2*Rnd(1.0,2.0),tempf2,True
@@ -1384,13 +1377,6 @@ Function PlaceForest_MapCreator(fr.Forest,x#,y#,z#,r.Rooms)
 										EntityFX detail_entity, 1
 										
 										RotateEntity detail_entity,0.0,Rnd(360.0),0.0,True
-									Case 6 ;add a stump
-										detail_entity=CopyEntity(fr\DetailMesh[1])
-										;EntityType detail_entity,HIT_MAP
-										tempf2=Rnd(0.1,0.12)
-										ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
-										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 								End Select
 								
 								If detail_entity <> 0 Then
