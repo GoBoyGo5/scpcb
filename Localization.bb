@@ -161,6 +161,7 @@ Type LocalizationTable
     Field LoadGame_Delete$
     Field LoadGame_DeleteConfirm$
     Field LoadGame_Nosaved$
+    Field LoadGame_ModsWarning$
     Field NewGame_Name$
     Field NewGame_Enableintro$
     Field NewGame_Start$
@@ -659,6 +660,7 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "delete" If loc\LoadGame_Delete = "" Then loc\LoadGame_Delete = value
                             Case "delete.confirm" If loc\LoadGame_DeleteConfirm = "" Then loc\LoadGame_DeleteConfirm = value
                             Case "nosaved" If loc\LoadGame_Nosaved = "" Then loc\LoadGame_Nosaved = value
+                            Case "mods.warning" If loc\LoadGame_ModsWarning = "" Then loc\LoadGame_ModsWarning = value
                         End Select
                     Case "New Game"
                         Select key

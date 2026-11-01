@@ -35,6 +35,19 @@ Function SaveGame(file$)
 	;WriteString f, VersionNumber
 	WriteString f, CompatibleNumber
 	
+	; Mods save
+	temp = 0
+	For m.Mods = Each Mods
+		If m\IsActive Then temp = temp + 1
+	Next
+	WriteInt f, temp
+	For m.Mods = Each Mods
+		If m\IsActive Then
+			WriteString f, m\Id
+			WriteString f, m\Name
+		EndIf
+	Next
+		
 	WriteFloat f, BlinkTimer
 	WriteFloat f, BlinkEffect
 	WriteFloat f, BlinkEffectTimer
@@ -524,6 +537,11 @@ Function LoadGame(file$)
 	
 	strtemp = ReadString(f)
 	version = strtemp
+	
+	For i = 1 To ReadInt(f) ;temp
+		ReadString(f) ;Id
+		ReadString(f) ;Name
+	Next
 	
 	BlinkTimer = ReadFloat(f)
 	BlinkEffect = ReadFloat(f)	
@@ -1377,6 +1395,11 @@ Function LoadGameQuick(file$)
 	strtemp = ReadString(f)
 	version = strtemp
 	
+	For i = 1 To ReadInt(f) ;temp
+		ReadString(f) ;Id
+		ReadString(f) ;Name
+	Next
+	
 	BlinkTimer = ReadFloat(f)
 	BlinkEffect = ReadFloat(f)	
 	BlinkEffectTimer = ReadFloat(f)	
@@ -2062,6 +2085,7 @@ Function LoadSaveGames()
 	Dim SaveGameDate$(SaveGameAmount + 1)
 	Dim SaveGameVersion$(SaveGameAmount + 1)
 	Dim SaveGamePlayTime$(SaveGameAmount + 1)
+	Dim SaveGameMods$(SaveGameAmount + 1)
 	For i = 1 To SaveGameAmount
 		DebugLog (SavePath + SaveGames(i - 1))
 		Local f% = ReadFile(SavePath + SaveGames(i - 1) + ".cbsav")
@@ -2077,6 +2101,25 @@ Function LoadSaveGames()
 		ReadFloat(f)
 		;End Skip
 		SaveGameVersion(i - 1) = ReadString(f)
+		
+		; Mods save
+		Local strtemp$ = ""
+		For k = 1 To ReadInt(f)
+			Local id$ = ReadString(f)
+			Local name$ = ReadString(f)
+			Local temp% = False
+			For m.Mods = Each Mods
+				If m\IsActive And m\Id = id Then
+					temp = True
+					Exit
+				EndIf
+			Next
+			If temp Then
+				If strtemp <> "" Then strtemp = strtemp + Chr(1) ;delimiter
+				strtemp = strtemp + name
+			EndIf
+		Next
+		SaveGameMods(i - 1) = strtemp
 		
 		CloseFile f
 	Next

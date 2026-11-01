@@ -29,13 +29,13 @@ Global MenuStr$, MenuStrX%, MenuStrY%
 
 Global MainMenuTab%
 
-
 Global IntroEnabled% = GetOptionInt("general", "intro enabled")
 
 Global SelectedInputBox%
 
 Global SavePath$ = "Saves\"
 Global SaveMSG$
+Global ModsMSG$
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
 Global PrevSave$, CurrSave$
@@ -46,6 +46,7 @@ Dim SaveGameTime$(SaveGameAmount + 1)
 Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
 Dim SaveGamePlayTime$(SaveGameAmount + 1)
+Dim SaveGameMods$(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
 
 Global SavedMapsAmount% = 0
@@ -223,6 +224,7 @@ Function UpdateMainMenu()
 
 		If DrawButton(x, y, width, height, I_Loc\Menu_LoadUpper) Then
 			LoadSaveGames()
+			ModsMSG = ""
 			MainMenuTab = 2
 		EndIf
 
@@ -261,6 +263,7 @@ Function UpdateMainMenu()
 					PutINIValue(OptionFile, "general", "intro enabled", IntroEnabled%)
 					MainMenuTab = 0
 				Case 2
+					ModsMSG = ""
 					CurrLoadGamePage = 0
 					MainMenuTab = 0
 				Case 3,5,6,7 ;save the options
@@ -497,7 +500,7 @@ Function UpdateMainMenu()
 				
 				SetFont Font2
 				
-				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" Then 
+				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" And ModsMSG = "" Then 
 					If DrawButton(x+530*MenuScale, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, ">") Then
 						CurrLoadGamePage = CurrLoadGamePage+1
 					EndIf
@@ -506,7 +509,7 @@ Function UpdateMainMenu()
 					Color(100, 100, 100)
 					Text(x+555*MenuScale, y + PagingFrameHeight + 27.5*MenuScale, ">", True, True)
 				EndIf
-				If CurrLoadGamePage > 0 And SaveMSG = "" Then
+				If CurrLoadGamePage > 0 And SaveMSG = "" And ModsMSG = "" Then
 					If DrawButton(x, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, "<") Then
 						CurrLoadGamePage = CurrLoadGamePage-1
 					EndIf
@@ -546,21 +549,25 @@ Function UpdateMainMenu()
 							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1) + RSet(SaveGameDate(i - 1), 21 - Len(SaveGameTime(i - 1))))
 							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1) + RSet(FormatDuration(SaveGamePlayTime(i - 1), False), 21 - Len(SaveGameVersion(i - 1))))
 							
-							If SaveMSG = "" Then
+							If SaveMSG = "" And ModsMSG = "" Then
 								If SaveGameVersion(i - 1) <> CompatibleNumber Then
 									DrawFrame(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
 									Text(x + 350 * MenuScale, y + 35 * MenuScale, I_Loc\LoadGame_Load, True, True)
 								Else
 									If DrawButton(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, I_Loc\LoadGame_Load, False) Then
-										LoadEntities()
-										LoadAllSounds()
-										InitRoomTemplates()
-										LoadGame(SaveGames(i - 1))
-										CurrSave = SaveGames(i - 1)
-										InitLoadGame()
-										MainMenuOpen = False
-										Return
+										If SaveGameMods(i - 1) <> "" Then
+											ModsMSG = SaveGameMods(i - 1)
+										Else
+											LoadEntities()
+											LoadAllSounds()
+											InitRoomTemplates()
+											LoadGame(SaveGames(i - 1))
+											CurrSave = SaveGames(i - 1)
+											InitLoadGame()
+											MainMenuOpen = False
+											Return
+										EndIf
 									EndIf
 								EndIf
 								
@@ -603,6 +610,40 @@ Function UpdateMainMenu()
 						EndIf
 						If DrawButton(x + 250 * MenuScale, y, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_No, False) Then
 							SaveMSG = ""
+						EndIf
+					EndIf
+					
+					If ModsMSG <> ""
+					
+						x = 740 * MenuScale
+						y = 366 * MenuScale
+						width = 420 * MenuScale
+						height = 100 * MenuScale
+						
+						DrawFrame(x, y, width, height + 70 * MenuScale)
+						
+						RowText(I_Loc\LoadGame_ModsWarning, x + 20 * MenuScale, y + 15 * MenuScale, width - 20 * MenuScale, height)
+						
+						Local new_y% = y + 100 * MenuScale
+						Local strtemp$ = ModsMSG
+						While strtemp <> ""
+							temp% = Instr(strtemp, Chr(1))
+							Local strtemp2$
+							If temp = 0 Then
+								strtemp2 = strtemp
+								strtemp = ""
+							Else
+								strtemp2 = Left(strtemp, temp - 1)
+								strtemp = Right(strtemp, Len(strtemp) - temp)
+							EndIf
+							If new_y < y + height - 60 * MenuScale Then
+								Text(x + 30 * MenuScale, new_y, "- " + strtemp2)
+							EndIf
+							new_y = new_y + 20 * MenuScale
+						Wend
+						
+						If DrawButton(x + 250 * MenuScale, y + 70 * MenuScale, width - 320 * MenuScale, height - 70 * MenuScale, I_Loc\Menu_Ok, False)
+							ModsMSG = ""
 						EndIf
 					EndIf
 				EndIf
