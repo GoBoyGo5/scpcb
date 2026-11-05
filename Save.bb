@@ -38,13 +38,13 @@ Function SaveGame(file$)
 	; Mods save
 	temp = 0
 	For m.Mods = Each Mods
-		If m\IsActive Then temp = temp + 1
+		If m\IsActive And m\AffectsGameplay > 0 Then temp = temp + 1
 	Next
 	WriteInt f, temp
 	For m.Mods = Each Mods
-		If m\IsActive Then
-			WriteString f, m\Id
-			WriteString f, m\Name
+		If m\IsActive And m\AffectsGameplay > 0 Then
+			WriteString f, m\SaveId
+			WriteString f, m\Name + Chr(2) + m\AffectsGameplay
 		EndIf
 	Next
 	
@@ -542,7 +542,8 @@ Function LoadGame(file$)
 	strtemp = ReadString(f)
 	version = strtemp
 	
-	For i = 1 To ReadInt(f) ;temp
+	temp = ReadInt(f)
+	For i = 1 To temp ;temp
 		ReadString(f) ;Id
 		ReadString(f) ;Name
 	Next
@@ -1381,7 +1382,8 @@ Function LoadGameQuick(file$)
 	strtemp = ReadString(f)
 	version = strtemp
 	
-	For i = 1 To ReadInt(f) ;temp
+	temp = ReadInt(f)
+	For i = 1 To temp ;temp
 		ReadString(f) ;Id
 		ReadString(f) ;Name
 	Next
@@ -2078,6 +2080,7 @@ Function LoadSaveGames()
 	Dim SaveGameVersion$(SaveGameAmount + 1)
 	Dim SaveGamePlayTime%(SaveGameAmount + 1)
 	Dim SaveGameMods$(SaveGameAmount + 1)
+	Dim SaveGameModsWarn$(SaveGameAmount + 1)
 	For i = 1 To SaveGameAmount
 		DebugLog (SavePath + SaveGames(i - 1))
 		Local f% = ReadFile(SavePath + SaveGames(i - 1) + ".cbsav")
@@ -2095,19 +2098,40 @@ Function LoadSaveGames()
 		SaveGameVersion(i - 1) = ReadString(f)
 		
 		; Mods save
-		Local strtemp$ = ""
-		For k = 1 To ReadInt(f)
+		Local errorList$ = "", warnList$ = ""
+		
+		Local temp% = ReadInt(f)
+		For k = 1 To temp
 			Local id$ = ReadString(f)
 			Local name$ = ReadString(f)
-			Local temp% = False
+			Local level% = 0
+			Local sep% = Instr(name, Chr(2))
+			If (sep > 0) Then
+				level = Int(Mid(name, sep + 1))
+				name = Left(name, sep - 1)
+			EndIf
+			Local temp2% = False
 			For m.Mods = Each Mods
-				If m\IsActive And m\Id = id Then
-					temp = True
+				If m\IsActive And ((Lower(m\SaveId) = Lower(id)) Or (m\Id = id) Or (Lower(m\Name) = Lower(id))) Then
+					temp2 = True
 					Exit
 				EndIf
 			Next
-			SaveGameMods(i - 1) = strtemp
+			
+			If Not temp2 Then
+				Select level
+					Case 1
+						If warnList <> "" Then warnList = warnList + Chr(1)
+						warnList = warnList + name
+					Case 2
+						If errorList <> "" Then errorList = errorList + Chr(1)
+						errorList = errorList + name
+				End Select
+			EndIf
 		Next
+		
+		SaveGameMods(i - 1) = errorList
+		SaveGameModsWarn(i - 1) = warnList
 		
 		CloseFile f
 	Next

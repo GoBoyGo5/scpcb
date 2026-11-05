@@ -11,6 +11,8 @@ Type Mods
     Field Author$
     Field IconPath$, Icon%, DisabledIcon%
     Field RequiresReload%
+    Field AffectsGameplay%
+    Field SaveId$
     Field IsNew%, IsActive%
     Field SteamWorkshopId$
     Field IsUserOwner%
@@ -19,6 +21,58 @@ End Type
 Global ModCount%
 
 Const STEAM_ITEM_ID_FILENAME$ = "steam_itemid.txt"
+
+Function ModChangesGameplay%(path$)
+	Local level% = FolderHasGameplayFile(path, False)
+	
+	If level <> 2 And FileType(path + "Data") = 2 Then
+		level = CombineGameplayLevel(level, FolderHasGameplayFile(path + "Data\", False))
+	EndIf
+	
+	If level <> 2 And FileType(path + "GFX\map") = 2 Then
+		level = CombineGameplayLevel(level, FolderHasGameplayFile(path + "GFX\map\", True))
+	EndIf
+	
+	Return level
+End Function
+
+Function FolderHasGameplayFile%(folder$, includeRooms%)
+	Local d% = ReadDir(folder)
+	If d = 0 Then Return False
+	Local templevel%, level% = 0
+	Repeat
+		Local f$ = NextFile(d)
+		If f = "" Then Exit
+		If f <> "." And f <> ".." And FileType(folder + f) = 1 Then
+			templevel = IsGameplayDataFile(f)
+			If includeRooms And Lower(File_GetExtension(f)) = "rmesh" Then templevel = 2
+			level = CombineGameplayLevel(level, templevel)
+			If level = 2 Then Exit
+		EndIf
+	Forever
+	CloseDir(d)
+	Return level
+End Function
+
+Function IsGameplayDataFile%(fileName$)
+
+	Local lf$ = Lower(fileName)
+	If File_GetExtension(lf) = "override" Then lf = Left(lf, Len(lf) - Len(".override"))
+	
+	Select lf
+		Case "events.ini", "npcs.ini", "scp-294.ini"
+			Return 1
+		Case "items.ini", "rooms.ini", "map.ini", "1499chunks.ini"
+			Return 2
+	End Select
+	
+	Return 0
+End Function
+
+Function CombineGameplayLevel(a%, b%)
+	If a > b Then Return a
+	Return b
+End Function
 
 Function InstantiateMod.Mods(id$, path$)
     Local m.Mods = new Mods
@@ -44,15 +98,21 @@ Function InstantiateMod.Mods(id$, path$)
                     m\Author = value
                 Case "requires reload"
                     m\RequiresReload = ParseINIInt(value)
+                Case "id"
+	                m\SaveId = value
             End Select
         EndIf
     Wend
     CloseFile(ini)
+    
+    m\AffectsGameplay = ModChangesGameplay(m\Path)
 
     If m\Name = "" Then RuntimeErrorExt("Mod at " + Chr(34) + m\Path + Chr(34) + " is missing a name in its info.ini file.")
+    If m\SaveId = "" Then m\SaveId = m\Name
+    
     For m2.Mods = Each Mods
         ; ID collisions should be impossible.
-        If m2 <> m And m2\Id = m\Id Then RuntimeErrorExt("Mod at " + Chr(34) + m\Path + Chr(34) + " and mod at " + Chr(34) + m\Path + Chr(34) + " share a mod ID.")
+        If m2 <> m And m2\Id = m\Id Then RuntimeErrorExt("Mod at " + Chr(34) + m\Path + Chr(34) + " and mod at " + Chr(34) + m2\Path + Chr(34) + " share a mod ID.")
     Next
 
     m\IconPath = DetermineIcon(m, False)
