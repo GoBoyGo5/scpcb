@@ -631,6 +631,7 @@ Function UpdateMainMenu()
 						Local warnResult% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, True)
 						If warnResult = 2 Then ModsWarnMSG = ""
 						If warnResult = 1 Then
+							ModsMSG = ""
 							LoadEntities()
 							LoadAllSounds()
 							InitRoomTemplates()
