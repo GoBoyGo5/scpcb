@@ -12,7 +12,6 @@ Type Mods
     Field IconPath$, Icon%, DisabledIcon%
     Field RequiresReload%
     Field AffectsGameplay%
-    Field SaveId$
     Field IsNew%, IsActive%
     Field SteamWorkshopId$
     Field IsUserOwner%
@@ -98,8 +97,6 @@ Function InstantiateMod.Mods(id$, path$)
                     m\Author = value
                 Case "requires reload"
                     m\RequiresReload = ParseINIInt(value)
-                Case "id"
-	                m\SaveId = value
             End Select
         EndIf
     Wend
@@ -108,7 +105,6 @@ Function InstantiateMod.Mods(id$, path$)
     m\AffectsGameplay = ModChangesGameplay(m\Path)
 
     If m\Name = "" Then RuntimeErrorExt("Mod at " + Chr(34) + m\Path + Chr(34) + " is missing a name in its info.ini file.")
-    If m\SaveId = "" Then m\SaveId = m\Name
     
     For m2.Mods = Each Mods
         ; ID collisions should be impossible.

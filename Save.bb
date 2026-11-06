@@ -43,7 +43,7 @@ Function SaveGame(file$)
 	WriteInt f, temp
 	For m.Mods = Each Mods
 		If m\IsActive And m\AffectsGameplay > 0 Then
-			WriteString f, m\SaveId
+			WriteString f, m\Id
 			WriteString f, m\Name + Chr(2) + m\AffectsGameplay
 		EndIf
 	Next
@@ -2112,7 +2112,7 @@ Function LoadSaveGames()
 			EndIf
 			Local temp2% = False
 			For m.Mods = Each Mods
-				If m\IsActive And ((Lower(m\SaveId) = Lower(id)) Or (m\Id = id) Or (Lower(m\Name) = Lower(id))) Then
+				If m\IsActive And ((m\Id = id) Or (Lower(m\Name) = Lower(id))) Then
 					temp2 = True
 					Exit
 				EndIf

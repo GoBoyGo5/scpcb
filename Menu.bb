@@ -628,19 +628,21 @@ Function UpdateMainMenu()
 					EndIf
 					
 					If ModsWarnMSG <> "" Then
-						Local warnResult% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, True)
-						If warnResult = 2 Then ModsWarnMSG = ""
-						If warnResult = 1 Then
-							ModsMSG = ""
-							LoadEntities()
-							LoadAllSounds()
-							InitRoomTemplates()
-							LoadGame(SaveGames(ModsWarnSaveIdx))
-							CurrSave = SaveGames(ModsWarnSaveIdx)
-							InitLoadGame()
-							MainMenuOpen = False
-							Return
-						EndIf
+						Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, True)
+						Select result
+							Case 1
+								ModsMSG = ""
+								LoadEntities()
+								LoadAllSounds()
+								InitRoomTemplates()
+								LoadGame(SaveGames(ModsWarnSaveIdx))
+								CurrSave = SaveGames(ModsWarnSaveIdx)
+								InitLoadGame()
+								MainMenuOpen = False
+								Return
+							Case 2
+								ModsWarnMSG = ""
+						End Select
 					EndIf
 				EndIf
 				
@@ -3022,16 +3024,17 @@ Function DrawModsPopup%(txt$, list$, askMode%)
 	Local width% = 420 * MenuScale
 	
 	SetFont Font1
-	Local warnW% = width - 40 * MenuScale
-	Local warnH% = GetLineAmount(txt, warnW, 0) * (StringHeight(txt) + 1)
-	Local height% = (15 + 10 + 50) * MenuScale + warnH + shown * 20 * MenuScale
+	Local warnWidth% = width - 40 * MenuScale
+	Local warnHeight% = GetLineAmount(txt, warnWidth, 0) * (StringHeight(txt) + 1)
+	Local height% = (15 + 10 + 50) * MenuScale + warnHeight + shown * 20 * MenuScale
 	
 	DrawFrame(x, y, width, height)
 	Color 255,255,255
-	RowText(txt, x + 20 * MenuScale, y + 15 * MenuScale, warnW, 0)
+	RowText(txt, x + 20 * MenuScale, y + 15 * MenuScale, warnWidth, 0)
 	
-	Local listY% = y + 15 * MenuScale + warnH + 10 * MenuScale
-	Local idx% = 0, entry$
+	Local listY% = y + 15 * MenuScale + warnHeight + 10 * MenuScale
+	Local idx% = 0
+	Local entry$ = ""
 	While list <> ""
 		pos = Instr(list, Chr(1))
 		If pos = 0 Then
