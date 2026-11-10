@@ -632,7 +632,7 @@ Function UpdateMainMenu()
 						Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, True)
 						Select result
 							Case 1
-								ModsMSG = ""
+								ModsWarnMSG = ""
 								LoadEntities()
 								LoadAllSounds()
 								InitRoomTemplates()
