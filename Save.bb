@@ -2105,17 +2105,20 @@ Function LoadSaveGames()
 		
 		Local temp% = ReadInt(f)
 		For k = 1 To temp
+
 			Local id$ = ReadString(f)
 			Local name$ = ReadString(f)
 			Local level% = 0
-			Local sep% = Instr(name, Chr(2))
-			If (sep > 0) Then
-				level = Int(Mid(name, sep + 1))
-				name = Left(name, sep - 1)
+
+			Local levelFind% = Instr(name, Chr(2))
+			If (levelFind > 0) Then
+				level = Int(Mid(name, levelFind + 1))
+				name = Left(name, levelFind - 1)
 			EndIf
+
 			Local temp2% = False
 			For m.Mods = Each Mods
-				If m\IsActive And ((m\Id = id) Or (Lower(m\Name) = Lower(id))) Then
+				If m\IsActive And m\Id = id Then
 					temp2 = True
 					Exit
 				EndIf

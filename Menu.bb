@@ -34,9 +34,12 @@ Global SelectedInputBox%
 
 Global SavePath$ = "Saves\"
 Global SaveMSG$
+
+; Mods
 Global ModsMSG$
 Global ModsWarnMSG$
 Global ModsWarnSaveIdx%
+Global ModsPage%
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
 Global PrevSave$, CurrSave$
@@ -624,30 +627,32 @@ Function UpdateMainMenu()
 						EndIf
 					EndIf
 					
+					; Mods
+					
 					If ModsMSG <> ""
-						If DrawModsPopup(I_Loc\LoadGame_ModsWarning, ModsMSG, False) Then ModsMSG = ""
+						ModsPage = 0
+						If DrawModsPopup(I_Loc\LoadGame_ModsWarning, ModsMSG) Then ModsMSG = ""
 					EndIf
 					
 					If ModsWarnMSG <> "" Then
-						Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, True)
-						Select result
-							Case 1
-								ModsWarnMSG = ""
-								LoadEntities()
-								LoadAllSounds()
-								InitRoomTemplates()
-								LoadGame(SaveGames(ModsWarnSaveIdx))
-								CurrSave = SaveGames(ModsWarnSaveIdx)
-								InitLoadGame()
-								MainMenuOpen = False
-								Return
-							Case 2
-								ModsWarnMSG = ""
-						End Select
+						ModsPage = 0
+						Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, 1)
+						
+						If result <> 0 Then ModsWarnMSG = ""
+						
+						If result = 1 Then
+							LoadEntities()
+							LoadAllSounds()
+							InitRoomTemplates()
+							LoadGame(SaveGames(ModsWarnSaveIdx))
+							CurrSave = SaveGames(ModsWarnSaveIdx)
+							InitLoadGame()
+							MainMenuOpen = False
+							Return
+						EndIf
 					EndIf
+					
 				EndIf
-				
-				
 				
 				;[End Block]
 			Case 3,5,6,7 ;options
@@ -3011,33 +3016,47 @@ Function Button%(x,y,width,height,txt$, disabled%=False)
 	If Pushed And MouseHit1 Then PlaySound_Strict ButtonSFX : Return True
 End Function
 
-Function DrawModsPopup%(txt$, list$, askMode%)
-	Local rows% = 1, pos% = Instr(list, Chr(1))
+Function DrawModsPopup%(txt$, list$, mode% = 0)
+
+	Local rows% = 1
+	Local pos% = Instr(list, Chr(1))
+	
 	While pos > 0
 		rows = rows + 1
 		pos = Instr(list, Chr(1), pos + 1)
 	Wend
-	Local shown% = rows
-	If shown > 8 Then shown = 8
 	
 	Local x% = 740 * MenuScale
-	Local y% = 366 * MenuScale
-	Local width% = 420 * MenuScale
+	Local y% = 286 * MenuScale
+	y = y + Int(70 * MenuScale) + 10 * MenuScale
 	
-	SetFont Font1
+	Local width% = 420 * MenuScale
+	Local height% = PagingFrameHeight
+	
 	Local warnWidth% = width - 40 * MenuScale
 	Local warnHeight% = GetLineAmount(txt, warnWidth, 0) * (StringHeight(txt) + 1)
-	Local height% = (15 + 10 + 50) * MenuScale + warnHeight + shown * 20 * MenuScale
 	
+	Local shown% = Min(rows, Max(1, (height - warnHeight - 50 * MenuScale) / (20 * MenuScale)))
+	
+	Local maxPages = Max(Int(Ceil(Float(rows) / shown)), 1)
+	ModsPage = Max(0, Min(ModsPage, maxPages - 1))
+	
+	SetFont Font1
 	DrawFrame(x, y, width, height)
 	Color 255,255,255
 	RowText(txt, x + 20 * MenuScale, y + 15 * MenuScale, warnWidth, 0)
 	
 	Local listY% = y + 15 * MenuScale + warnHeight + 10 * MenuScale
+	
+	Local firstMod = ModsPage * shown + 1
+	Local lastMod = firstMod + shown - 1
+	
 	Local idx% = 0
 	Local entry$ = ""
+	
 	While list <> ""
 		pos = Instr(list, Chr(1))
+		
 		If pos = 0 Then
 			entry = list
 			list = ""
@@ -3045,23 +3064,64 @@ Function DrawModsPopup%(txt$, list$, askMode%)
 			entry = Left(list, pos - 1)
 			list = Right(list, Len(list) - pos)
 		EndIf
+		
 		idx = idx + 1
-		If idx < 8 Lor rows <= 8 Then
+		
+		If idx >= firstMod And idx <= lastMod Then
 			Text(x + 30 * MenuScale, listY, "- " + entry)
-		ElseIf idx = 8 Then
-			Text(x + 30 * MenuScale, listY, "- ... (+" + (rows - 7) + ")")
+			listY = listY + 20 * MenuScale
 		EndIf
-		If idx <= 8 Then listY = listY + 20 * MenuScale
 	Wend
 	
-	Local result% = 0
-	Local by% = y + height - 45 * MenuScale
-	If askMode Then
-		If DrawButton(x + 50 * MenuScale, by, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_Load, False) Then result = 1
-		If DrawButton(x + width - 150 * MenuScale, by, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_Ok, False) Then result = 2
-	Else
-		If DrawButton(x + width / 2 - 50 * MenuScale, by, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_Ok, False) Then result = 1
+	; Pages
+	
+	If maxPages > 1 Then
+		
+		SetFont Font2
+		
+		If ModsPage > 0 Then
+			If DrawButton(x, y + height, 50 * MenuScale, 55 * MenuScale, "<") Then
+				ModsPage = ModsPage - 1
+			EndIf
+		Else
+			DrawFrame(x, y + height, 50 * MenuScale, 55 * MenuScale)
+			Color(100,100,100)
+			Text(x + 25 * MenuScale, y + height + 27 * MenuScale, "<", True, True)
+		EndIf
+		
+		If ModsPage < maxPages - 1 Then
+			If DrawButton(x + width - 50 * MenuScale, y + height, 50 * MenuScale, 55 * MenuScale, ">") Then
+				ModsPage = ModsPage + 1
+			EndIf
+		Else
+			DrawFrame(x + width - 50 * MenuScale, y + height, 50 * MenuScale, 55 * MenuScale)
+			Color(100,100,100)
+			Text(x + width - 25 * MenuScale, y + height + 27 * MenuScale, ">", True, True)
+		EndIf
+		
+		DrawFrame(x + 50 * MenuScale, y + height, width - 100 * MenuScale, 55 * MenuScale)
+		Color 255,255,255
+		Text(x + width / 2, y + height + 27 * MenuScale, Format(I_Loc\Menu_Page, ModsPage + 1, maxPages), True, True)
 	EndIf
+	
+	SetFont Font1
+	
+	; Buttons vars
+	
+	Local result% = 0
+	Local buttonY% = y + height - 45 * MenuScale
+	
+	; Modes:
+	; 1 = load
+	; 2 = close popup
+	Select mode
+		Case 0
+			If DrawButton(x + width / 2 - 50 * MenuScale, buttonY, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_Ok, False) Then result = 1
+		Case 1
+			If DrawButton(x + 50 * MenuScale, buttonY, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_Load, False) Then result = 1
+			If DrawButton(x + width - 150 * MenuScale, buttonY, 100 * MenuScale, 30 * MenuScale, I_Loc\Menu_Ok, False) Then result = 2
+	End Select
+	
 	Return result
 End Function
 
