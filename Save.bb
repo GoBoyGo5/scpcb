@@ -2101,7 +2101,7 @@ Function LoadSaveGames()
 		SaveGameVersion(i - 1) = ReadString(f)
 		
 		; Mods save
-		Local errorList$ = "";, warnList$ = ""
+		Local errorList$ = "", warnList$ = ""
 		
 		Local temp% = ReadInt(f)
 		For k = 1 To temp

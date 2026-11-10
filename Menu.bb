@@ -630,34 +630,33 @@ Function UpdateMainMenu()
 					; Mods
 					
 					If ModsMSG <> ""
-						;ModsPage = 0
+						ModsPage = 0
 						If DrawModsPopup(I_Loc\LoadGame_ModsWarning, ModsMSG) Then ModsMSG = ""
 					EndIf
 					
 					If ModsWarnMSG <> "" Then
-						;ModsPage = 0
-						;Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, 1)
-						;
-						;If result <> 0 Then ModsWarnMSG = ""
-						;
-						;If result = 1 Then
-							;LoadEntities()
-							;LoadAllSounds()
-							;InitRoomTemplates()
-							;LoadGame(SaveGames(ModsWarnSaveIdx))
-							;CurrSave = SaveGames(ModsWarnSaveIdx)
-							;InitLoadGame()
-							;MainMenuOpen = False
-							;Return
-						;EndIf
-						Local testList$ = ""
-
-						For i = 1 To 40
-							testList = testList + "Bob Rooms Long Ass Name Mod Number " + i
-							If i < 40 Then testList = testList + Chr(1)
-						Next
+						ModsPage = 0
+						Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, 1)
 						
-						DrawModsPopup(I_Loc\LoadGame_ModsOptional, testList)
+						If result <> 0 Then ModsWarnMSG = ""
+						
+						If result = 1 Then
+							LoadEntities()
+							LoadAllSounds()
+							InitRoomTemplates()
+							LoadGame(SaveGames(ModsWarnSaveIdx))
+							CurrSave = SaveGames(ModsWarnSaveIdx)
+							InitLoadGame()
+							MainMenuOpen = False
+							Return
+						EndIf
+						;Local testList$ = ""
+						;For i = 1 To 40
+							;testList = testList + "Bob Rooms Long Ass Name Mod Number " + i
+							;If i < 40 Then testList = testList + Chr(1)
+						;Next
+						;
+						;DrawModsPopup(I_Loc\LoadGame_ModsOptional, testList)
 					EndIf
 					
 				EndIf
