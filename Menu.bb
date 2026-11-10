@@ -630,26 +630,34 @@ Function UpdateMainMenu()
 					; Mods
 					
 					If ModsMSG <> ""
-						ModsPage = 0
+						;ModsPage = 0
 						If DrawModsPopup(I_Loc\LoadGame_ModsWarning, ModsMSG) Then ModsMSG = ""
 					EndIf
 					
 					If ModsWarnMSG <> "" Then
-						ModsPage = 0
-						Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, 1)
+						;ModsPage = 0
+						;Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, 1)
+						;
+						;If result <> 0 Then ModsWarnMSG = ""
+						;
+						;If result = 1 Then
+							;LoadEntities()
+							;LoadAllSounds()
+							;InitRoomTemplates()
+							;LoadGame(SaveGames(ModsWarnSaveIdx))
+							;CurrSave = SaveGames(ModsWarnSaveIdx)
+							;InitLoadGame()
+							;MainMenuOpen = False
+							;Return
+						;EndIf
+						Local testList$ = ""
+
+						For i = 1 To 40
+							testList = testList + "Bob Rooms Long Ass Name Mod Number " + i
+							If i < 40 Then testList = testList + Chr(1)
+						Next
 						
-						If result <> 0 Then ModsWarnMSG = ""
-						
-						If result = 1 Then
-							LoadEntities()
-							LoadAllSounds()
-							InitRoomTemplates()
-							LoadGame(SaveGames(ModsWarnSaveIdx))
-							CurrSave = SaveGames(ModsWarnSaveIdx)
-							InitLoadGame()
-							MainMenuOpen = False
-							Return
-						EndIf
+						DrawModsPopup(I_Loc\LoadGame_ModsOptional, testList)
 					EndIf
 					
 				EndIf
@@ -3036,7 +3044,7 @@ Function DrawModsPopup%(txt$, list$, mode% = 0)
 	Local warnWidth% = width - 40 * MenuScale
 	Local warnHeight% = GetLineAmount(txt, warnWidth, 0) * (StringHeight(txt) + 1)
 	
-	Local shown% = Min(rows, Max(1, (height - warnHeight - 50 * MenuScale) / (20 * MenuScale)))
+	Local shown% = Min(rows, Max(1, (height - warnHeight - 75 * MenuScale) / (20 * MenuScale)))
 	
 	Local maxPages = Max(Int(Ceil(Float(rows) / shown)), 1)
 	ModsPage = Max(0, Min(ModsPage, maxPages - 1))
@@ -3068,7 +3076,7 @@ Function DrawModsPopup%(txt$, list$, mode% = 0)
 		idx = idx + 1
 		
 		If idx >= firstMod And idx <= lastMod Then
-			Text(x + 30 * MenuScale, listY, "- " + entry)
+			Text(x + 30 * MenuScale, listY, "- " + EllipsisLeft(entry, 32))
 			listY = listY + 20 * MenuScale
 		EndIf
 	Wend

@@ -2101,7 +2101,7 @@ Function LoadSaveGames()
 		SaveGameVersion(i - 1) = ReadString(f)
 		
 		; Mods save
-		Local errorList$ = "", warnList$ = ""
+		Local errorList$ = "";, warnList$ = ""
 		
 		Local temp% = ReadInt(f)
 		For k = 1 To temp
@@ -2116,15 +2116,15 @@ Function LoadSaveGames()
 				name = Left(name, levelFind - 1)
 			EndIf
 
-			Local temp2% = False
+			Local found% = False
 			For m.Mods = Each Mods
 				If m\IsActive And m\Id = id Then
-					temp2 = True
+					found = True
 					Exit
 				EndIf
 			Next
 			
-			If Not temp2 Then
+			If Not found Then
 				Select level
 					Case 1
 						If warnList <> "" Then warnList = warnList + Chr(1)
