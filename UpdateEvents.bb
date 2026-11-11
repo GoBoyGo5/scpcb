@@ -8539,15 +8539,13 @@ Function UpdateEvents()
 				
 				If PlayerRoom=e\room Then
 					; Walked past the first door
-					If EntityX(Collider) < (e\room\x - 1280.0 * RoomScale) Then
+					If EntityX(Collider, True) < (e\room\x - 1280.0 * RoomScale) Then
 					
-						If e\room\RoomDoors[1]\open Then
+						If e\room\RoomDoors[0]\open Then
 							GiveAchievement(Achv002)
-						EndIf
-						
-						If Achv002\Unlocked Then
 							ShouldPlay = 22
 						EndIf
+						
 					EndIf
 				EndIf
 				

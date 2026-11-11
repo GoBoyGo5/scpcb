@@ -1,4 +1,5 @@
 Add new 002 achv icon
 Finish room2hangar room and event
 Tweak the room chances when I understand how these work
-edit changelog when finished with 0.0.5
+remake scp-005 inv, achv icons
+add 002 chamber label
