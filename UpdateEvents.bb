@@ -325,7 +325,7 @@ Function UpdateEvents()
 						If i = 0 Then PlaySound_Strict(LoadTempSound("SFX\Room\Intro\PA\scripted\scripted6.ogg"))
 						
 						If (i>0 And i<26) Then
-							If Not CommotionState(i) Then ;Prevents the same commotion file from playing more then once.
+							If Not CommotionState(i) Then ;Prevents the same commotion file from playing more than once.
 								CommotionState(i) = PlaySound_Strict(LoadTempSound("SFX\Room\Intro\Commotion\Commotion"+i+".ogg"))
 							EndIf
 						EndIf
@@ -4820,13 +4820,7 @@ Function UpdateEvents()
 							EndIf
 							
 							If e\room\RoomDoors[4]\open = False
-								If UpdateLever(e\room\Levers[0])
-									e\room\RoomDoors[4]\open = True
-									If e\Sound2 <> 0 Then FreeSound_Strict e\Sound2 : e\Sound2=0
-									e\Sound2 = LoadSound_Strict("SFX\Door\Door2Open1_dist.ogg")
-									e\SoundCHN2 = PlaySound2(e\Sound2,Camera,e\room\RoomDoors[4]\obj,400)
-								EndIf
-								If UpdateLever(e\room\Levers[1])
+								If UpdateLever(e\room\Levers[0]) Or UpdateLever(e\room\Levers[1])
 									e\room\RoomDoors[4]\open = True
 									If e\Sound2 <> 0 Then FreeSound_Strict e\Sound2 : e\Sound2=0
 									e\Sound2 = LoadSound_Strict("SFX\Door\Door2Open1_dist.ogg")
@@ -6478,6 +6472,45 @@ Function UpdateEvents()
 										FreeEntity pvt
 										
 										ResetEntity Collider
+									EndIf
+								ElseIf SelectedItem\itemtemplate\name="scp005"
+									If MouseHit1 Then
+									
+										PlaySound_Strict(LoadTempSound("SFX\Door\1123DoorOpen.ogg"))
+										SelectedItem = Null
+										BlinkTimer = -10
+										
+										RotateEntity e\room\Objects[3], 0, 0, 0
+										RotateEntity e\room\Objects[4], 0, 180, 0
+										
+										pvt = CreatePivot()
+										PositionEntity pvt, EntityX(Camera),EntityY(Camera),EntityZ(Camera)
+										PointEntity pvt, e\room\obj
+										ang# = WrapAngle(EntityYaw(pvt)-EntityYaw(e\room\obj,True))
+										
+										If ang > 90 And ang < 270 Then
+											e\EventState2 = 1
+										Else
+											e\EventState2 = 0
+										EndIf
+										FreeEntity pvt
+										
+										PositionEntity Collider, EntityX(e\room\Objects[2],True),0.5,EntityZ(e\room\Objects[2],True)
+										
+										RotateEntity Collider, 0, EntityYaw(e\room\obj,True)+e\EventState2*180, 0
+										MoveEntity Collider, 0,0,1.5
+										
+										ResetEntity Collider
+										
+										UpdateDoorsTimer = 0
+										UpdateDoors()
+										
+										SecondaryLightOn = PrevSecondaryLightOn
+										
+										e\EventState = 0.0
+										e\EventState3 = 0.0
+										
+										
 									EndIf
 								EndIf
 							EndIf
@@ -8649,11 +8682,28 @@ Function UpdateEvents()
 						BlurTimer = 3000
 					EndIf
 				EndIf
+			Case "room2hangar"
+				;[Block]
+				
+				If PlayerRoom=e\room Then
+					; Walked past the first door
+					If EntityX(Collider) < (e\room\x - 1280.0 * RoomScale) Then
+					
+						If e\room\RoomDoors[1]\open Then
+							GiveAchievement(Achv002)
+						EndIf
+						
+						If Achv002\Unlocked Then
+							ShouldPlay = 22
+						EndIf
+					EndIf
+				EndIf
+				
 				;[End Block]
 		End Select
 	Next
 	
-	;This here is necessary because the 294 drinks with explosion effect didn't worked anymore - ENDSHN
+	;This here is necessary because the 294 drinks with explosion effect didn't work anymore - ENDSHN
 	If ExplosionTimer > 0 Then
 		ExplosionTimer = ExplosionTimer+FPSfactor
 		

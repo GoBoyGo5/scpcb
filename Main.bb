@@ -328,6 +328,8 @@ Global CurTime%, PrevTime%, LoopDelay%, AccumulatedLoopDelay#, FPSfactor#, FPSfa
 Global TimeScale# = 1.0
 Local CheckFPS%, ElapsedLoops%, FPS%
 
+Global RadioElapsedTime% = 0
+
 Global Framelimit% = GetOptionInt("graphics", "framelimit")
 Global Vsync% = GetOptionInt("graphics", "vsync")
 
@@ -885,6 +887,9 @@ Music(23) = "Ending"
 Music(24) = "Credits"
 Music(25) = "SaveMeFrom"
 Music(26) = "HalloweenFields"
+
+; Mod music
+Music(27) = "002"
 
 Global MusicVolume# = GetOptionFloat("audio", "music volume")
 ;Global MusicCHN% = StreamSound_Strict("SFX\Music\"+Music(2)+".ogg", MusicVolume, CurrMusicStream)
@@ -1559,6 +1564,8 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					temp = 5
 				Case "key6"
 					temp = 6
+				Case "scp005"
+					temp = 7
 				Default 
 					temp = -1
 			End Select
@@ -1572,18 +1579,28 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					EndIf
 				EndIf
 				Return				
-			ElseIf temp >= d\KeyCard 
+			ElseIf temp >= d\KeyCard
 				SelectedItem = Null
 				If showmsg = True Then
 					If d\locked Then
 						PlaySound_Strict KeyCardSFX2
-						Msg = I_Loc\MessageButton_KeyNothing
+						Select temp
+							Case 7
+								Msg = I_Loc\MessageButton_005KeyFail
+							Default
+								Msg = I_Loc\MessageButton_KeyNothing
+						End Select
 						MsgTimer = 70 * 7
 						ActivateKeyCardMsgCooldown()
 						Return
 					Else
 						PlaySound_Strict KeyCardSFX1
-						Msg = I_Loc\MessageButton_KeyInserted
+						Select temp
+							Case 7
+								Msg = I_Loc\MessageButton_005KeySuccess
+							Default
+								Msg = I_Loc\MessageButton_KeyInserted
+						End Select
 						MsgTimer = 70 * 7	
 						ActivateKeyCardMsgCooldown()
 					EndIf
@@ -1607,11 +1624,18 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 		;I can't find any way to produce short circuited boolean expressions so work around this by using a temporary variable - risingstar64
 		If SelectedItem <> Null Then
 			temp = (SelectedItem\itemtemplate\name = "hand" And d\KeyCard=-1) Or (SelectedItem\itemtemplate\name = "hand2" And d\KeyCard=-2)
+			If SelectedItem\itemtemplate\name = "scp005" Then temp = 7 ; VERY HACKY STUFF
 		EndIf
 		SelectedItem = Null
 		If temp <> 0 Then
 			PlaySound_Strict ScannerSFX1
 			Msg = I_Loc\MessageButton_DnaSuccess
+			Select temp
+				Case 7
+					Msg = I_Loc\MessageButton_005DnaSuccess
+				Default
+					Msg = I_Loc\MessageButton_DnaSuccess
+			End Select
 			MsgTimer = 70 * 10
 			ActivateScannerMsgCooldown()
 		Else
@@ -1620,8 +1644,13 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 					Msg = I_Loc\MessageButton_DnaNohands
 				Else
 					PlaySound_Strict ScannerSFX2
-					Msg = I_Loc\MessageButton_DnaSelf
-				EndIf
+					Select temp
+            Case 7
+              Msg = I_Loc\MessageButton_005DnaFail
+            Default
+              Msg = I_Loc\MessageButton_DnaSelf
+				  End Select
+				EndIf				
 				MsgTimer = 70 * 10
 			EndIf
 			Return			
@@ -2007,6 +2036,10 @@ Function InitEvents()
 	CreateEvent("room2pit106", "room2pit", 0, 0.07 + (0.1*SelectedDifficulty\aggressiveNPCs))
 	
 	CreateEvent("room1archive", "room1archive", 0, 1.0)
+
+	; MOD
+	
+	CreateEvent("room2hangar", "room2hangar", 0, 1.0)
 	
 End Function
 
@@ -2181,6 +2214,8 @@ While IsRunning
 	Else
 		Input_ResetTime = Max(Input_ResetTime-FPSfactor2,0.0)
 	EndIf
+	
+	If RadioState4(3) = True And (Not (MainMenuOpen Lor MenuOpen)) And SelectedEnding="" And TimerStopped=0 Then RadioElapsedTime = RadioElapsedTime + ElapsedTime
 	
 	UpdateMusic()
 	If EnableSFXRelease Then AutoReleaseSounds()
@@ -3099,6 +3134,7 @@ Function DrawEnding()
 	GiveAchievement(Achv055)
 	If (Not UsedConsole) Then GiveAchievement(AchvConsole)
 	If SelectedDifficulty = difficulties[KETER] Then GiveAchievement(AchvKeter)
+	If (RadioState4(3) = True) And (RadioElapsedTime < 60*5*1000) Then GiveAchievement(AchvBucks)
 	Local x,y,width,height, temp
 	Local itt.ItemTemplates, r.Rooms
 	
@@ -3124,6 +3160,8 @@ Function DrawEnding()
 		;EndIf
 		
 		If EndingScreen = 0 Then
+			KillSounds()
+		
 			SubBox\screenTop = GraphicHeight * 0.9
 			RecalculateSubtitleBoxTarget()
 
@@ -4200,6 +4238,41 @@ Function DrawGUI()
 			If ClosestDoor <> Null Then 
 				If ClosestDoor\Code <> "" Then
 					SelectedDoor = ClosestDoor
+					If SelectedItem <> Null And SelectedItem\itemtemplate\name = "scp005" And ClosestDoor\Code <> "ABCD" And ClosestDoor\Code <> "GEAR" Then
+						SelectedItem = Null
+
+						PlaySound_Strict ScannerSFX1
+										
+						If SelectedDoor\Code = Str(AccessCode) Then
+							GiveAchievement(AchvMaynard)
+						ElseIf SelectedDoor\Code = Str(HARPCODE)
+							GiveAchievement(AchvHarp)
+						EndIf
+						
+						SelectedDoor\locked = 0
+						UseDoor(SelectedDoor,True)
+						SelectedDoor = Null
+						MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+
+						If Not HasKeyCardMsg() Then
+							Msg = I_Loc\MessageButton_005KeypadSuccess
+							MsgTimer = 70 * 7
+							ActivateKeyCardMsgCooldown()
+						EndIf
+					ElseIf SelectedItem <> Null And SelectedItem\itemtemplate\name = "scp005" And (ClosestDoor\Code = "ABCD" Or ClosestDoor\Code = "GEAR") Then
+						SelectedDoor = Null
+						SelectedItem = Null
+
+						PlaySound_Strict ScannerSFX2
+
+						If Not HasKeyCardMsg() Then
+							Msg = I_Loc\MessageButton_005KeypadFail
+							MsgTimer = 70 * 7
+							ActivateKeyCardMsgCooldown()
+						EndIf
+
+						KeypadInput = ""
+					EndIf
 				ElseIf Playable Then
 					PlaySound2(ButtonSFX, Camera, ClosestButton)
 					UseDoor(ClosestDoor,True)				
@@ -4786,7 +4859,7 @@ Function DrawGUI()
 						Local groupSelector$ = ""
 						If SelectedItem\itemtemplate\group = "paper" Lor SelectedItem\itemtemplate\group = "misc" Then groupSelector = SelectedItem\itemtemplate\name
 						Select SelectedItem\itemtemplate\name
-							Case groupSelector,"key1","key2","key3","key4","key5","key6","oldpaper","badge","oldbadge","ticket","25ct","coin","key","scp860"
+							Case groupSelector,"key1","key2","key3","key4","key5","key6","oldpaper","badge","oldbadge","ticket","25ct","coin","key","scp860","scp005"
 								;[Block]
 								If Inventory(MouseSlot)\itemtemplate\name = "clipboard" Then
 									;Add an item to clipboard
@@ -5108,7 +5181,8 @@ Function DrawGUI()
 						Next
 					EndIf
 					;[End Block]
-				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct"
+				Case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct", "scp005"
+
 					;[Block]
 					DrawItemImg(SelectedItem)
 					;[End Block]
@@ -8017,7 +8091,7 @@ Function LoadEntities()
 	Next
 	
 	OldAiPics(0) = LoadTexture_Strict("GFX\AIface.jpg")
-	OldAiPics(1) = LoadTexture_Strict("GFX\AIface2.jpg")	
+	OldAiPics(1) = LoadTexture_Strict("GFX\AIface2.jpg")
 	
 	DrawLoading(20)
 	
@@ -8877,8 +8951,8 @@ Function PlaySound2%(SoundHandle%, cam%, entity%, range# = 10, volume# = 1.0, us
 		s\Range = range
 		s\Volume = volume
 		s\UseSFXVolume = useSFXVolume
-		soundchn = s\Chn
 		UpdateFireAndForgetSounds(s)
+		soundchn = s\Chn
 	EndIf
 	
 	Return soundchn
@@ -9689,7 +9763,7 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					If Rand(2)=1 Then
 						it2 = CreateItem("mastercard", x, y, z)
 					Else
-						it2 = CreateItem("playingcard", x, y, z)			
+						it2 = CreateItem("playingcard", x, y, z)
 					EndIf	
 				Case "fine", "very fine"
 					it2 = CreateItem("key6", x, y, z)
@@ -10047,6 +10121,23 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					If setting = "very fine" Then n\Speed = n\Speed * 5 : n\State = -10
 			End Select
 
+		Case "scp005"
+			Select setting
+				Case "rough", "coarse"
+					d.Decals = CreateDecal(0, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
+					d\Size = 0.07 : ScaleSprite(d\obj, d\Size, d\Size)
+				Case "1:1"
+					If Rand(2)=1 Then
+						it2 = CreateItem("mastercard", x, y, z)
+					Else
+						it2 = CreateItem("playingcard", x, y, z)
+					EndIf
+				Case "fine", "very fine"
+					d.Decals = CreateDecal(0, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
+					d\Size = 0.07 : ScaleSprite(d\obj, d\Size, d\Size)
+			End Select
+			
+			RemoveItem(item)
 		Default
 			If item\itemtemplate\group = "paper" Then
 				Select setting
