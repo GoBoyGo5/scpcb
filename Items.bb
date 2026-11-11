@@ -998,6 +998,14 @@ Function PickItem(item.Items)
 				item\Dropped = -1
 				
 				item\itemtemplate\found=True
+				If item\Inventory <> Null Then
+					For n% = 0 To item\Inventory\Size
+						If item\Inventory\Items[n] <> Null Then
+							item\Inventory\Items[n]\itemtemplate\found = True
+						EndIf
+					Next
+				EndIf
+
 				ItemAmount = ItemAmount + 1
 				
 				Inventory(n) = item
