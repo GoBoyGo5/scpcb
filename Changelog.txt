@@ -1,40 +1,67 @@
 ﻿v0.0.5
-- Remove redundant check for SCP-005 on scanners
-- Add more details to credits
-- Changed the order of localization
-- Removed SCP-004
-- (HALF-IMPLEMENTED) Added SCP-002
-- Added a secret achievement
-- Fixed Replacement Note document not appearing
-- Added SCP-006 as SCP-294 drink
+
+Removed:
+- Redundant check for SCP-005 on scanners
+- SCP-004
+
+Added:
+- More details to credits
+- SCP-002
+- a secret achievement
+- SCP-006
+
+Changed:
+- The order of localization
+- Changelog layout
+
+Fixed:
+- SCP-005 Note not appearing
 
 ----------------------------------------------------------------------------------
 
 v0.0.4
-- Changed SCP-914 outputs for SCP-005, Omni keycard
-- Added placeholder SCP-004 keys
+
+Changed:
+- SCP-914 outputs for SCP-005, Omni keycard
+
+Added:
+- Placeholder SCP-004 keys
 
 ----------------------------------------------------------------------------------
 
 v0.0.3
+
+Added:
+- 'indev' folder
 - SCP-005 now can open all doors in room860
-- Changed room2scps3 room spawn chance
-- Added 'indev' folder
-- Replaced base Credits.txt and Changelog.txt to the mod-specific ones
+- Credits.txt and Changelog.txt
+
+Changed:
+- room2scps3 room spawn chance
 
 ----------------------------------------------------------------------------------
 
 v0.0.2
-- Added maynard's note
+
+Added:
+- SCP-005 Note
+
+Changed:
 - Replaced room005 with room2scps3
 
 ----------------------------------------------------------------------------------
 
 v0.0.1
+
+Changed:
 - Replaced placeholder SCP-005 textures
-- Added containment chamber for SCP-005
+
+Added:
+- Containment chamber for SCP-005
 
 ----------------------------------------------------------------------------------
 
 v0.0.0
-- Added SCP-005
+
+Added:
+- SCP-005
