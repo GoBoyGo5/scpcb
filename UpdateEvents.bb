@@ -8691,9 +8691,12 @@ Function UpdateEvents()
 					
 						If e\room\RoomDoors[0]\open Then
 							GiveAchievement(Achv002)
-							ShouldPlay = 22
+							e\EventState = 1
 						EndIf
 						
+						If e\EventState = 1 Then
+							ShouldPlay = 27
+						EndIf
 					EndIf
 				EndIf
 				
