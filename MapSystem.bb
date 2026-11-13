@@ -5665,7 +5665,7 @@ Function FillRoom(r.Rooms)
 			d\AutoClose = False
 			
 			; Big door at the end of hangar
-			d.Doors = CreateDoor(r\zone, r\x - 6560.0 * RoomScale, r\y - 448.0 * RoomScale, r\z, 270, r, False, True)
+			d.Doors = CreateDoor(r\zone, r\x - 6400.0 * RoomScale, r\y - 448.0 * RoomScale, r\z, 270, r, False, True)
 			d\AutoClose = False
 			FreeEntity d\buttons[0] : d\buttons[0]=0
 			FreeEntity d\buttons[1] : d\buttons[1]=0
