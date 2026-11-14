@@ -6760,53 +6760,51 @@ Function UpdateEvents()
 				
 			Case "testroom"
 				;[Block]
-				If e <> Null Then
-					If PlayerRoom = e\room Then
-						If e\EventState = 0 Then
-							If e\room\Objects[7]<>0 Then FreeEntity(e\room\Objects[7]) : e\room\Objects[7]=0
+				If PlayerRoom = e\room Then
+					If e\EventState = 0 Then
+						If e\room\Objects[7]<>0 Then FreeEntity(e\room\Objects[7]) : e\room\Objects[7]=0
 
-							e\room\Objects[7]=LoadAnimMesh_Strict("GFX\npcs\scp-1048.b3d")
-							ScaleEntity e\room\Objects[7], 0.05,0.05,0.05
-							
-							TFormPoint EntityX(Collider),EntityY(Collider),EntityZ(Collider),0,e\room\obj
-							If TFormedZ()=0 Then temp = -1 Else temp = -Sgn(TFormedZ())
-							TFormPoint -720,0,816*temp,e\room\obj,0
-							PositionEntity(e\room\Objects[7],TFormedX(),0,TFormedZ())
-							
-							RotateEntity e\room\Objects[7],-90,e\room\angle-90,0
-							SetAnimTime e\room\Objects[7],297
-							e\EventState = 1
+						e\room\Objects[7]=LoadAnimMesh_Strict("GFX\npcs\scp-1048.b3d")
+						ScaleEntity e\room\Objects[7], 0.05,0.05,0.05
+						
+						TFormPoint EntityX(Collider),EntityY(Collider),EntityZ(Collider),0,e\room\obj
+						If TFormedZ()=0 Then temp = -1 Else temp = -Sgn(TFormedZ())
+						TFormPoint -720,0,816*temp,e\room\obj,0
+						PositionEntity(e\room\Objects[7],TFormedX(),0,TFormedZ())
+						
+						RotateEntity e\room\Objects[7],-90,e\room\angle-90,0
+						SetAnimTime e\room\Objects[7],297
+						e\EventState = 1
+					EndIf
+				EndIf
+				
+				If e\EventState <> 0 Then
+					If EntityDistance(Collider, e\room\Objects[6]) < 2.5 And e\EventState > 0 Then
+						PlaySound_Strict(LoadTempSound("SFX\SCP\079\TestroomWarning.ogg"))
+						For i = 0 To 5
+							em.Emitters = CreateEmitter(EntityX(e\room\Objects[i], True), EntityY(e\room\Objects[i], True), EntityZ(e\room\Objects[i], True), 0)
+							TurnEntity(em\Obj, 90, 0, 0, True)
+							;entityParent(em\obj, e\room\obj)
+							em\RandAngle = 5
+							em\Speed = 0.042
+							em\SizeChange = 0.0025									
+						Next
+						;Delete e
+						e\EventState = e\EventState * -1
+					EndIf
+					If e\room\Objects[7]<>0 Then
+						Animate2(e\room\Objects[7],AnimTime(e\room\Objects[7]),284,295,0.3)
+						MoveEntity e\room\Objects[7],0,-0.008*FPSfactor,0
+						TFormPoint EntityX(e\room\Objects[7]),EntityY(e\room\Objects[7]),EntityZ(e\room\Objects[7]),0,e\room\obj
+						
+						If Abs(TFormedX())>725 Lor e\room\RoomDoors[0]\open Then
+							FreeEntity(e\room\Objects[7])
+							e\room\Objects[7]=0
+							e\EventState = e\EventState *2
 						EndIf
 					EndIf
-					
-					If e\EventState > 0 Then
-						If EntityDistance(Collider, e\room\Objects[6]) < 2.5 And e\EventState > 0 Then
-							PlaySound_Strict(LoadTempSound("SFX\SCP\079\TestroomWarning.ogg"))
-							For i = 0 To 5
-								em.Emitters = CreateEmitter(EntityX(e\room\Objects[i], True), EntityY(e\room\Objects[i], True), EntityZ(e\room\Objects[i], True), 0)
-								TurnEntity(em\Obj, 90, 0, 0, True)
-								;entityParent(em\obj, e\room\obj)
-								em\RandAngle = 5
-								em\Speed = 0.042
-								em\SizeChange = 0.0025									
-							Next
-							;Delete e
-							e\EventState = e\EventState * -1
-						EndIf
-						If e\room\Objects[7]<>0 Then
-							Animate2(e\room\Objects[7],AnimTime(e\room\Objects[7]),284,295,0.3)
-							MoveEntity e\room\Objects[7],0,-0.008*FPSfactor,0
-							TFormPoint EntityX(e\room\Objects[7]),EntityY(e\room\Objects[7]),EntityZ(e\room\Objects[7]),0,e\room\obj
-							
-							If Abs(TFormedX())>725 Lor e\room\RoomDoors[0]\open Then
-								FreeEntity(e\room\Objects[7])
-								e\room\Objects[7]=0
-								e\EventState = e\EventState *2
-							EndIf
-						EndIf
-						If e\EventState = -2 Then RemoveEvent(e)
-					EndIf
-				End If
+					If e\EventState = -2 Then RemoveEvent(e)
+				EndIf
 				;[End Block]
 			Case "tunnel2smoke"
 				;[Block]
@@ -6952,7 +6950,7 @@ Function UpdateEvents()
 				
 			Case "testroom173"
 				;[Block]
-				If e\EventState2 = 0 And e\room\Objects[3] <> 0 Then
+				If IsHalloween And e\EventState2 = 0 And e\room\Objects[3] <> 0 Then
 					For r2.Rooms = Each Rooms
 						If r2\RoomTemplate\Name = "room4info" Then
 							it.Items = Object.Items(e\room\Objects[3])
@@ -8622,7 +8620,9 @@ Function UpdateEvents()
 			Case "halloweenpd"
 				;[Block]
 				If PlayerRoom=e\room Then
-					If e\EventState = 0 Then
+					; The <= and the set to 0 here are intended to fix already broken saves for v1.3.12.7.1.
+					If e\EventState <= 0 Then
+						e\EventState = 0
 						While e\room\Objects[e\EventState] <> 0
 							e\EventState = e\EventState + 1
 						Wend
@@ -8738,7 +8738,7 @@ End Function
 
 Function UpdateDimension1499()
 	; Saving while wearing 1499 in the PD very weird behavior, bandaid fix.
-	If NTF_1499PrevRoom\RoomTemplate\Name = "pocketdimension" Then CanSave = False
+	If NTF_1499PrevRoom <> Null And NTF_1499PrevRoom\RoomTemplate\Name = "pocketdimension" Then CanSave = False
 
 	Local e.Events,n.NPCs,n2.NPCs,r.Rooms,it.Items,i%,j%,du.Dummy1499,du2.Dummy1499,temp%,scale#,x%,y%
 	

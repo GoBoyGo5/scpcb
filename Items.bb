@@ -322,6 +322,8 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	ElseIf name="scp330" then
 		i\state = 1 Shl Rand(0, 2)
 		SetAnimTime i\model, i\state + 1
+	ElseIf name = "snavulti" Lor name = "fineradio" Lor name = "veryfineradio" Then
+		i\state = 101
 	EndIf
 	
 	i\ID=LastItemID+1
@@ -929,7 +931,7 @@ Function PickItem(item.Items)
 							SelectedItem = item
 						EndIf
 					Case "scp330"
-						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
+						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
 						If item\state = -1 Then
 							; Empty, allow it to be picked up
 						ElseIf item\state = -3 Then
@@ -999,9 +1001,9 @@ Function PickItem(item.Items)
 				
 				item\itemtemplate\found=True
 				If item\Inventory <> Null Then
-					For n% = 0 To item\Inventory\Size
-						If item\Inventory\Items[n] <> Null Then
-							item\Inventory\Items[n]\itemtemplate\found = True
+					For i% = 0 To item\Inventory\Size-1
+						If item\Inventory\Items[i] <> Null Then
+							item\Inventory\Items[i]\itemtemplate\found = True
 						EndIf
 					Next
 				EndIf

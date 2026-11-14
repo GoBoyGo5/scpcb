@@ -453,13 +453,11 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             Local itt.ItemTemplates = FindItemTemplate(Right(cmd, Len(cmd) - Instr(cmd, " ")))
             If itt = Null Then
                 CreateConsoleMsg("Item not found.",255,150,0)
+            Elseif itt\name = "cup"
+                CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
             Else
                 CreateConsoleMsg(itt\displayname + " spawned.")
                 it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-
-                If itt\name = "snavulti" Lor itt\name = "fineradio" Lor itt\name = "veryfineradio" Then
-                    it\state = 101
-                EndIf
             End If
             ;[End Block]
         Case "giveitem"
@@ -470,6 +468,8 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
                 itt.ItemTemplates = FindItemTemplate(Right(cmd, Len(cmd) - Instr(cmd, " ")))
                 If itt = Null Then
                     CreateConsoleMsg("Item not found.",255,150,0)
+                Elseif itt\name = "cup"
+                    CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
                 Else
                     CreateConsoleMsg(itt\displayname + " given.")
                     it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
@@ -984,7 +984,6 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
         Case "spawnradio"
             ;[Block]
             it.Items = CreateItem("fineradio", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-            it\state = 101
             ;[End Block]
         Case "spawnnvg"
             ;[Block]
@@ -998,7 +997,6 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
         Case "spawnnav"
             ;[Block]
             it.Items = CreateItem("snavulti", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-            it\state = 101
             ;[End Block]
         Case "teleport173"
             ;[Block]
