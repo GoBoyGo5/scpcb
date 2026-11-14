@@ -1654,7 +1654,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 		EndIf
 	Else
 		If d\locked Then
-			If showmsg = True Then 
+			If showmsg = True Then
 				If Not (d\IsElevatorDoor>0) Then
 					PlaySound_Strict ButtonSFX2
 					If PlayerRoom\RoomTemplate\Name <> "room2elevator" Then

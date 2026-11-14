@@ -17,5 +17,19 @@ metalbeam.jpg
 pinterest.com/pin/857232110297117298/
 (resized to 256x256)
 
+redgrunge.jpg
+https://www.magnific.com/free-photo/red-grunge-texture_957855.htm
+Image by kjpargeter on Magnific
+(resized to 4096x4096)
+
+Any morse code audio
+morsecode.world
+
 Any resized images
 https://imageresizer.com/
+
+Any resized images more than 10mb
+https://www.iloveimg.com/resize-image
+
+Any source image edit
+GIMP https://www.gimp.org/

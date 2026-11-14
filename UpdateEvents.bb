@@ -8682,24 +8682,19 @@ Function UpdateEvents()
 					EndIf
 				EndIf
 			Case "room2hangar"
-				;[Block]
-				
+				; Player is in the room
 				If PlayerRoom=e\room Then
-					; Walked past the first door
-					If EntityX(Collider, True) < (e\room\x - 1280.0 * RoomScale) Then
-					
-						If e\room\RoomDoors[0]\open Then
-							GiveAchievement(Achv002)
-							e\EventState = 1
-						EndIf
-						
-						If e\EventState = 1 Then
-							ShouldPlay = 27
-						EndIf
-					EndIf
+					; Big door to 002 open
+					If e\room\RoomDoors[0]\open Then
+						GiveAchievement(Achv002)
+						ShouldPlay = 27
+						e\room\RoomDoors[1]\locked = True
+						e\room\RoomDoors[1]\open = False
+					Else
+						e\room\RoomDoors[1]\locked = False
+					EndIf 
 				EndIf
-				
-				;[End Block]
+			;[Block End]
 		End Select
 	Next
 	

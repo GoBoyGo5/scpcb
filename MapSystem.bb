@@ -5651,14 +5651,14 @@ Function FillRoom(r.Rooms)
 		Case "room2hangar"
 		
 			; Door to chamber
-			d.Doors = CreateDoor(r\zone, r\x - 1280.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 608.0 * RoomScale, 270, r)
-			d\AutoClose = False
+			r\RoomDoors[1] = CreateDoor(r\zone, r\x - 1280.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 608.0 * RoomScale, 270, r)
+			r\RoomDoors[1]\AutoClose = False
 			
 			; Big door to hangar
-			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 2336.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 384.0 * RoomScale, 270, r, False, True)
+			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 2336.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 384.0 * RoomScale, 270, r, False, True, 3)
 			r\RoomDoors[0]\AutoClose = False
 			PositionEntity r\RoomDoors[0]\buttons[0], r\x - 2040.0 * RoomScale, r\y - 240.0 * RoomScale, r\z + 868.0 * RoomScale, True
-			FreeEntity r\RoomDoors[0]\buttons[1] : r\RoomDoors[0]\buttons[1]=0
+			FreeEntity r\RoomDoors[0]\buttons[1] : r\RoomDoors[0]\buttons[1] = 0
 			
 			; Door to window
 			d.Doors = CreateDoor(r\zone, r\x - 1920.0 * RoomScale, r\y - 448.0 * RoomScale, r\z + 76.0 * RoomScale, 180, r, False, False, 3)
@@ -5667,8 +5667,8 @@ Function FillRoom(r.Rooms)
 			; Big door at the end of hangar
 			d.Doors = CreateDoor(r\zone, r\x - 6400.0 * RoomScale, r\y - 448.0 * RoomScale, r\z, 270, r, False, True)
 			d\AutoClose = False
-			FreeEntity d\buttons[0] : d\buttons[0]=0
-			FreeEntity d\buttons[1] : d\buttons[1]=0
+			FreeEntity d\buttons[0] : d\buttons[0] = 0
+			FreeEntity d\buttons[1] : d\buttons[1] = 0
 			
 			;
 	End Select
