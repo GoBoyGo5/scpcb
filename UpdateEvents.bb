@@ -6493,6 +6493,45 @@ Function UpdateEvents()
 										
 										ResetEntity Collider
 									EndIf
+								ElseIf SelectedItem\itemtemplate\name="scp005"
+									If MouseHit1 Then
+									
+										PlaySound_Strict(LoadTempSound("SFX\Door\1123DoorOpen.ogg"))
+										SelectedItem = Null
+										BlinkTimer = -10
+										
+										RotateEntity e\room\Objects[3], 0, 0, 0
+										RotateEntity e\room\Objects[4], 0, 180, 0
+										
+										pvt = CreatePivot()
+										PositionEntity pvt, EntityX(Camera),EntityY(Camera),EntityZ(Camera)
+										PointEntity pvt, e\room\obj
+										ang# = WrapAngle(EntityYaw(pvt)-EntityYaw(e\room\obj,True))
+										
+										If ang > 90 And ang < 270 Then
+											e\EventState2 = 1
+										Else
+											e\EventState2 = 0
+										EndIf
+										FreeEntity pvt
+										
+										PositionEntity Collider, EntityX(e\room\Objects[2],True),0.5,EntityZ(e\room\Objects[2],True)
+										
+										RotateEntity Collider, 0, EntityYaw(e\room\obj,True)+e\EventState2*180, 0
+										MoveEntity Collider, 0,0,1.5
+										
+										ResetEntity Collider
+										
+										UpdateDoorsTimer = 0
+										UpdateDoors()
+										
+										SecondaryLightOn = PrevSecondaryLightOn
+										
+										e\EventState = 0.0
+										e\EventState3 = 0.0
+										
+										
+									EndIf
 								EndIf
 							EndIf
 						EndIf
@@ -8663,7 +8702,20 @@ Function UpdateEvents()
 						BlurTimer = 3000
 					EndIf
 				EndIf
-				;[End Block]
+			Case "room2hangar"
+				; Player is in the room
+				If PlayerRoom=e\room Then
+					; Big door to 002 open
+					If e\room\RoomDoors[0]\open Then
+						GiveAchievement(Achv002)
+						ShouldPlay = 27
+						e\room\RoomDoors[1]\locked = True
+						e\room\RoomDoors[1]\open = False
+					Else
+						e\room\RoomDoors[1]\locked = False
+					EndIf 
+				EndIf
+			;[Block End]
 		End Select
 	Next
 	

@@ -2167,8 +2167,8 @@ Function FillRoom(r.Rooms)
 ;			CameraFogMode dp\cam,1
 			
 			;doors to observation booth
-			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z + 640.0 * RoomScale,0,r,False,False,False,"ABCD")
-			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z - 640.0 * RoomScale,0,r,True,False,False,"ABCD")
+			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z + 640.0 * RoomScale,0,r,False,False,False,"FOREST")
+			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z - 640.0 * RoomScale,0,r,True,False,False,"FOREST")
 			d\AutoClose = False : d\MTFClose = False : d\DisableWaypoint = True
 			
 			;doors to the room itself
@@ -2887,9 +2887,11 @@ Function FillRoom(r.Rooms)
 			d\AutoClose = False : d\open = False	
 			
 			it = CreateItem("mysteriousnote", r\x + 736.0 * RoomScale, r\y + 224.0 * RoomScale, r\z + 544.0 * RoomScale)
-			EntityParent(it\collider, r\obj)	
+			EntityParent(it\collider, r\obj)
 			it = CreateItem("vest", r\x + 608.0 * RoomScale, r\y + 112.0 * RoomScale, r\z + 32.0 * RoomScale)
 			EntityParent(it\collider, r\obj) : RotateEntity(it\collider, 0, 90, 0)
+			it = CreateItem("scp005", r\x + 736.0 * RoomScale, r\y + 224.0 * RoomScale, r\z + 750.0 * RoomScale)
+			EntityParent(it\collider, r\obj)
 			
 			it = CreateItem("docIR106", r\x + 704.0 * RoomScale, r\y + 183.0 * RoomScale, r\z - 576.0 * RoomScale)
 			EntityParent(it\collider, r\obj)
@@ -5616,6 +5618,80 @@ Function FillRoom(r.Rooms)
 				EndIf
 				tempIt = tempIt\Successor
 			Wend
+		Case "room2scps3"
+			;[Block]
+			
+			; Maintenance Room
+			d.Doors = CreateDoor(r\zone, r\x + 264.0 * RoomScale, 0, r\z, 90, r, False, False, 1)
+			d\AutoClose = False
+			PositionEntity(d\buttons[0], r\x + 320.0 * RoomScale, EntityY(d\buttons[0],True), EntityZ(d\buttons[0],True), True)
+			PositionEntity(d\buttons[1], r\x + 224.0 * RoomScale, EntityY(d\buttons[1],True), EntityZ(d\buttons[1],True), True)
+			
+			; SCP room
+			d.Doors = CreateDoor(r\zone, r\x - 264.0 * RoomScale, 0, r\z, 270, r, False, False, 3)
+			d\AutoClose = False
+			PositionEntity(d\buttons[0], r\x - 320.0 * RoomScale, EntityY(d\buttons[0],True), EntityZ(d\buttons[0],True), True)
+			PositionEntity(d\buttons[1], r\x - 224.0 * RoomScale, EntityY(d\buttons[1],True), EntityZ(d\buttons[1],True), True)
+			
+			; Left door SCP room
+			d.Doors = CreateDoor(r\zone, r\x-560.0 * RoomScale, 0, r\z - 272.0 * RoomScale, 0, r)
+			d.Doors\AutoClose = False
+			
+			; Right door SCP room
+			d.Doors = CreateDoor(r\zone, r\x-560.0 * RoomScale, 0, r\z + 272.0 * RoomScale, 180, r)
+			d.Doors\AutoClose = False
+			
+			; Center door SCP room (SCP-005)
+			d.Doors = CreateDoor(r\zone, r\x-816.0 * RoomScale, 0, r\z, 270, r, False, False, 4)
+			d.Doors\AutoClose = False
+			
+			; maynard's note
+			it = CreateItem("maynard005note", r\x - 1152.0 * RoomScale, r\y + 224.0 * RoomScale, r\z)
+			EntityParent(it\collider, r\obj)
+			
+			sc.SecurityCams = CreateSecurityCam(r\x + 560.0 * RoomScale, r\y + 386 * RoomScale, r\z - 416.0 * RoomScale, r)
+			sc\angle = 180 : sc\turn = 30
+			TurnEntity(sc\CameraObj, 30, 0, 0)
+			EntityParent(sc\obj, r\obj)
+			
+			sc.SecurityCams = CreateSecurityCam(r\x - 560.0 * RoomScale, r\y + 386 * RoomScale, r\z - 416.0 * RoomScale, r)
+			sc\angle = 180 : sc\turn = 30
+			TurnEntity(sc\CameraObj, 30, 0, 0)
+			EntityParent(sc\obj, r\obj)
+			
+			sc.SecurityCams = CreateSecurityCam(r\x + 560.0 * RoomScale, r\y + 386 * RoomScale, r\z + 480.0 * RoomScale, r)
+			sc\angle = 0 : sc\turn = 30
+			TurnEntity(sc\CameraObj, 30, 0, 0)
+			EntityParent(sc\obj, r\obj)
+			
+			sc.SecurityCams = CreateSecurityCam(r\x - 560.0 * RoomScale, r\y + 386 * RoomScale, r\z + 480.0 * RoomScale, r)
+			sc\angle = 0 : sc\turn = 30
+			TurnEntity(sc\CameraObj, 30, 0, 0)
+			EntityParent(sc\obj, r\obj)
+			;[End Block]
+		Case "room2hangar"
+		
+			; Door to chamber
+			r\RoomDoors[1] = CreateDoor(r\zone, r\x - 1280.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 608.0 * RoomScale, 270, r)
+			r\RoomDoors[1]\AutoClose = False
+			
+			; Big door to hangar
+			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 2336.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 384.0 * RoomScale, 270, r, False, True, 3)
+			r\RoomDoors[0]\AutoClose = False
+			PositionEntity r\RoomDoors[0]\buttons[0], r\x - 2040.0 * RoomScale, r\y - 240.0 * RoomScale, r\z + 868.0 * RoomScale, True
+			FreeEntity r\RoomDoors[0]\buttons[1] : r\RoomDoors[0]\buttons[1] = 0
+			
+			; Door to window
+			d.Doors = CreateDoor(r\zone, r\x - 1920.0 * RoomScale, r\y - 448.0 * RoomScale, r\z + 76.0 * RoomScale, 180, r, False, False, 3)
+			d\AutoClose = False
+			
+			; Big door at the end of hangar
+			d.Doors = CreateDoor(r\zone, r\x - 6400.0 * RoomScale, r\y - 448.0 * RoomScale, r\z, 270, r, False, True)
+			d\AutoClose = False
+			FreeEntity d\buttons[0] : d\buttons[0] = 0
+			FreeEntity d\buttons[1] : d\buttons[1] = 0
+			
+			;
 	End Select
 	
 	For lt.lighttemplates = Each LightTemplates

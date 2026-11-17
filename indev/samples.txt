@@ -1,0 +1,35 @@
+new scp box thingy.vmf
+by helenathemeh
+
+50 dollar bill (achvbucks icon)
+by Wikipedia
+https://upload.wikimedia.org/wikipedia/commons/0/05/Obverse_of_the_%2450_Federal_Reserve_Note.jpg
+
+any new room, the base which was from ue rooms repo
+(mostly from) https://github.com/Jabka666/scpcb-ue-rooms/blob/main/Source%20Rooms/UE%20Dev%20Rooms/3dws/
+
+whitemetalwall.jpg
+https://www.magnific.com/ru/free-photo/white-corrugated-metal-wall-background_11181031.htm
+designed by ArthurHidden - Magnific.com
+(resized to 2048x2048)
+
+metalbeam.jpg
+pinterest.com/pin/857232110297117298/
+(resized to 256x256)
+
+redgrunge.jpg
+https://www.magnific.com/free-photo/red-grunge-texture_957855.htm
+Image by kjpargeter on Magnific
+(resized to 4096x4096)
+
+Any morse code audio
+morsecode.world
+
+Any resized images
+https://imageresizer.com/
+
+Any resized images more than 10mb
+https://www.iloveimg.com/resize-image
+
+Any source image edit
+GIMP https://www.gimp.org/
