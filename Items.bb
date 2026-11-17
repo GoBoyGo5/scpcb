@@ -868,7 +868,7 @@ Function PickItem(item.Items)
 						GiveAchievement(Achv860)
 					Case "key6"
 						GiveAchievement(AchvOmni)
-          Case "scp005"
+					Case "scp005"
 						GiveAchievement(Achv005)
 					Case "veryfinevest"
 						Msg = I_Loc\MessageItem_VestHeavy

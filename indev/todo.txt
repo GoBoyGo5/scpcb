@@ -1,6 +1,0 @@
-SCP-005
-- Inv icon
-- Achv icon
-SCP-002
-- chamber label
-- Achv icon
