@@ -5646,7 +5646,7 @@ Function FillRoom(r.Rooms)
 			d.Doors\AutoClose = False
 			
 			; maynard's note
-			it = CreateItem("maynard005note", r\x - 1152.0 * RoomScale, r\y + 224.0 * RoomScale, r\z)
+			it = CreateItem("scp005note", r\x - 1152.0 * RoomScale, r\y + 224.0 * RoomScale, r\z)
 			EntityParent(it\collider, r\obj)
 			
 			sc.SecurityCams = CreateSecurityCam(r\x + 560.0 * RoomScale, r\y + 386 * RoomScale, r\z - 416.0 * RoomScale, r)
@@ -5670,10 +5670,8 @@ Function FillRoom(r.Rooms)
 			EntityParent(sc\obj, r\obj)
 			;[End Block]
 		Case "room2hangar"
-		
 			; Door to chamber
-			r\RoomDoors[1] = CreateDoor(r\zone, r\x - 1280.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 608.0 * RoomScale, 270, r)
-			r\RoomDoors[1]\AutoClose = False
+			CreateDoor(r\zone, r\x - 1280.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 608.0 * RoomScale, 270, r)
 			
 			; Big door to hangar
 			r\RoomDoors[0] = CreateDoor(r\zone, r\x - 2336.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 384.0 * RoomScale, 270, r, False, True, 3)
@@ -5682,7 +5680,7 @@ Function FillRoom(r.Rooms)
 			FreeEntity r\RoomDoors[0]\buttons[1] : r\RoomDoors[0]\buttons[1] = 0
 			
 			; Door to window
-			d.Doors = CreateDoor(r\zone, r\x - 1920.0 * RoomScale, r\y - 448.0 * RoomScale, r\z + 76.0 * RoomScale, 180, r, False, False, 3)
+			d.Doors = CreateDoor(r\zone, r\x - 1920.0 * RoomScale, r\y - 448.0 * RoomScale, r\z + 88.0 * RoomScale, 180, r, False, False, 3)
 			d\AutoClose = False
 			
 			; Big door at the end of hangar
@@ -5691,7 +5689,16 @@ Function FillRoom(r.Rooms)
 			FreeEntity d\buttons[0] : d\buttons[0] = 0
 			FreeEntity d\buttons[1] : d\buttons[1] = 0
 			
-			;
+			; Door to big door to chamber
+			CreateDoor(r\zone, r\x - 2128.0 * RoomScale, r\y - 448.0 * RoomScale, r\z - 384.0 * RoomScale, 270, r)
+			
+			;Keycard
+			it = CreateItem("key4", r\x - 1792.0 * RoomScale, r\y - 288.0 * RoomScale, r\z + 816.0 * RoomScale)
+			EntityParent(it\collider, r\obj) : RotateEntity(it\collider, 0, 15, 0)
+			
+			;002 doc
+			it = CreateItem("doc330", r\x - 1664.0 * RoomScale, r\y - 192.0 * RoomScale, r\z + 800.0 * RoomScale)
+			EntityParent(it\collider, r\obj) : RotateEntity(it\collider, 0, -30, 0)
 	End Select
 	
 	For lt.lighttemplates = Each LightTemplates

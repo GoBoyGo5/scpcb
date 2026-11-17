@@ -8703,17 +8703,12 @@ Function UpdateEvents()
 					EndIf
 				EndIf
 			Case "room2hangar"
-				; Player is in the room
 				If PlayerRoom=e\room Then
 					; Big door to 002 open
 					If e\room\RoomDoors[0]\open Then
 						GiveAchievement(Achv002)
 						ShouldPlay = 27
-						e\room\RoomDoors[1]\locked = True
-						e\room\RoomDoors[1]\open = False
-					Else
-						e\room\RoomDoors[1]\locked = False
-					EndIf 
+					EndIf
 				EndIf
 			;[Block End]
 		End Select
