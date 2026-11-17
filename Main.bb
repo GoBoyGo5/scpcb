@@ -3528,7 +3528,7 @@ Function MovePlayer()
 	Local temp#
 	
 	If PlayerRoom\RoomTemplate\Name<>"pocketdimension" Then 
-		If KeyDown(KEY_SPRINT) Then
+		If KeyDown(KEY_SPRINT) And (Not Crouch) Then
 			If Stamina < 5 Then
 				temp = 0
 				If WearingGasMask>0 Or Wearing1499>0 Then temp=1
@@ -4590,54 +4590,19 @@ Function DrawGUI()
 				EndIf
 			Else
 				If MouseSlot = 66 Then
-					If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
-					
-					ShowEntity(SelectedItem\collider)
-					PositionEntity(SelectedItem\collider, EntityX(Camera), EntityY(Camera), EntityZ(Camera))
-					RotateEntity(SelectedItem\collider, EntityPitch(Camera), EntityYaw(Camera), 0)
-					MoveEntity(SelectedItem\collider, 0, -0.1, 0.1)
-					RotateEntity(SelectedItem\collider, 0, Rand(360), 0)
-					ResetEntity (SelectedItem\collider)
-					;move the item so that it doesn't overlap with other items
-					;For it.Items = Each Items
-					;	If it <> SelectedItem And it\Picked = False Then
-					;		x = Abs(EntityX(SelectedItem\collider, True)-EntityX(it\collider, True))
-					;		If x < 0.2 Then 
-					;			z = Abs(EntityZ(SelectedItem\collider, True)-EntityZ(it\collider, True))
-					;			If z < 0.2 Then
-					;				While (x+z)<0.25
-					;					MoveEntity(SelectedItem\collider, 0, 0, 0.025)
-					;					x = Abs(EntityX(SelectedItem\collider, True)-EntityX(it\collider, True))
-					;					z = Abs(EntityZ(SelectedItem\collider, True)-EntityZ(it\collider, True))
-					;				Wend
-					;			EndIf
-					;		EndIf
-					;	EndIf
-					;Next
-					
-					SelectedItem\DropSpeed = 0.0
-					
-					SelectedItem\Picked = False
-					For z% = 0 To OtherSize - 1
-						If OtherOpen\Inventory\Items[z] = SelectedItem Then
-							OtherOpen\Inventory\Items[z] = Null
-							Exit
-						EndIf
-					Next
+					DropItem(SelectedItem)
 					
 					isEmpty=True
 					If OtherOpen\itemtemplate\name = "wallet" Then
-						If (Not isEmpty) Then
-							For z% = 0 To OtherSize - 1
-								If OtherOpen\Inventory\Items[z]<>Null
-									Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
-									If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" Then
-										isEmpty=False
-										Exit
-									EndIf
+						For z% = 0 To OtherSize - 1
+							If OtherOpen\Inventory\Items[z]<>Null
+								Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
+								If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" Then
+									isEmpty=False
+									Exit
 								EndIf
-							Next
-						EndIf
+							EndIf
+						Next
 					Else
 						For z% = 0 To OtherSize - 1
 							If OtherOpen\Inventory\Items[z]<>Null
@@ -4902,7 +4867,7 @@ Function DrawGUI()
 										MsgTimer = 70 * 5
 									EndIf
 								ElseIf Inventory(MouseSlot)\itemtemplate\name = "wallet" Then
-									;Add an item to clipboard
+									;Add an item to wallet
 									added.Items = Null
 									b$ = SelectedItem\itemtemplate\group
 									b2$ = SelectedItem\itemtemplate\name
@@ -6966,8 +6931,9 @@ Function DrawMap()
 	Local startX% = HUDEndX - (MapWidth + 1) * cellSize
 	Local startY% = HUDEndY - (MapHeight + 1) * cellSize
 
+	Local hoveredRoom.Rooms
 	For r.Rooms = Each Rooms					
-		If PlayerRoom\x = r\x And PlayerRoom\z = r\z Then
+		If PlayerRoom = r Then
 			Color 0, 255, 0
 		Else
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
@@ -6976,13 +6942,65 @@ Function DrawMap()
 		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
 		Local y% = startY + ((r\z / 8) * cellSize)
 
-		If MouseOn(x, y, cellSize, cellSize) 
+		If MouseOn(x, y, cellSize+1, cellSize+1) 
+			hoveredRoom = r
 			Color 100, 255, 100
 			If MouseHit1
 				Teleport(r)
 			EndIf
 		EndIf
 		Rect(x, y, cellSize, cellSize, 1)
+	Next
+
+	If hoveredRoom = Null Then Return
+
+	Local isSelected% = KeyDown(29)
+	Local lines% = 1
+	For e.Events = Each Events
+		If e\room = hoveredRoom Then
+			lines = lines + 1
+			If isSelected Then lines = lines + 4
+			Exit
+		EndIf
+	Next
+	Local height% = StringHeight("T")
+	Local mx% = MouseX() + 5, my% = MouseY() + 21
+	Local totalWidth% = 0
+	For action% = 0 To 1
+		For strNo% = 0 To lines-1
+			Local line$
+			Select strNo
+				Case 0 line = hoveredRoom\RoomTemplate\Name
+				Case 1 line = "Event: " + e\EventName
+				Case 2 line = "State: " + e\EventState
+				Case 3 line = "State2: " + e\EventState2
+				Case 4 line = "State3: " + e\EventState3
+				Case 5 line = "String: " + e\EventStr
+			End Select
+
+			If action = 0 Then
+				Local lineWidth% = StringWidth(line)
+				If strNo = 0 Then lineWidth = lineWidth + ImageWidth(MenuArrowIMG) + 5*MenuScale
+				totalWidth = Max(totalWidth, lineWidth)
+			Else
+				Text(mx+10*MenuScale, my+10*MenuScale + strNo*height, line)
+				If strNo = 0 Then
+					RotateImage(MenuArrowIMG, hoveredRoom\angle)
+					DrawImage(MenuArrowIMG, mx+10*MenuScale+StringWidth(line)+2.5*MenuScale, my+10*MenuScale + strNo*height - height * 1 / 3)
+					RotateImage(MenuArrowIMG, 90)
+				EndIf
+			EndIf
+		Next
+		If action = 0 Then
+			totalWidth = totalWidth + 20 * MenuScale
+			Local totalHeight = (height*lines)+(15+lines)*MenuScale
+			; Center below cursor
+			mx = mx - totalWidth / 2
+			; Cap at screen edge
+			If mx + totalWidth > GraphicWidth Then mx = GraphicWidth - totalWidth
+			If my + totalHeight > GraphicHeight Then my = GraphicHeight - totalHeight
+			DrawFrame(mx,my,totalWidth,totalHeight, 0, 0, False)
+		EndIf
 	Next
 End Function
 
