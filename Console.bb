@@ -453,13 +453,11 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             Local itt.ItemTemplates = FindItemTemplate(Right(cmd, Len(cmd) - Instr(cmd, " ")))
             If itt = Null Then
                 CreateConsoleMsg("Item not found.",255,150,0)
+            Elseif itt\name = "cup"
+                CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
             Else
                 CreateConsoleMsg(itt\displayname + " spawned.")
                 it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-
-                If itt\name = "snavulti" Lor itt\name = "fineradio" Lor itt\name = "veryfineradio" Then
-                    it\state = 101
-                EndIf
             End If
             ;[End Block]
         Case "giveitem"
@@ -470,6 +468,8 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
                 itt.ItemTemplates = FindItemTemplate(Right(cmd, Len(cmd) - Instr(cmd, " ")))
                 If itt = Null Then
                     CreateConsoleMsg("Item not found.",255,150,0)
+                Elseif itt\name = "cup"
+                    CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
                 Else
                     CreateConsoleMsg(itt\displayname + " given.")
                     it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
@@ -984,7 +984,6 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
         Case "spawnradio"
             ;[Block]
             it.Items = CreateItem("fineradio", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-            it\state = 101
             ;[End Block]
         Case "spawnnvg"
             ;[Block]
@@ -998,7 +997,6 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
         Case "spawnnav"
             ;[Block]
             it.Items = CreateItem("snavulti", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-            it\state = 101
             ;[End Block]
         Case "teleport173"
             ;[Block]
@@ -1144,7 +1142,7 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
             Else
                 CreateConsoleMsg("SHOW MAP OFF")
             EndIf
-            If ShowMap% Then CreateConsoleMsg("TYPE " + Chr(34) + "help showmap" + Chr(34) + " FOR A LIST OF ROOM COLORS")
+            If ShowMap% Then CreateConsoleMsg("TYPE " + Chr(34) + "help showmap" + Chr(34) + " FOR A LIST OF ROOM COLORS") : CreateConsoleMsg("HOLD CTRL WHILE HOVERING A ROOM FOR EVENT DETAILS")
             ;[End Block]
         Case "timescale"
             TimeScale = Float(Lower(Right(cmd, Len(cmd) - Instr(cmd, " "))))
@@ -1156,8 +1154,8 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
                 If keyName <> "" Then CreateConsoleMsg(i + ": " + keyName)
             Next
         Case "bind"
-            Local argStart% = Instr(cmd, " ")
-            Local cmdStart% = Instr(cmd, " ", argStart + 1)
+            Local argStart% = Instr(cmd, " ") + 1
+            Local cmdStart% = Instr(cmd, " ", argStart)
             Local bindingKey% = Int(Mid(cmd, argStart, cmdStart - argStart))
             Local bindingCmd$ = Right(cmd, Len(cmd) - cmdStart)
             Local verb$ = "Bound "

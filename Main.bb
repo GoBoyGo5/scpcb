@@ -1,4 +1,4 @@
-Const VersionNumber$ = "1.3.12.7.1"
+Const VersionNumber$ = "1.3.12.8"
 ;Only change this if the version given isn't working with the current build version - ENDSHN
 Const CompatibleNumber$ = "1.3.12.7.1"
 
@@ -550,9 +550,6 @@ End Type
 
 Include "Bindings.bb"
 Include "Console.bb"
-
-If FileType(DataDir + "cfg\autoexec.cfg") = 1 Then
-ExecuteCfg(DataDir + "cfg\autoexec.cfg") EndIf
 
 Function ExecAutoExec()
 	Local autoExec$ = DataDir + "autoexec.cfg"
@@ -3493,7 +3490,7 @@ Function MovePlayer()
 	Local temp#
 	
 	If PlayerRoom\RoomTemplate\Name<>"pocketdimension" Then 
-		If KeyDown(KEY_SPRINT) Then
+		If KeyDown(KEY_SPRINT) And (Not Crouch) Then
 			If Stamina < 5 Then
 				temp = 0
 				If WearingGasMask>0 Or Wearing1499>0 Then temp=1
@@ -3892,11 +3889,11 @@ Function MouseLook(handleInput% = True)
 		Else
 			
 			If KillAnim = 0 Then 
-				MoveEntity Head, 0, 0, HeadDropSpeed
+				MoveEntity Head, 0, 0, HeadDropSpeed * FPSfactor
 				RotateEntity(Head, CurveAngle(-90.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
 				RotateEntity(Camera, CurveAngle(EntityPitch(Head) - 40.0, EntityPitch(Camera), 40.0), EntityYaw(Camera), EntityRoll(Camera))
 			Else
-				MoveEntity Head, 0, 0, -HeadDropSpeed
+				MoveEntity Head, 0, 0, -HeadDropSpeed * FPSfactor
 				RotateEntity(Head, CurveAngle(90.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
 				RotateEntity(Camera, CurveAngle(EntityPitch(Head) + 40.0, EntityPitch(Camera), 40.0), EntityYaw(Camera), EntityRoll(Camera))
 			EndIf
@@ -4520,54 +4517,19 @@ Function DrawGUI()
 				EndIf
 			Else
 				If MouseSlot = 66 Then
-					If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
-					
-					ShowEntity(SelectedItem\collider)
-					PositionEntity(SelectedItem\collider, EntityX(Camera), EntityY(Camera), EntityZ(Camera))
-					RotateEntity(SelectedItem\collider, EntityPitch(Camera), EntityYaw(Camera), 0)
-					MoveEntity(SelectedItem\collider, 0, -0.1, 0.1)
-					RotateEntity(SelectedItem\collider, 0, Rand(360), 0)
-					ResetEntity (SelectedItem\collider)
-					;move the item so that it doesn't overlap with other items
-					;For it.Items = Each Items
-					;	If it <> SelectedItem And it\Picked = False Then
-					;		x = Abs(EntityX(SelectedItem\collider, True)-EntityX(it\collider, True))
-					;		If x < 0.2 Then 
-					;			z = Abs(EntityZ(SelectedItem\collider, True)-EntityZ(it\collider, True))
-					;			If z < 0.2 Then
-					;				While (x+z)<0.25
-					;					MoveEntity(SelectedItem\collider, 0, 0, 0.025)
-					;					x = Abs(EntityX(SelectedItem\collider, True)-EntityX(it\collider, True))
-					;					z = Abs(EntityZ(SelectedItem\collider, True)-EntityZ(it\collider, True))
-					;				Wend
-					;			EndIf
-					;		EndIf
-					;	EndIf
-					;Next
-					
-					SelectedItem\DropSpeed = 0.0
-					
-					SelectedItem\Picked = False
-					For z% = 0 To OtherSize - 1
-						If OtherOpen\Inventory\Items[z] = SelectedItem Then
-							OtherOpen\Inventory\Items[z] = Null
-							Exit
-						EndIf
-					Next
+					DropItem(SelectedItem)
 					
 					isEmpty=True
 					If OtherOpen\itemtemplate\name = "wallet" Then
-						If (Not isEmpty) Then
-							For z% = 0 To OtherSize - 1
-								If OtherOpen\Inventory\Items[z]<>Null
-									Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
-									If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" And name$<>"scp714" Then
-										isEmpty=False
-										Exit
-									EndIf
+						For z% = 0 To OtherSize - 1
+							If OtherOpen\Inventory\Items[z]<>Null
+								Local name$=OtherOpen\Inventory\Items[z]\itemtemplate\name
+								If name$<>"25ct" And name$<>"coin" And name$<>"key" And name$<>"scp860" Then
+									isEmpty=False
+									Exit
 								EndIf
-							Next
-						EndIf
+							EndIf
+						Next
 					Else
 						For z% = 0 To OtherSize - 1
 							If OtherOpen\Inventory\Items[z]<>Null
@@ -4832,7 +4794,7 @@ Function DrawGUI()
 										MsgTimer = 70 * 5
 									EndIf
 								ElseIf Inventory(MouseSlot)\itemtemplate\name = "wallet" Then
-									;Add an item to clipboard
+									;Add an item to wallet
 									added.Items = Null
 									b$ = SelectedItem\itemtemplate\group
 									b2$ = SelectedItem\itemtemplate\name
@@ -6401,41 +6363,47 @@ Function DrawGUI()
 					;[End Block]
 				Case "eyecandy"
 					;[Block]
-					If CanUseItem(False, False, True)						
-						Local closestWaypoint.WayPoints
-						Local minDist# = INFINITY
-						Local collX# = EntityX(Collider), collY# = EntityY(Collider), collZ# = EntityZ(Collider)
-						For w.WayPoints = Each WayPoints
-							dist# = (EntityX(w\obj, True) - collX)^2 + (EntityY(w\obj, True) - collY)^2 + (EntityZ(w\obj, True) - collZ)^2
-							If dist < minDist And dist > 0.4 Then
-								closestWaypoint = w
-								minDist = dist
-							EndIf
-						Next
-						If minDist < 8 * 8 Then
-							If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
-							
-							Local jello.NPCs = CreateNPC(NPCtype066, EntityX(closestWaypoint\obj, True), EntityY(closestWaypoint\obj, True) + 0.1, EntityZ(closestWaypoint\obj, True))
-							jello\State = 2
-							it = CreateItem("killbat", 0, 0, 0)
-							it\state = True
-							ChangeNPCTextureID(jello, 1)
-							EntityParent(it\collider, jello\ManipulationType)
-							PositionEntity(it\collider, 0, 0, 0)
-							ResetEntity(it\collider)
-
+					If CanUseItem(False, False, True)
+						If (Not IsHalloween) Then
+							MsgTimer = 70*10
+							Msg = I_Loc\MessageItem_EyecandyUseStale
 							RemoveItem(SelectedItem)
-							
-							LightVolume = -1.25
-							
-							Msg = I_Loc\MessageItem_EyecandyUse
 						Else
-							Msg = I_Loc\MessageItem_EyecandyUseShock
-						EndIf
-						MsgTimer = 70*12
+							Local closestWaypoint.WayPoints
+							Local minDist# = INFINITY
+							Local collX# = EntityX(Collider), collY# = EntityY(Collider), collZ# = EntityZ(Collider)
+							For w.WayPoints = Each WayPoints
+								dist# = (EntityX(w\obj, True) - collX)^2 + (EntityY(w\obj, True) - collY)^2 + (EntityZ(w\obj, True) - collZ)^2
+								If dist < minDist And dist > 0.4 Then
+									closestWaypoint = w
+									minDist = dist
+								EndIf
+							Next
+							If minDist < 8 * 8 Then
+								If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
+								
+								Local jello.NPCs = CreateNPC(NPCtype066, EntityX(closestWaypoint\obj, True), EntityY(closestWaypoint\obj, True) + 0.1, EntityZ(closestWaypoint\obj, True))
+								jello\State = 2
+								it = CreateItem("killbat", 0, 0, 0)
+								it\state = True
+								ChangeNPCTextureID(jello, 1)
+								EntityParent(it\collider, jello\ManipulationType)
+								PositionEntity(it\collider, 0, 0, 0)
+								ResetEntity(it\collider)
 
-						PlaySound_Strict(LoadTempSound("SFX\Room\Tesla\Shock.ogg"))
-						LightFlash = 0.5
+								RemoveItem(SelectedItem)
+								
+								LightVolume = -1.25
+								
+								Msg = I_Loc\MessageItem_EyecandyUse
+							Else
+								Msg = I_Loc\MessageItem_EyecandyUseShock
+							EndIf
+							MsgTimer = 70*12
+
+							PlaySound_Strict(LoadTempSound("SFX\Room\Tesla\Shock.ogg"))
+							LightFlash = 0.5
+						EndIf
 
 						SelectedItem = Null
 					EndIf
@@ -6443,10 +6411,13 @@ Function DrawGUI()
 				Case "lollipop"
 					;[Block]
 					If CanUseItem(False, False, True)
-						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
+						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
 
 						MsgTimer = 70*10
-						If PlayerRoom\RoomTemplate\Name = "halloweenfields" Then
+						If (Not IsHalloween) Then
+							Msg = I_Loc\MessageItem_LollipopUseStale
+							RemoveItem(SelectedItem)
+						Else If PlayerRoom\RoomTemplate\Name = "halloweenfields" Then
 							Msg = I_Loc\MessageItem_LollipopUseNumb
 							RemoveItem(SelectedItem)
 						Else
@@ -6469,10 +6440,13 @@ Function DrawGUI()
 				Case "chocolate"
 					;[Block]
 					If CanUseItem(False, False, True)
-						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
+						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("candies_eaten", Steam_GetStatInt("candies_eaten") + 1)
 
 						MsgTimer = 70*10
-						If PlayerRoom\RoomTemplate\Name = "halloweenpd" Lor PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
+						If (Not IsHalloween) Then
+							Msg = I_Loc\MessageItem_ChocolateUseStale
+							RemoveItem(SelectedItem)
+						Else If PlayerRoom\RoomTemplate\Name = "halloweenpd" Lor PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
 							Msg = I_Loc\MessageItem_ChocolateUseNumb
 							RemoveItem(SelectedItem)
 						Else
@@ -6793,6 +6767,9 @@ Function DrawHUD()
 	EndIf
 
 	If DebugHUD Then
+		x% = HUDStartX + 80
+		y% = HUDEndY - 95
+
 		Color 255, 255, 255
 		SetFont ConsoleFont
 		
@@ -6880,8 +6857,9 @@ Function DrawMap()
 	Local startX% = HUDEndX - (MapWidth + 1) * cellSize
 	Local startY% = HUDEndY - (MapHeight + 1) * cellSize
 
+	Local hoveredRoom.Rooms
 	For r.Rooms = Each Rooms					
-		If PlayerRoom\x = r\x And PlayerRoom\z = r\z Then
+		If PlayerRoom = r Then
 			Color 0, 255, 0
 		Else
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
@@ -6890,13 +6868,65 @@ Function DrawMap()
 		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
 		Local y% = startY + ((r\z / 8) * cellSize)
 
-		If MouseOn(x, y, cellSize, cellSize) 
+		If MouseOn(x, y, cellSize+1, cellSize+1) 
+			hoveredRoom = r
 			Color 100, 255, 100
 			If MouseHit1
 				Teleport(r)
 			EndIf
 		EndIf
 		Rect(x, y, cellSize, cellSize, 1)
+	Next
+
+	If hoveredRoom = Null Then Return
+
+	Local isSelected% = KeyDown(29)
+	Local lines% = 1
+	For e.Events = Each Events
+		If e\room = hoveredRoom Then
+			lines = lines + 1
+			If isSelected Then lines = lines + 4
+			Exit
+		EndIf
+	Next
+	Local height% = StringHeight("T")
+	Local mx% = MouseX() + 5, my% = MouseY() + 21
+	Local totalWidth% = 0
+	For action% = 0 To 1
+		For strNo% = 0 To lines-1
+			Local line$
+			Select strNo
+				Case 0 line = hoveredRoom\RoomTemplate\Name
+				Case 1 line = "Event: " + e\EventName
+				Case 2 line = "State: " + e\EventState
+				Case 3 line = "State2: " + e\EventState2
+				Case 4 line = "State3: " + e\EventState3
+				Case 5 line = "String: " + e\EventStr
+			End Select
+
+			If action = 0 Then
+				Local lineWidth% = StringWidth(line)
+				If strNo = 0 Then lineWidth = lineWidth + ImageWidth(MenuArrowIMG) + 5*MenuScale
+				totalWidth = Max(totalWidth, lineWidth)
+			Else
+				Text(mx+10*MenuScale, my+10*MenuScale + strNo*height, line)
+				If strNo = 0 Then
+					RotateImage(MenuArrowIMG, hoveredRoom\angle)
+					DrawImage(MenuArrowIMG, mx+10*MenuScale+StringWidth(line)+2.5*MenuScale, my+10*MenuScale + strNo*height - height * 1 / 3)
+					RotateImage(MenuArrowIMG, 90)
+				EndIf
+			EndIf
+		Next
+		If action = 0 Then
+			totalWidth = totalWidth + 20 * MenuScale
+			Local totalHeight = (height*lines)+(15+lines)*MenuScale
+			; Center below cursor
+			mx = mx - totalWidth / 2
+			; Cap at screen edge
+			If mx + totalWidth > GraphicWidth Then mx = GraphicWidth - totalWidth
+			If my + totalHeight > GraphicHeight Then my = GraphicHeight - totalHeight
+			DrawFrame(mx,my,totalWidth,totalHeight, 0, 0, False)
+		EndIf
 	Next
 End Function
 
@@ -8194,11 +8224,13 @@ Function LoadEntities()
 
 	tex = 0
 	If IsHalloween Then
-		tex = LoadTexture_Strict("GFX\map\Halloween\miscsigns3_Halloween.png", 1)
+		If Left(CurrentDate(), 7) = "31 Oct " Then
+			tex = LoadTexture_Strict("GFX\map\Halloween\miscsigns3_Halloween.png", 1)
+		Else
+ 			tex = LoadTexture_Strict("GFX\map\Halloween\miscsigns3_Pumpkin.png", 1)
+		EndIf
 	Else If IsBirthday Then
 		tex = LoadTexture_Strict("GFX\map\miscsigns3.ae", 1)
-	Else
-		tex = LoadTexture_Strict("GFX\map\Halloween\miscsigns3_Pumpkin.png", 1)
 	End If
 	If tex <> 0 Then
 		TextureBlend(tex, 5)
@@ -9284,7 +9316,13 @@ End Function
 ;--------------------------------------- random -------------------------------------------------------
 
 Function f2s$(n#, count%)
-	Return Left(n, Len(Int(Str(n)))+count+1)
+	Local targetSize% = Len(Int(Str(n)))+count+1
+	Local ret$ = Left(n, targetSize)
+	If Len(ret) < targetSize Then
+		If Instr(ret, ".") = 0 Then ret = ret + "."
+		ret = ret + String("0", targetSize - Len(ret))
+	EndIf
+	Return ret
 End Function
 
 Function AnimateNPC(n.NPCs, start#, quit#, speed#, loop=True)
@@ -9439,11 +9477,11 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					PositionEntity(item\collider, x, y, z)
 					ResetEntity(item\collider)
 				Case "fine"
-					item\Inventory\Size = Max(item\state2,15)
+					item\Inventory\Size = Max(item\Inventory\Size,15)
 					PositionEntity(item\collider, x, y, z)
 					ResetEntity(item\collider)
 				Case "very fine"
-					item\Inventory\Size = Max(item\state2,20)
+					item\Inventory\Size = Max(item\Inventory\Size,20)
 					PositionEntity(item\collider, x, y, z)
 					ResetEntity(item\collider)
 			End Select
@@ -9736,7 +9774,6 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					it2\state = 100
 				Case "very fine"
 					it2 = CreateItem("snavulti", x, y, z)
-					it2\state = 101
 			End Select
 			
 			RemoveItem(item)
@@ -9749,10 +9786,8 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 					it2\state = 100
 				Case "fine"
 					it2 = CreateItem("fineradio", x, y, z)
-					it2\state = 101
 				Case "very fine"
 					it2 = CreateItem("veryfineradio", x, y, z)
-					it2\state = 101
 			End Select
 			
 			RemoveItem(item)
@@ -9969,7 +10004,7 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 						EndIf
 					Next
 					If flute <> Null And killbat <> Null And pumpkin <> Null Then
-						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_unlocked_infinite_candy_bowl", 1)
+						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_unlocked_infinite_candy_bowl", 1)
 						RemoveItem(flute)
 						RemoveItem(killbat)
 						RemoveItem(pumpkin)
@@ -11359,10 +11394,10 @@ Function RenderWorld2()
 			Local plusY% = 0
 			If hasBattery=1 Then plusY% = 40
 			
-			Text GraphicWidth/2,HUDStartY+(20+plusY)*HUDScale,I_Loc\HUD_NvgRefresh,True,False
+			Text GraphicWidth/2,HUDStartY+(16+plusY)*HUDScale,I_Loc\HUD_NvgRefresh,True,False
 			
-			Text GraphicWidth/2,HUDStartY+(60+plusY)*HUDScale,Max(f2s(NVTimer/60.0,1),0.0),True,False
-			Text GraphicWidth/2,HUDStartY+(100+plusY)*HUDScale,I_Loc\HUD_NvgRefreshSeconds,True,False
+			Text GraphicWidth/2,HUDStartY+(44+plusY)*HUDScale,f2s(Max(NVTimer/60.0,0.0),1),True,False
+			Text GraphicWidth/2,HUDStartY+(72+plusY)*HUDScale,I_Loc\HUD_NvgRefreshSeconds,True,False
 			
 			Local temp% = CreatePivot(), temp2% = CreatePivot()
 			PositionEntity temp, EntityX(Collider), EntityY(Collider), EntityZ(Collider)

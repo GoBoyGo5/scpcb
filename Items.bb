@@ -322,6 +322,8 @@ Function CreateItem.Items(name$, x#, y#, z#)
 	ElseIf name="scp330" then
 		i\state = 1 Shl Rand(0, 2)
 		SetAnimTime i\model, i\state + 1
+	ElseIf name = "snavulti" Lor name = "fineradio" Lor name = "veryfineradio" Then
+		i\state = 101
 	EndIf
 	
 	i\ID=LastItemID+1
@@ -927,7 +929,7 @@ Function PickItem(item.Items)
 							SelectedItem = item
 						EndIf
 					Case "scp330"
-						If SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
+						If IsHalloween And SteamActive And (Not UsedConsole) Then Steam_SetStatInt("has_grabbed_candy", 1)
 						If item\state = -1 Then
 							; Empty, allow it to be picked up
 						ElseIf item\state = -3 Then
@@ -996,6 +998,14 @@ Function PickItem(item.Items)
 				item\Dropped = -1
 				
 				item\itemtemplate\found=True
+				If item\Inventory <> Null Then
+					For i% = 0 To item\Inventory\Size-1
+						If item\Inventory\Items[i] <> Null Then
+							item\Inventory\Items[i]\itemtemplate\found = True
+						EndIf
+					Next
+				EndIf
+
 				ItemAmount = ItemAmount + 1
 				
 				Inventory(n) = item
@@ -1066,12 +1076,21 @@ Function DropItem(item.Items,playdropsound%=True)
 	ResetEntity (item\collider)
 	
 	item\Picked = False
-	For z% = 0 To MaxItemAmount - 1
-		If Inventory(z) = item Then
-			Inventory(z) = Null
-			Exit
-		EndIf
-	Next
+	If OtherOpen <> Null Then
+		For z% = 0 To OtherOpen\Inventory\Size - 1
+			If OtherOpen\Inventory\Items[z] = item Then
+				OtherOpen\Inventory\Items[z] = Null
+				Exit
+			EndIf
+		Next
+	Else
+		For z% = 0 To MaxItemAmount - 1
+			If Inventory(z) = item Then
+				Inventory(z) = Null
+				Exit
+			EndIf
+		Next
+	EndIf
 	Select item\itemtemplate\name
 		Case "gasmask", "supergasmask", "gasmask3"
 			WearingGasMask = False
