@@ -2083,7 +2083,7 @@ Function LoadSaveGames()
 	Dim SaveGameVersion$(SaveGameAmount + 1)
 	Dim SaveGamePlayTime%(SaveGameAmount + 1)
 	Dim SaveGameMods$(SaveGameAmount + 1)
-	Dim SaveGameModsWarn$(SaveGameAmount + 1)
+	;Dim SaveGameModsWarn$(SaveGameAmount + 1)
 	For i = 1 To SaveGameAmount
 		DebugLog (SavePath + SaveGames(i - 1))
 		Local f% = ReadFile(SavePath + SaveGames(i - 1) + ".cbsav")
@@ -2101,7 +2101,7 @@ Function LoadSaveGames()
 		SaveGameVersion(i - 1) = ReadString(f)
 		
 		; Mods save
-		Local errorList$ = "", warnList$ = ""
+		Local list$ = "";, warnList$ = ""
 		
 		Local temp% = ReadInt(f)
 		For k = 1 To temp
@@ -2125,19 +2125,19 @@ Function LoadSaveGames()
 			Next
 			
 			If Not found Then
-				Select level
-					Case 1
-						If warnList <> "" Then warnList = warnList + Chr(1)
-						warnList = warnList + name
-					Case 2
-						If errorList <> "" Then errorList = errorList + Chr(1)
-						errorList = errorList + name
-				End Select
+				;Select level
+				;	Case 1
+				;		If warnList <> "" Then warnList = warnList + Chr(1)
+				;		warnList = warnList + name
+				;	Case 2
+						If list <> "" Then list = list + Chr(1)
+						list = list + name
+				;End Select
 			EndIf
 		Next
 		
-		SaveGameMods(i - 1) = errorList
-		SaveGameModsWarn(i - 1) = warnList
+		SaveGameMods(i - 1) = list
+		;SaveGameModsWarn(i - 1) = warnList
 		
 		CloseFile f
 	Next

@@ -37,8 +37,8 @@ Global SaveMSG$
 
 ; Mods
 Global ModsMSG$
-Global ModsWarnMSG$
-Global ModsWarnSaveIdx%
+;Global ModsWarnMSG$
+;Global ModsWarnSaveIdx%
 Global ModsPage%
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
@@ -51,7 +51,7 @@ Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
 Dim SaveGamePlayTime%(SaveGameAmount + 1)
 Dim SaveGameMods$(SaveGameAmount + 1)
-Dim SaveGameModsWarn$(SaveGameAmount + 1)
+;Dim SaveGameModsWarn$(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
 Global HideIncompatibleSaves% = GetOptionInt("general", "hide incompatible saves")
 
@@ -569,9 +569,9 @@ Function UpdateMainMenu()
 
 										If SaveGameMods(SaveIdx) <> "" Then
 											ModsMSG = SaveGameMods(SaveIdx)
-										ElseIf SaveGameModsWarn(SaveIdx) <> ""
-											ModsWarnMSG = SaveGameModsWarn(SaveIdx)
-											ModsWarnSaveIdx = SaveIdx
+										;ElseIf SaveGameModsWarn(SaveIdx) <> ""
+										;	ModsWarnMSG = SaveGameModsWarn(SaveIdx)
+										;	ModsWarnSaveIdx = SaveIdx
 										Else
 											LoadEntities()
 											LoadAllSounds()
@@ -634,30 +634,30 @@ Function UpdateMainMenu()
 						If DrawModsPopup(I_Loc\LoadGame_ModsWarning, ModsMSG) Then ModsMSG = ""
 					EndIf
 					
-					If ModsWarnMSG <> "" Then
-						ModsPage = 0
-						Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, 1)
-						
-						If result <> 0 Then ModsWarnMSG = ""
-						
-						If result = 1 Then
-							LoadEntities()
-							LoadAllSounds()
-							InitRoomTemplates()
-							LoadGame(SaveGames(ModsWarnSaveIdx))
-							CurrSave = SaveGames(ModsWarnSaveIdx)
-							InitLoadGame()
-							MainMenuOpen = False
-							Return
-						EndIf
-						;Local testList$ = ""
-						;For i = 1 To 40
-							;testList = testList + "Bob Rooms Long Ass Name Mod Number " + i
-							;If i < 40 Then testList = testList + Chr(1)
-						;Next
+					;If ModsWarnMSG <> "" Then
+						;ModsPage = 0
+						;Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, 1)
 						;
-						;DrawModsPopup(I_Loc\LoadGame_ModsOptional, testList)
-					EndIf
+						;If result <> 0 Then ModsWarnMSG = ""
+						;
+						;If result = 1 Then
+							;LoadEntities()
+							;LoadAllSounds()
+							;InitRoomTemplates()
+							;LoadGame(SaveGames(ModsWarnSaveIdx))
+							;CurrSave = SaveGames(ModsWarnSaveIdx)
+							;InitLoadGame()
+							;MainMenuOpen = False
+							;Return
+						;EndIf
+						;;Local testList$ = ""
+						;;For i = 1 To 40
+							;;testList = testList + "Bob Rooms Long Ass Name Mod Number " + i
+							;;If i < 40 Then testList = testList + Chr(1)
+						;;Next
+						;;
+						;;DrawModsPopup(I_Loc\LoadGame_ModsOptional, testList)
+					;EndIf
 					
 				EndIf
 				
