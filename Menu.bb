@@ -507,7 +507,7 @@ Function UpdateMainMenu()
 				
 				SetFont Font2
 				
-				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" And ModsMSG = "" Then 
+				If CurrLoadGamePage < Ceil(Float(VisibleSaveAmount)/EntriesPerPage)-1 And SaveMSG = "" And ModsMSG = "" Then 
 					If DrawButton(x+530*MenuScale, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, ">") Then
 						CurrLoadGamePage = CurrLoadGamePage+1
 					EndIf
