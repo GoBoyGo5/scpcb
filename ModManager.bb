@@ -46,7 +46,7 @@ Function FolderHasGameplayFile%(folder$, includeRooms%)
 			templevel = IsGameplayDataFile(f)
 			If includeRooms And Lower(File_GetExtension(f)) = "rmesh" Then templevel = 2
 			level = CombineGameplayLevel(level, templevel)
-			If level = 2 Then Exit
+			If level > 1 Then Exit
 		EndIf
 	Forever
 	CloseDir(d)

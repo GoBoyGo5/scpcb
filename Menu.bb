@@ -37,8 +37,7 @@ Global SaveMSG$
 
 ; Mods
 Global ModsMSG$
-;Global ModsWarnMSG$
-;Global ModsWarnSaveIdx%
+Global ModsSaveIdx%
 Global ModsPage%
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
@@ -51,7 +50,6 @@ Dim SaveGameDate$(SaveGameAmount + 1)
 Dim SaveGameVersion$(SaveGameAmount + 1)
 Dim SaveGamePlayTime%(SaveGameAmount + 1)
 Dim SaveGameMods$(SaveGameAmount + 1)
-;Dim SaveGameModsWarn$(SaveGameAmount + 1)
 Global KeepDuplicateSaveCount% = GetOptionInt("general", "keep duplicate saves")
 Global HideIncompatibleSaves% = GetOptionInt("general", "hide incompatible saves")
 
@@ -509,7 +507,7 @@ Function UpdateMainMenu()
 				
 				SetFont Font2
 				
-				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" And ModsMSG = "" And ModsWarnMSG = "" Then 
+				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/EntriesPerPage)-1 And SaveMSG = "" And ModsMSG = "" Then 
 					If DrawButton(x+530*MenuScale, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, ">") Then
 						CurrLoadGamePage = CurrLoadGamePage+1
 					EndIf
@@ -518,7 +516,7 @@ Function UpdateMainMenu()
 					Color(100, 100, 100)
 					Text(x+555*MenuScale, y + PagingFrameHeight + 27.5*MenuScale, ">", True, True)
 				EndIf
-				If CurrLoadGamePage > 0 And SaveMSG = "" And ModsMSG = "" And ModsWarnMSG = "" Then
+				If CurrLoadGamePage > 0 And SaveMSG = "" And ModsMSG = "" Then
 					If DrawButton(x, y + PagingFrameHeight, 50*MenuScale, 55*MenuScale, "<") Then
 						CurrLoadGamePage = CurrLoadGamePage-1
 					EndIf
@@ -559,7 +557,7 @@ Function UpdateMainMenu()
 							Text(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(SaveIdx) + RSet(SaveGameDate(SaveIdx), 21 - Len(SaveGameTime(SaveIdx))))
 							Text(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(SaveIdx) + RSet(FormatDuration(SaveGamePlayTime(SaveIdx), False), 21 - Len(SaveGameVersion(SaveIdx))))
 							
-							If SaveMSG = "" And ModsMSG = "" And ModsWarnMSG = "" Then
+							If SaveMSG = "" And ModsMSG = "" Then
 								If SaveGameVersion(SaveIdx) <> CompatibleNumber And SaveGameVersion(SaveIdx) <> "1.3.12.7" Then
 									DrawFrame(x + 300 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
@@ -569,9 +567,8 @@ Function UpdateMainMenu()
 
 										If SaveGameMods(SaveIdx) <> "" Then
 											ModsMSG = SaveGameMods(SaveIdx)
-										;ElseIf SaveGameModsWarn(SaveIdx) <> ""
-										;	ModsWarnMSG = SaveGameModsWarn(SaveIdx)
-										;	ModsWarnSaveIdx = SaveIdx
+											ModsSaveIdx = SaveIdx
+											ModsPage = 0
 										Else
 											LoadEntities()
 											LoadAllSounds()
@@ -630,34 +627,36 @@ Function UpdateMainMenu()
 					; Mods
 					
 					If ModsMSG <> ""
-						ModsPage = 0
-						If DrawModsPopup(I_Loc\LoadGame_ModsWarning, ModsMSG) Then ModsMSG = ""
+						
+						If GetModsListLevel(ModsMSG) <= 1 Then
+							Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsMSG, 1)
+							
+							If result <> 0 Then
+								ModsMSG = ""
+								
+								If result = 1 Then
+									LoadEntities()
+									LoadAllSounds()
+									InitRoomTemplates()
+									LoadGame(SaveGames(ModsSaveIdx))
+									CurrSave = SaveGames(ModsSaveIdx)
+									InitLoadGame()
+									MainMenuOpen = False
+									Return
+								EndIf
+							EndIf
+						Else
+							If DrawModsPopup(I_Loc\LoadGame_ModsWarning, ModsMSG) Then ModsMSG = ""
+						EndIf
+						
+						;Local testList$ = ""
+						;For i = 1 To 40
+							;testList = testList + "Bob Rooms Long Ass Name Mod Number " + i + Chr(2) + "1"
+							;If i < 40 Then testList = testList + Chr(1)
+						;Next
+						;
+						;If DrawModsPopup(I_Loc\LoadGame_ModsOptional, testList) Then ModsMSG = ""
 					EndIf
-					
-					;If ModsWarnMSG <> "" Then
-						;ModsPage = 0
-						;Local result% = DrawModsPopup(I_Loc\LoadGame_ModsOptional, ModsWarnMSG, 1)
-						;
-						;If result <> 0 Then ModsWarnMSG = ""
-						;
-						;If result = 1 Then
-							;LoadEntities()
-							;LoadAllSounds()
-							;InitRoomTemplates()
-							;LoadGame(SaveGames(ModsWarnSaveIdx))
-							;CurrSave = SaveGames(ModsWarnSaveIdx)
-							;InitLoadGame()
-							;MainMenuOpen = False
-							;Return
-						;EndIf
-						;;Local testList$ = ""
-						;;For i = 1 To 40
-							;;testList = testList + "Bob Rooms Long Ass Name Mod Number " + i
-							;;If i < 40 Then testList = testList + Chr(1)
-						;;Next
-						;;
-						;;DrawModsPopup(I_Loc\LoadGame_ModsOptional, testList)
-					;EndIf
 					
 				EndIf
 				
@@ -3023,6 +3022,35 @@ Function Button%(x,y,width,height,txt$, disabled%=False)
 	If Pushed And MouseHit1 Then PlaySound_Strict ButtonSFX : Return True
 End Function
 
+Function GetModsListLevel%(list$)
+	Local maxLevel% = 0
+	Local pos% = 0
+	Local entry$ = ""
+	Local levelPos% = 0
+	Local level% = 0
+	
+	While list <> ""
+		pos = Instr(list, Chr(1))
+		
+		If pos = 0 Then
+			entry = list
+			list = ""
+		Else
+			entry = Left(list, pos - 1)
+			list = Right(list, Len(list) - pos)
+		EndIf
+		
+		levelPos = Instr(entry, Chr(2))
+		
+		level = 2
+		If levelPos > 0 Then level = Int(Mid(entry, levelPos + 1))
+		
+		If level > maxLevel Then maxLevel = level
+	Wend
+	
+	Return maxLevel
+End Function
+
 Function DrawModsPopup%(txt$, list$, mode% = 0)
 
 	Local rows% = 1
@@ -3071,6 +3099,9 @@ Function DrawModsPopup%(txt$, list$, mode% = 0)
 			entry = Left(list, pos - 1)
 			list = Right(list, Len(list) - pos)
 		EndIf
+		
+		Local levelPos% = Instr(entry, Chr(2))
+		If levelPos > 0 Then entry = Left(entry, levelPos - 1)
 		
 		idx = idx + 1
 		
