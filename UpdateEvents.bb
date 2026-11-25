@@ -7830,7 +7830,7 @@ Function UpdateEvents()
 							Else
 								PlaySound_Strict LoadTempSound("SFX\SCP\1162\BodyHorrorExchange"+Rand(1,4)+".ogg")
 								LightFlash = 5.0
-								Msg = I_Loc\Message_1162ExchangeSuccess
+								Msg = I_Loc\Message_1162ExchangeFailure
 								MsgTimer = 70*5
 							EndIf
 							e\EventState2 = 0.0
@@ -8669,8 +8669,8 @@ Function UpdateEvents()
 
 						x# = EntityX(Curr106\obj, True)
 						z# = EntityZ(Curr106\obj, True)
-						px# = EntityX(Collider, True)
-						pz# = EntityZ(Collider, True)
+						Local px# = EntityX(Collider, True)
+						Local pz# = EntityZ(Collider, True)
 						count% = 0
 						For w.WayPoints = Each WayPoints
 							Local wx# = EntityX(w\obj, True), wz# = EntityZ(w\obj, True)

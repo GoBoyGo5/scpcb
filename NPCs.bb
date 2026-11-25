@@ -5445,7 +5445,7 @@ Function UpdateMTFUnit(n.NPCs)
 	Local prevDist#,newDist#
 	Local n2.NPCs
 	
-	Local p.Particles, target, dist#, dist2#
+	Local p.Particles, target, dist# = EntityDistance(n\Collider,Collider), dist2#
 	
 	If n\IsDead Then
 		n\BlinkTimer = -1.0
@@ -5498,7 +5498,7 @@ Function UpdateMTFUnit(n.NPCs)
 					Else ;i am the leader
 						If Curr173\Idle<>2
 							For r = Each Rooms
-								If ((Abs(r\x-EntityX(n\Collider,True))>12.0) Or (Abs(r\z-EntityZ(n\Collider,True))>12.0)) And (Rand(1,Max(4-Int(Abs(r\z-EntityZ(n\Collider,True)/8.0)),2))=1) Then
+								If ((Abs(r\x-EntityX(n\Collider,True))>12.0) Or (Abs(r\z-EntityZ(n\Collider,True))>12.0)) And (Rand(1,Max(4-Int(Abs(r\z-EntityZ(n\Collider,True))/8.0),2))=1) Then
 									x = r\x
 									y = 0.1
 									z = r\z
@@ -6479,7 +6479,7 @@ Function UpdateMTFUnit(n.NPCs)
 							n\PathStatus = FindPath(n,EntityX(n\MTFLeader\Collider,True),EntityY(n\MTFLeader\Collider,True)+0.1,EntityZ(n\MTFLeader\Collider,True))
 						Else
 							For r = Each Rooms
-								If ((Abs(r\x-EntityX(n\Collider,True))>12.0) Or (Abs(r\z-EntityZ(n\Collider,True))>12.0)) And (Rand(1,Max(4-Int(Abs(r\z-EntityZ(n\Collider,True)/8.0)),2))=1) Then
+								If ((Abs(r\x-EntityX(n\Collider,True))>12.0) Or (Abs(r\z-EntityZ(n\Collider,True))>12.0)) And (Rand(1,Max(4-Int(Abs(r\z-EntityZ(n\Collider,True))/8.0),2))=1) Then
 									If EntityDistance(r\obj,n\Target\Collider)>6.0
 										x = r\x
 										y = 0.1
@@ -6677,7 +6677,7 @@ Function UpdateMTFUnit(n.NPCs)
 						n\PathStatus = FindPath(n,EntityX(n\MTFLeader\Collider,True),EntityY(n\MTFLeader\Collider,True)+0.1,EntityZ(n\MTFLeader\Collider,True)) ;whatever you say boss
 					Else ;i am the leader
 						For r = Each Rooms
-							If ((Abs(r\x-EntityX(n\Collider,True))>12.0) Or (Abs(r\z-EntityZ(n\Collider,True))>12.0)) And (Rand(1,Max(4-Int(Abs(r\z-EntityZ(n\Collider,True)/8.0)),2))=1) Then
+							If ((Abs(r\x-EntityX(n\Collider,True))>12.0) Or (Abs(r\z-EntityZ(n\Collider,True))>12.0)) And (Rand(1,Max(4-Int(Abs(r\z-EntityZ(n\Collider,True))/8.0),2))=1) Then
 								x = r\x
 								y = 0.1
 								z = r\z
@@ -7822,7 +7822,7 @@ Function UpgradeNPC914(n.NPCs, setting$, x#, y#, z#)
 			Select setting
 				Case "rough"
 					; yeah, he bleeds blood, what about it?
-					de.Decals = CreateDecal(2, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
+					Local de.Decals = CreateDecal(2, x, 8 * RoomScale + 0.005, z, 90, Rand(360), 0)
 					de\Size = 0.4 : ScaleSprite(de\obj, de\Size, de\Size)
 					RemoveNPC(n) : n = Null
 				Case "coarse"

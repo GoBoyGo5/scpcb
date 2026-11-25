@@ -427,6 +427,8 @@ Global KEY_INV = GetOptionInt("binds", "Inventory key")
 Global KEY_CROUCH = GetOptionInt("binds", "Crouch key")
 Global KEY_SAVE = GetOptionInt("binds", "Save key")
 Global KEY_CONSOLE = GetOptionInt("binds", "Console key")
+Global KEY_SHOW_MOUSE = GetOptionInt("binds", "Show mouse key")
+Global IsShowMouseKeyDown = False
 
 Global MouseSmooth# = GetOptionFloat("controls", "mouse smoothing")
 
@@ -1101,6 +1103,13 @@ Global ForestNPC,ForestNPCTex,ForestNPCData#[3]
 ;-----------------------------------------  Images ----------------------------------------------------------
 
 Global PauseMenuIMG% = 0
+
+Function InPauseMenu%(px%, py%)
+	If (Not MenuOpen) Then Return False
+	Local w% = ImageWidth(PauseMenuIMG), h% = ImageHeight(PauseMenuIMG)
+	Local x% = GraphicWidth / 2 - w / 2, y% = GraphicHeight / 2 - h / 2
+	Return px >= x And px <= x + w And py >= y And py <= y + h
+End Function
 
 Global SprintIcon% = 0
 Global BlinkIcon% = 0
@@ -2306,6 +2315,12 @@ While IsRunning
 		UpdateCheckpoint1 = False
 		UpdateCheckpoint2 = False
 		
+		Local newShowMouseKeyDown% = KeyDown(KEY_SHOW_MOUSE)
+		If newShowMouseKeyDown <> IsShowMouseKeyDown Then
+			IsShowMouseKeyDown = newShowMouseKeyDown
+			MouseXSpeed() : MouseYSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+		EndIf
+
 		If (Not IsPaused()) And EndingTimer=>0 Then
 			LightVolume = CurveValue(TempLightVolume, LightVolume, 50.0)
 			CameraFogRange(Camera, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
@@ -3329,7 +3344,7 @@ Function IsAnyMenuOpen()
 End Function
 
 Function IsPaused()
-	Return IsAnyMenuOpen() Lor SelectedDoor <> Null Lor SelectedScreen <> Null
+	Return IsAnyMenuOpen() Lor SelectedDoor <> Null Lor SelectedScreen <> Null Lor KeyDown(KEY_SHOW_MOUSE)
 End Function
 
 Type CreditsLine
@@ -3769,7 +3784,7 @@ Function MovePlayer()
 	If Injuries > 1.0 Then
 		temp2 = Bloodloss
 		BlurTimer = Max(Max(Sin(MilliSecs()/100.0)*Bloodloss*30.0,Bloodloss*2*(2.0-CrouchState)),BlurTimer)
-		If (Not I_427\Using And I_427\Timer < 70*360) Then
+		If ((Not I_427\Using) And I_427\Timer < 70*360) Then
 			Bloodloss = Min(Bloodloss + (Min(Injuries,3.5)/300.0)*FPSfactor,100)
 		EndIf
 		
@@ -3909,7 +3924,7 @@ Function MouseLook(handleInput% = True)
 		
 		If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor PlayerRoom\RoomTemplate\Name = "halloweenpd" Then
 			If EntityY(Collider)<2000*RoomScale Or EntityY(Collider)>2608*RoomScale Then
-				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0)*ViewBobScale ; Pitch the user;s camera up And down.
+				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs()/150.0)*30.0*ViewBobScale) ; Pitch the user;s camera up And down.
 			EndIf
 		EndIf
 		
@@ -4083,7 +4098,7 @@ Function MouseLook(handleInput% = True)
 					Stamina = Stamina - FPSfactor * 0.1
 				Case 3 ;appendicitis
 					;0.035/sec = 2.1/min
-					If (Not I_427\Using And I_427\Timer < 70*360) Then
+					If ((Not I_427\Using) And I_427\Timer < 70*360) Then
 						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.0005
 					EndIf
 					If SCP1025state[i]>20.0 Then
@@ -4104,7 +4119,7 @@ Function MouseLook(handleInput% = True)
 						CurrSpeed = CurveValue(0, CurrSpeed, 10+Stamina*15)
 					EndIf
 				Case 5;cardiac arrest
-					If (Not I_427\Using And I_427\Timer < 70*360) Then
+					If ((Not I_427\Using) And I_427\Timer < 70*360) Then
 						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.35
 					EndIf
 					;35/sec
@@ -4137,7 +4152,7 @@ Function DrawGUI()
 	
 	Local e.Events, it.Items
 	
-	If IsAnyMenuOpen() Lor SelectedDoor <> Null Lor EndingTimer < 0 Then
+	If IsAnyMenuOpen() Lor SelectedDoor <> Null Lor EndingTimer < 0 Lor KeyDown(KEY_SHOW_MOUSE) Then
 		ShowPointer()
 	Else
 		HidePointer()
@@ -4547,7 +4562,7 @@ Function DrawGUI()
 							MouseHit1 = False
 							
 							If DoubleClick Then
-								If OtherOpen\Inventory\Items[n]\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(OtherOpen\Inventory\Items[n]\itemtemplate\sound))
+								PlayPickSound(OtherOpen\Inventory\Items[n])
 								OtherOpen = Null
 								closedInv=True
 								InvOpen = False
@@ -4743,7 +4758,7 @@ Function DrawGUI()
 									SelectedItem = Null
 									Return
 								EndIf
-								If Inventory(n)\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(Inventory(n)\itemtemplate\sound))
+								PlayPickSound(Inventory(n))
 								InvOpen = False
 								DoubleClick = False
 							EndIf
@@ -4840,7 +4855,7 @@ Function DrawGUI()
 													For ri% = 0 To MaxItemAmount - 1
 														If Inventory(ri) = SelectedItem Then
 															Inventory(ri) = Null
-															PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+															PlayPickSound(SelectedItem)
 															Exit
 														EndIf
 													Next
@@ -4885,7 +4900,7 @@ Function DrawGUI()
 													For ri% = 0 To MaxItemAmount - 1
 														If Inventory(ri) = SelectedItem Then
 															Inventory(ri) = Null
-															PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+															PlayPickSound(SelectedItem)
 															Exit
 														EndIf
 													Next
@@ -4916,7 +4931,7 @@ Function DrawGUI()
 								;[Block]
 								Select Inventory(MouseSlot)\itemtemplate\name
 									Case "snav", "snav300", "snav310"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4926,7 +4941,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_NavBatNoplace
 										MsgTimer = 70 * 5
 									Case "radio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4939,7 +4954,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNofit
 										MsgTimer = 70 * 5
 									Case "supernv", "nvgoggles"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 1000.0
@@ -4969,7 +4984,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNoplace
 										MsgTimer = 70 * 5
 									Case "18vradio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = 100.0
@@ -4984,7 +4999,7 @@ Function DrawGUI()
 								;[Block]
 								Select Inventory(MouseSlot)\itemtemplate\name
 									Case "snav", "snav300", "snav310"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -4994,7 +5009,7 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_NavBatNoplace
 										MsgTimer = 70 * 5
 									Case "radio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -5004,14 +5019,14 @@ Function DrawGUI()
 										Msg = I_Loc\MessageItem_RadioBatNoplace
 										MsgTimer = 70 * 5
 									Case "18vradio"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
 										Msg = I_Loc\MessageItem_RadioBatReplace
 										MsgTimer = 70 * 5
 									Case "supernv", "nvgoggles"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
+										PlayPickSound(SelectedItem)
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory(MouseSlot)\state = INFINITY
@@ -5965,7 +5980,7 @@ Function DrawGUI()
 								Else
 									WearingHazmat = 3
 								EndIf
-								If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+								PlayPickSound(SelectedItem)
 								Msg = I_Loc\MessageItem_HazmatOn
 								If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 								WearingGasMask = 0
@@ -5999,7 +6014,7 @@ Function DrawGUI()
 								Msg = I_Loc\MessageItem_VestOnHeavy
 								WearingVest = 2
 							EndIf
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 						EndIf
 						SelectedItem\state=0
 						MsgTimer = 70 * 5
@@ -6275,14 +6290,14 @@ Function DrawGUI()
 							SecondaryLightOn = PrevSecondaryLightOn
 							Wearing1499 = False
 							;DropItem(SelectedItem)
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 						Else
 							If SelectedItem\itemtemplate\name="scp1499" Then
 								Wearing1499 = 1
 							Else
 								Wearing1499 = 2
 							EndIf
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+							PlayPickSound(SelectedItem)
 							GiveAchievement(Achv1499)
 							PrevSecondaryLightOn = SecondaryLightOn
 							SecondaryLightOn = True
@@ -6531,7 +6546,7 @@ Function DrawGUI()
 								PositionEntity(SelectedItem\collider, 0, 0, 0)
 								ResetEntity(SelectedItem\collider)
 
-								de.Decals = CreateDecal(0, EntityX(Collider), EntityY(Collider)-0.29, EntityZ(Collider), 90, Rand(360), 0)
+								Local de.Decals = CreateDecal(0, EntityX(Collider), EntityY(Collider)-0.29, EntityZ(Collider), 90, Rand(360), 0)
 								de\Size = 0.05 : de\SizeChange = 0.001 : EntityAlpha(de\obj, 0.8) : UpdateDecals
 								PlaySound_Strict(DecaySFX(0))
 							Else
@@ -6699,7 +6714,7 @@ Function DrawGUI()
 					;EndIf
 				EndIf
 				
-				If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
+				PlayPickSound(SelectedItem)
 				SelectedItem = Null
 			EndIf
 		End If		
@@ -6758,14 +6773,12 @@ Function TeleportFromHalloweenRoom%()
 			Return True
 		EndIf
 	Next
-	If Not found Then
-		For r.Rooms = Each Rooms
-			If r\RoomTemplate\Name = "room2testroom2" Then
-				Teleport(r)
-				Return True
-			EndIf
-		Next
-	EndIf
+	For r.Rooms = Each Rooms
+		If r\RoomTemplate\Name = "room2testroom2" Then
+			Teleport(r)
+			Return True
+		EndIf
+	Next
 	Return False
 End Function
 
@@ -6928,8 +6941,12 @@ Global ShowMap% = False
 
 Function DrawMap()
 	Local cellSize% = 20 * HUDScale
-	Local startX% = HUDEndX - (MapWidth + 1) * cellSize
-	Local startY% = HUDEndY - (MapHeight + 1) * cellSize
+	cellSize = Min(cellSize, GraphicWidth / (MapWidth + 1))
+	cellSize = Min(cellSize, GraphicHeight / (MapHeight + 1))
+	cellSize = Max(cellSize, 1)
+
+	Local startX% = Max(0, HUDEndX - (MapWidth + 1) * cellSize)
+	Local startY% = Max(0, HUDEndY - (MapHeight + 1) * cellSize)
 
 	Local hoveredRoom.Rooms
 	For r.Rooms = Each Rooms					
@@ -6939,10 +6956,10 @@ Function DrawMap()
 			Color r\RoomTemplate\r, r\RoomTemplate\g, r\RoomTemplate\b
 		EndIf
 		
-		Local x% = startX + ((18 - (r\x / 8)) * cellSize)
+		Local x% = startX + ((MapWidth - (r\x / 8)) * cellSize)
 		Local y% = startY + ((r\z / 8) * cellSize)
 
-		If MouseOn(x, y, cellSize+1, cellSize+1) 
+		If IsPaused() And MouseOn(x, y, cellSize+1, cellSize+1) And (Not InPauseMenu(MouseX(), MouseY()))
 			hoveredRoom = r
 			Color 100, 255, 100
 			If MouseHit1
@@ -8858,6 +8875,7 @@ Function NullGame(playbuttonsfx%=True)
 		FreeImageHUDScaled(itt\invimg)
 		If itt\invimg2 <> 0 Then FreeImageHUDScaled(itt\invimg2)
 		If itt\img <> 0 Then FreeImageHUDScaled(itt\img)
+		If itt\customSoundPath <> "" Then FreeSound_Strict(itt\sound)
 		Delete itt
 	Next
 
@@ -10621,7 +10639,7 @@ Function UpdateInfect()
 		
 		If Infect < 93.0 Then
 			temp=Infect
-			If (Not I_427\Using And I_427\Timer < 70*360) Then
+			If ((Not I_427\Using) And I_427\Timer < 70*360) Then
 				Infect = Min(Infect+FPSfactor*0.002,100)
 			EndIf
 			

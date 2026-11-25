@@ -20,6 +20,7 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
     ConsoleReissue = Null
     ConsoleScroll = 0
     CreateConsoleMsg(cmd,255,255,0,True)
+    Local StrTemp$, StrTemp2$, StrTemp3$
     If Instr(cmd, " ") > 0 Then
         StrTemp$ = Lower(Left(cmd, Instr(cmd, " ") - 1))
     Else
@@ -457,25 +458,21 @@ Function ExecuteConsoleCommand(cmd$, quiet% = False)
                 CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
             Else
                 CreateConsoleMsg(itt\displayname + " spawned.")
-                it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+                Local it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
             End If
             ;[End Block]
         Case "giveitem"
             ;[Block]
-            If ItemAmount >= MaxItemAmount Then
-                CreateConsoleMsg("No free inventory slot.",255,150,0)
+            itt.ItemTemplates = FindItemTemplate(Right(cmd, Len(cmd) - Instr(cmd, " ")))
+            If itt = Null Then
+                CreateConsoleMsg("Item not found.",255,150,0)
+            Elseif itt\name = "cup"
+                CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
             Else
-                itt.ItemTemplates = FindItemTemplate(Right(cmd, Len(cmd) - Instr(cmd, " ")))
-                If itt = Null Then
-                    CreateConsoleMsg("Item not found.",255,150,0)
-                Elseif itt\name = "cup"
-                    CreateConsoleMsg("To spawn SCP-294 drinks, use the spawncup command.",255,150,0)
-                Else
-                    CreateConsoleMsg(itt\displayname + " given.")
-                    it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-                    PickItem(it)
-                End If
-            EndIf
+                CreateConsoleMsg(itt\displayname + " given.")
+                it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+                PickItem(it)
+            End If
             ;[End Block]
         Case "itemlist", "items"
             CreateConsoleMsg("Listing items:")

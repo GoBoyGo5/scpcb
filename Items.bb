@@ -14,7 +14,7 @@ Type ItemTemplates
 	Field name$
 	Field group$
 	
-	Field sound%
+	Field sound%, customSoundPath$
 	
 	Field found%
 	
@@ -125,7 +125,8 @@ Function InitItemTemplatesFromFile(file$)
 	Local model$, textureoverride$, textureflags%, anim%
 	Local invicon$, invicon2$
 	Local document$
-	Local sound%, scale#
+	Local sound%, customSoundPath$
+	Local scale#
 	Local hasCustomColor%, r%, g%, b%
 
 	Local f% = OpenFile(file)
@@ -140,6 +141,7 @@ Function InitItemTemplatesFromFile(file$)
 						EntityColor(itt\obj, r, g, b)
 					EndIf
 					itt\sound = sound
+					itt\customSoundPath = customSoundPath
 				EndIf
 
 				name = Trim(Mid(l, 2, Len(l) - 2))
@@ -156,6 +158,7 @@ Function InitItemTemplatesFromFile(file$)
 				invicon2 = ""
 				document = ""
 				sound = 1
+				customSoundPath = ""
 				scale = 1.0
 				hasCustomColor = False
 			Else
@@ -184,7 +187,21 @@ Function InitItemTemplatesFromFile(file$)
 					Case "texture flags"
 						textureflags = Int(value)
 					Case "sound"
-						sound = Int(value)
+						If value = "" Lor value = "0" Then
+							sound = 0
+						Else
+							sound = Int(value)
+							If sound = 0 Then
+								customSoundPath = Lower(value)
+								For itt2.ItemTemplates = Each ItemTemplates
+									If itt2\customSoundPath = customSoundPath Then
+										sound = itt2\sound
+										Exit
+									EndIf
+								Next
+								If sound = 0 Then sound = LoadSound_Strict(customSoundPath)
+							EndIf
+						EndIf
 					Case "color"
 						hasCustomColor = True
 						r = Int(Piece(value,1,","))
@@ -204,6 +221,7 @@ Function InitItemTemplatesFromFile(file$)
 			EntityColor(itt\obj, r, g, b)
 		EndIf
 		itt\sound = sound
+		itt\customSoundPath = customSoundPath
 	EndIf
 
 End Function
@@ -375,7 +393,7 @@ Function CreateCup%(drinkName$, x#, y#, z#)
 	If loc <> -1 Then
 		Local chn% = 0
 
-		strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
+		Local strtemp$ = GetINIString2(iniStr, loc, "dispensesound")
 		If strtemp = "" Then strtemp = GetINIString2(iniStr, loc, "dispensersound")
 		If strtemp<>"" Then
 			chn = PlaySound_Strict (LoadTempSound(strtemp))
@@ -447,11 +465,11 @@ End Function
 
 Function RemoveItem(i.Items, inGame%=True)
 	CatchErrors("Uncaught (RemoveItem)")
-	Local n
+	Local n%
 	FreeEntity(i\model) : FreeEntity(i\collider) : i\collider = 0
 	
 	If i\Picked And inGame Then
-		For n% = 0 To MaxItemAmount - 1
+		For n = 0 To MaxItemAmount - 1
 			If Inventory(n) = i
 				DebugLog "Removed "+i\itemtemplate\name+" from slot "+n
 				Inventory(n) = Null
@@ -483,7 +501,12 @@ Function RemoveItem(i.Items, inGame%=True)
 		FreeImageHUDScaled i\itemtemplate\img
 		i\itemtemplate\img = 0
 	EndIf
-	If i\Inventory <> Null Then Delete i\Inventory
+	If i\Inventory <> Null Then
+		For n = 0 To i\Inventory\Size - 1
+			If i\Inventory\Items[n] <> Null Then RemoveItem(i\Inventory\Items[n])
+		Next
+		Delete i\Inventory
+	EndIf
 	Delete i
 	
 	CatchErrors("RemoveItem")
@@ -667,7 +690,7 @@ Function UpdateItems()
 					EndIf
 
 					If PlayerStepped Then
-						de.Decals = CreateDecal(0, EntityX(Collider),EntityY(Collider)-0.29,EntityZ(Collider), 90, Rand(360), 0)
+						Local de.Decals = CreateDecal(0, EntityX(Collider),EntityY(Collider)-0.29,EntityZ(Collider), 90, Rand(360), 0)
 						de\Size = 0.2 : de\SizeChange = 0.004 : de\timer = 90000 : EntityAlpha(de\obj, 0.8) : UpdateDecals() 											
 					EndIf
 					i\state = i\state + FPSfactor
@@ -995,7 +1018,7 @@ Function PickItem(item.Items)
 						Next
 				End Select
 				
-				If item\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(item\itemtemplate\sound))
+				PlayPickSound(item)
 				item\Picked = True
 				item\Dropped = -1
 				
@@ -1063,7 +1086,7 @@ Function DropItem(item.Items,playdropsound%=True)
 	
 	CatchErrors("Uncaught (DropItem)")
 	If playdropsound Then
-		If item\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(item\itemtemplate\sound))
+		PlayPickSound(item)
 	EndIf
 	
 	item\Dropped = 1
@@ -1206,10 +1229,16 @@ Function Update294()
 	CatchErrors("Update294")
 End Function
 
-
-
-
-
+Function PlayPickSound(item.Items)
+	Local usedSound%
+	If item\itemtemplate\customSoundPath = "" Then
+		If item\itemtemplate\sound = 66 Then Return
+		usedSound = PickSFX(item\itemtemplate\sound)
+	Else
+		usedSound = item\itemtemplate\sound
+	EndIf
+	PlaySound_Strict(usedSound)
+End Function
 
 
 
