@@ -8,7 +8,6 @@ Added:
 - More details to credits
 - SCP-002
 - a secret achievement
-- SCP-006
 
 Changed:
 - The order of localization
